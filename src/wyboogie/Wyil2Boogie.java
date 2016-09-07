@@ -44,7 +44,6 @@ import wyil.lang.Type;
 import wyil.lang.Type.Method;
 import wyil.lang.Bytecode.AliasDeclaration;
 import wyil.lang.Bytecode.Expr;
-import wyil.lang.Bytecode.Operator;
 import wyil.lang.Bytecode.VariableAccess;
 import wyil.lang.Bytecode.VariableDeclaration;
 import wyil.lang.Constant;
@@ -114,10 +113,10 @@ public final class Wyil2Boogie {
 	}
 
 	/**
-	 * Whiley: <b>type</b> Name is T where P.
-	 * This is translated to Boogie:
+	 * Whiley: <b>type</b> Name is (v:T) where P(v).
+	 * This is translated to Boogie as:
 	 * <pre>
-	 *   function isName(v:WVal) returns (bool) { isT(v) && P };
+	 *   function isName(v:WVal) returns (bool) { isT(v) && P(v) };
 	 * </pre>
 	 *
 	 * @param td
@@ -128,17 +127,20 @@ public final class Wyil2Boogie {
 		}
 		Type t = td.type();
 		// writeModifiers(td.modifiers());
-		@SuppressWarnings("unchecked")
-		Location<VariableDeclaration> loc = (Location<VariableDeclaration>) td.getTree().getLocation(0);
-		String param = loc.getBytecode().getName();
-		out.print("function is" + td.name() + "(" + param + ":WVal) returns (bool) { ");
+		String param = "x";
+		if (!td.getTree().getLocations().isEmpty()) {
+			@SuppressWarnings("unchecked")
+			Location<VariableDeclaration> loc = (Location<VariableDeclaration>) td.getTree().getLocation(0);
+			param = loc.getBytecode().getName();
+		}
+		out.print("function " + typePredicateName(td.name()) + "(" + param + ":WVal) returns (bool) { ");
 		out.print(typePredicate(param, t));
 		if (!td.getInvariant().isEmpty()) {
 			out.print(" && (");
 			writeConjunction(td.getInvariant());
+			out.println(")");
 		}
-		out.println(") }");
-		out.println();
+		out.println(" }");
 	}
 
 	private void writeConstant(WyilFile.Constant cd) {
@@ -146,8 +148,7 @@ public final class Wyil2Boogie {
 			writeLocationsAsComments(cd.getTree());
 		}
 		out.println("const " + cd.name() + " : WVal;");
-		// TODO: handle other types, not just Int.
-		out.println("axiom " + cd.name() + " == fromInt(" + cd.constant() + ");");
+		out.println("axiom " + cd.name() + " == " + createConstant(cd.constant()) + ";");
 		out.println();
 	}
 
@@ -473,8 +474,10 @@ public final class Wyil2Boogie {
 		out.print("while (toBool(");
 		writeExpression(b.getOperand(0));
 		out.print("))");
-		writeLoopInvariant(indent, loopInvariant);
-		out.println(" {");
+		writeLoopInvariant(indent + 2, loopInvariant);
+		out.println();
+		tabIndent(indent+1);
+		out.println("{");
 		writeBlock(indent+1, b.getBlock(0));
 		tabIndent(indent+1);
 		out.println("}");
@@ -537,8 +540,10 @@ public final class Wyil2Boogie {
 		out.print("))");
 		// out.print(" modifies ");
 		// writeExpressions(modifiedOperands,out);
-		writeLoopInvariant(indent, loopInvariant);
-		out.println(" {");
+		writeLoopInvariant(indent + 2, loopInvariant);
+		out.println();
+		tabIndent(indent + 1);
+		out.println("{");
 		writeBlock(indent+1,b.getBlock(0));
 		tabIndent(indent+1);
 		out.println("}");
@@ -546,13 +551,12 @@ public final class Wyil2Boogie {
 
 	private void writeLoopInvariant(int indent, Location<?>[] loopInvariant) {
 		if (loopInvariant.length > 0) {
-			out.println();
-			tabIndent(indent+1);
-			out.print("invariant true ");
 			for (Location<?> invariant : loopInvariant) {
-				out.print(" && toBool(");
+				out.println();
+				tabIndent(indent);
+				out.print("invariant toBool(");
 				writeExpression(invariant);
-				out.print(")");
+				out.print(");");
 			}
 		}
 	}
@@ -754,7 +758,7 @@ public final class Wyil2Boogie {
 	}
 
 	/**
-	 * Whiley array literal [a,b,c] is represented as:
+	 * Whiley array literals [a,b,c] (and strings) are represented as:
 	 * <pre>
 	 *   fromArray(arrayconst(null)[0 := a][1 := b][2 := c], 3)
 	 * </pre>
@@ -801,8 +805,7 @@ public final class Wyil2Boogie {
 	}
 
 	private void writeConst(Location<Bytecode.Const> expr) {
-		// TODO: handle non-integer constants
-		out.print("fromInt(" + expr.getBytecode().constant() + ")");
+		out.print(createConstant(expr.getBytecode().constant()));
 	}
 
 	private void writeFieldLoad(Location<Bytecode.FieldLoad> expr) {
@@ -909,40 +912,49 @@ public final class Wyil2Boogie {
 
 	@SuppressWarnings("unchecked")
 	private void writeQuantifier(Location<Bytecode.Quantifier> c) {
-		out.print(quantifierKind(c));
-		out.print(" { ");
+		out.print("fromBool(");
+		final String predOp;
+		switch(c.getOpcode()) {
+		case Bytecode.OPCODE_some:
+			out.print("(exists ");
+			predOp = " && ";
+			break;
+		case Bytecode.OPCODE_all:
+			out.print("(forall ");
+			predOp = " ==> ";
+			break;
+		default:
+			throw new IllegalArgumentException();
+		}
+		// first pass just declares the bound variables
 		for (int i = 0; i != c.numberOfOperandGroups(); ++i) {
 			Location<?>[] range = c.getOperandGroup(i);
 			if (i != 0) {
 				out.print(", ");
 			}
 			Location<VariableDeclaration>  v = (Location<VariableDeclaration>) range[SyntaxTree.VARIABLE];
-			out.print(v.getBytecode().getName());
-			out.print(" in ");
+			String name = v.getBytecode().getName();
+			out.print(name);
+			out.print(":WVal");
+		}
+		out.print(" :: ");
+		// second pass adds the type and range constraints
+		for (int i = 0; i != c.numberOfOperandGroups(); ++i) {
+			Location<?>[] range = c.getOperandGroup(i);
+			if (i != 0) {
+				out.print(" && ");
+			}
+			Location<VariableDeclaration>  v = (Location<VariableDeclaration>) range[SyntaxTree.VARIABLE];
+			String name = v.getBytecode().getName();
+			out.print("isInt(" + name + ") && toInt(");
 			writeExpression(range[SyntaxTree.START]);
-			out.print("..");
+			out.print(") <= toInt(" + name + ") && toInt(" + name + ") < toInt(");
 			writeExpression(range[SyntaxTree.END]);
+			out.print(")");
 		}
-		out.print(" | ");
+		out.print(predOp);
 		writeExpression(c.getOperand(SyntaxTree.CONDITION));
-		out.print(" } ");
-	}
-
-	private String quantifierKind(Location<Bytecode.Quantifier> c) {
-		switch(c.getOpcode()) {
-		case Bytecode.OPCODE_some:
-			return "some";
-		case Bytecode.OPCODE_all:
-			return "all";
-		}
-		throw new IllegalArgumentException();
-	}
-
-	private void writeModifiers(List<Modifier> modifiers) {
-		for(Modifier m : modifiers) {
-			out.print(m.toString());
-			out.print(" ");
-		}
+		out.print("))");
 	}
 
 	private boolean needsBrackets(Bytecode e) {
@@ -1059,9 +1071,9 @@ public final class Wyil2Boogie {
 	public String typePredicate(String var, Type type) {
 		if (type instanceof Type.Nominal) {
 			String typeName = ((Type.Nominal) type).name().name();
-			return "is" + typeName + "(" + var + ")";
+			return typePredicateName(typeName) + "(" + var + ")";
 		}
-		if (type instanceof Type.Int || type instanceof Type.Bool) {
+		if (type instanceof Type.Int) {
 			return "isInt(" + var + ")";
 		}
 		if (type instanceof Type.Array) {
@@ -1075,7 +1087,7 @@ public final class Wyil2Boogie {
 //		}
 		if (type instanceof Type.Record) {
 			// TODO: add constraints about the fields?
-			HashMap<String, Type> fields = ((Type.Record) type).fields();
+			// HashMap<String, Type> fields = ((Type.Record) type).fields();
 			if (((Type.Record) type).isOpen()) {
 				return "isObject(" + var + ")";
 			} else {
@@ -1096,7 +1108,7 @@ public final class Wyil2Boogie {
 //			return Optional.ofNullable(stores.getUserDefinedType(type)).get().name() + "*";
 		}
 		if (type instanceof Type.Union) {
-			Type.Union u = (Type.Union) type;
+			// Type.Union u = (Type.Union) type;
 			// TODO: generate the disjunction of all the bounds??
 			// u.bounds()
 			// return Optional.ofNullable(stores.getUserDefinedType(type)).get().name() + "*";
@@ -1125,6 +1137,64 @@ public final class Wyil2Boogie {
 			return "true";
 		}
 		throw new RuntimeException("TODO: type " + type);
+	}
+
+	/**
+	 * Create a type predicate name, like "isList", from a type name "list".
+	 *
+	 * @param typeName a non-empty string.
+	 * @return a non-null string.
+	 */
+	private String typePredicateName(String typeName) {
+		return "is" + typeName.substring(0, 1).toUpperCase() + typeName.substring(1);
+	}
+
+	/**
+	 * Given a constant of the given type, cast it into a WVal value.
+	 *
+	 * @param cd a Whiley constant, with a type.
+	 * @return an expression string with type WVal.
+	 */
+	private String createConstant(Constant cd) {
+		Type type = cd.type();
+		if (cd instanceof Constant.Integer) {
+			return "fromInt(" + cd.toString() + ")";
+		}
+		if (cd instanceof Constant.Bool) {
+			return "fromBool(" + cd.toString() + ")";
+		}
+		if (cd instanceof Constant.Byte) {
+			return "fromInt(" + cd.toString() + ")";
+		}
+		if (cd instanceof Constant.Array) {
+			Constant.Array aconst = (Constant.Array) cd;
+			ArrayList<Constant> values = aconst.values();
+			return createArrayInitialiser(values);
+		}
+		if (cd instanceof Constant.Null) {
+			return "null"; // already a WVal
+		}
+		throw new RuntimeException("TODO: constantToWVal(" + cd + "):" + type);
+	}
+
+	private String createArrayInitialiser(ArrayList<Constant> values) {
+		StringBuilder out = new StringBuilder();
+		out.append("fromArray(arrayconst(");
+		if (values.size() == 0) {
+			out.append("null"); // the type of values should be irrelevant
+		} else {
+			out.append(createConstant(values.get(0)));
+		}
+		out.append(")");
+		for (int i = 1; i != values.size(); ++i) {
+			out.append("[" + i + " := ");
+			out.append(createConstant(values.get(i)));
+			out.append("]");
+		}
+		out.append(", ");
+		out.append(values.size());
+		out.append(")");
+		return out.toString();
 	}
 
     /**
@@ -1195,6 +1265,7 @@ public final class Wyil2Boogie {
 		boolean verbose = false;
 		if (args.length > argnum && "-v".equals(args[argnum])) {
 			verbose = true;
+			System.out.println("Current directory is " + System.getProperty("user.dir"));
 			argnum++;
 		}
 		if (args.length == argnum) {

@@ -99,19 +99,10 @@ axiom (forall v:WVal :: isArray(v) ==> 0 <= arraylen(v));
 
 // Whiley array generators [val;len] are represented as:
 //    fromArray(arrayconst(val), len)
+// and array literals use arrayconst(val0)[1 := val1][2 := val2] etc.
+//
 function arrayconst(val:WVal) returns ([int]WVal);
 axiom (forall val:WVal, i:int :: arrayconst(val)[i] == val);
-
-procedure __test();
-implementation __test() {
-    var a:[int]WVal;
-    a := arrayconst(fromBool(true));
-    assert a[13] == fromBool(true);
-    a := a[3 := fromBool(false)];
-    assert a[2] == fromBool(true);
-    assert a[3] == fromBool(false);
-    assert toBool(a[4]) == true;
-}
     
 // A few programs need extensionality of arrays.
 // Boogie does not include this by default (page 12 KRML178).

@@ -1,5 +1,17 @@
 // Some testing of basic WVal (Whiley Value) examples.
 
+// some array tests
+procedure __test();
+implementation __test() {
+    var a:[int]WVal;
+    a := arrayconst(fromBool(true));
+    assert a[13] == fromBool(true);
+    a := a[3 := fromBool(false)];
+    assert a[2] == fromBool(true);
+    assert a[3] == fromBool(false);
+    assert toBool(a[4]) == true;
+}
+
 // for test_arith_38.wyal
 function isNat(n:WVal) returns (bool) { isInt(n) && toInt(n) >= 0 }
 
