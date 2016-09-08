@@ -286,13 +286,15 @@ public final class Wyil2Boogie {
 	private void writeConjunction(List<Location<Bytecode.Expr>> preds) {
 		if (preds.isEmpty()) {
 			out.print("true");
-		} else if (preds.size() == 1) {
-			// we must convert it from WVal to a Boogie boolean value
-			out.print("toBool(");
-			writeExpression(preds.get(0));
-			out.print(")");
 		} else {
-			writeExpressions(preds.toArray(new Location<?>[0]), " && ");
+			String sep = "";
+			for (Location<Expr> pred : preds) {
+				out.print(sep);
+				sep = " && ";
+				out.print("toBool(");
+				writeExpression(pred);
+				out.print(")");
+			}
 		}
 	}
 
@@ -844,9 +846,9 @@ public final class Wyil2Boogie {
 	private void writeArrayGenerator(Location<Bytecode.Operator> expr) {
 		out.print("fromArray(arrayconst(");
 		writeExpression(expr.getOperand(0));
-		out.print("), ");
+		out.print("), toInt(");
 		writeExpression(expr.getOperand(1));
-		out.print(")");
+		out.print("))");
 	}
 
 	private void writeConvert(Location<Bytecode.Convert> expr) {
@@ -1010,8 +1012,9 @@ public final class Wyil2Boogie {
 			out.print(")");
 		}
 		out.print(predOp);
+		out.print("toBool(");
 		writeExpression(c.getOperand(SyntaxTree.CONDITION));
-		out.print("))");
+		out.print(")))");
 	}
 
 	private boolean needsBrackets(Bytecode e) {
@@ -1123,7 +1126,7 @@ public final class Wyil2Boogie {
 	 *
 	 * @param var the name of the variable being typed. Example "a".
 	 * @param type the WyIL type
-	 * @return a Boogie typing predicate, such as "isInt(a)".
+	 * @return a Boogie boolean typing predicate, such as "isInt(a)".
 	 *    The outermost operator will have precedence of && or tighter.
 	 */
 	public String typePredicate(String var, Type type) {
