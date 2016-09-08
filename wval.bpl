@@ -15,10 +15,13 @@ function isBool(WVal) returns (bool);
 function isString(WVal) returns (bool);
 function isArray(WVal) returns (bool);
 function isRecord(WVal) returns (bool);
-function isObject(WVal) returns (bool);
-function isRef(WVal) returns (bool);      // TODO
+function isObject(WVal) returns (bool);   // Not used yet.
+function isRef(WVal) returns (bool);      // TODO how to represent these?
 function isFunction(WVal) returns (bool); // supports function closures too
 function isMethod(WVal) returns (bool);   // supports method closures too
+
+// byte is a subset of int.
+function isByte(b:WVal) returns (bool) { isInt(b) && 0 <= toInt(b) && toInt(b) < 256 }
 
 // Now make sure these subsets of WVal are disjoint.
 axiom (forall v:WVal :: isNull(v) ==>
@@ -125,3 +128,28 @@ axiom (forall a1:WVal, a2:WVal ::
     && (forall i:int :: toArray(a1)[i] == toArray(a2)[i])
     ==> a1 == a2
     );
+
+
+// Records (and objects)
+// =====================
+// These are similar to arrays, but indexed by WField constants.
+// Undefined fields are all mapped to the 'undef__field' value.
+//
+// The Whiley type system distinguishes between record and objects
+// (closed versus open), so this Boogie theory does not need to.
+// However, equality of records/objects is always expanded out into
+// an explicit set of equalities over a known set of fields.
+
+// Record and object injection and extraction functions
+function toRecord(WVal) returns ([WField]WVal);
+function fromRecord([WField]WVal) returns (WVal);
+function recordupdate(a:WVal, f:WField, v:WVal) returns (WVal) {
+    fromRecord(toRecord(a)[f := v]) }
+axiom (forall s:[WField]WVal :: isRecord(fromRecord(s)));
+axiom (forall s:[WField]WVal :: toRecord(fromRecord(s)) == s);
+axiom (forall v:WVal :: isRecord(v) ==> fromRecord(toRecord(v)) == v);
+
+// Whiley record literals use empty__record[field1 := val1][field2 := val2] etc.
+const unique empty__record : [WField]WVal;
+const unique undef__field:WVal; // undefined fields map to this value
+axiom (forall f:WField :: empty__record[f] == undef__field);

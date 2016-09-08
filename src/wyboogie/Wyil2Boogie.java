@@ -25,8 +25,23 @@
 
 package wyboogie;
 
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import wybs.lang.Build;
 import wybs.util.StdProject;
@@ -66,6 +81,7 @@ import wyc.util.WycBuildTask;
 public final class Wyil2Boogie {
 	private PrintWriter out;
 	private boolean verbose = false;
+	private Set<String> declaredFields = new HashSet<>();
 
 	/** Input parameters of current function/procedure. */
 	List<Location<?>> inDecls;
@@ -87,6 +103,29 @@ public final class Wyil2Boogie {
 
 	public void setVerbose(boolean flag) {
 		this.verbose = flag;
+	}
+
+	/**
+	 *
+	 * @param field a non-null field name.
+	 * @return true iff that field has already been declared.
+	 */
+	protected boolean isDeclaredField(String field) {
+		return declaredFields.contains(field);
+	}
+
+	/**
+	 * Declare any new record fields that have not already been declared.
+	 *
+	 * This should be called with all fields in a definition, before that definition is output.
+	 */
+	protected void declareNewFields(Set<String> fields) {
+		for (String f : fields) {
+			if (!declaredFields.contains(f)) {
+				out.println("const unique " + f + ":WField;");
+				declaredFields.add(f);
+			}
+		}
 	}
 
 	// ======================================================================
@@ -126,6 +165,8 @@ public final class Wyil2Boogie {
 			writeLocationsAsComments(td.getTree());
 		}
 		Type t = td.type();
+		declareFields(t);
+		declareFields(td.getTree());
 		// writeModifiers(td.modifiers());
 		String param = "x";
 		if (!td.getTree().getLocations().isEmpty()) {
@@ -147,6 +188,7 @@ public final class Wyil2Boogie {
 		if(verbose) {
 			writeLocationsAsComments(cd.getTree());
 		}
+		declareFields(cd.constant().type());
 		out.println("const " + cd.name() + " : WVal;");
 		out.println("axiom " + cd.name() + " == " + createConstant(cd.constant()) + ";");
 		out.println();
@@ -157,6 +199,7 @@ public final class Wyil2Boogie {
 			writeLocationsAsComments(method.getTree());
 		}
 		Type.FunctionOrMethod ft = method.type();
+		declareFields(method.getTree());
 		String name = method.name();
 		int inSize = ft.params().size();
 		int outSize = ft.returns().size();
@@ -274,17 +317,24 @@ public final class Wyil2Boogie {
 	 */
 	private void writeLocalVarDecls(List<Location<?>> locs) {
 		// We start after the input and output parameters.
+		Map<String, Type> locals = new LinkedHashMap<>(); // preserve order, but remove duplicates
 		for (int i = inDecls.size() + outDecls.size(); i < locs.size(); i++) {
 			if (locs.get(i).getBytecode() instanceof VariableDeclaration) {
 				@SuppressWarnings("unchecked")
 				Location<VariableDeclaration> decl = (Location<VariableDeclaration>) locs.get(i);
-				tabIndent(1);
 				String name = decl.getBytecode().getName();
-				out.print("var ");
-				out.print(name);
-				out.print(" : WVal where ");
-				out.print(typePredicate(name, decl.getType()));
-				out.println(";");
+				Type prevType = locals.get(name);
+				if (prevType == null) {
+					locals.put(name, decl.getType());
+					tabIndent(1);
+					out.print("var ");
+					out.print(name);
+					out.print(" : WVal where ");
+					out.print(typePredicate(name, decl.getType()));
+					out.println(";");
+				} else if (!prevType.equals(decl.getType())) {
+					throw new IllegalArgumentException("local var " + name + " has multiple types");
+				}
 			}
 		}
 	}
@@ -492,7 +542,7 @@ public final class Wyil2Boogie {
 		writeExpression(b.getOperand(0));
 		out.println(")) {");
 		writeBlock(indent+1,b.getBlock(0));
-		if(b.numberOfBlocks() > 1) {
+		if (b.numberOfBlocks() > 1) {
 			tabIndent(indent+1);
 			out.println("} else {");
 			writeBlock(indent+1,b.getBlock(1));
@@ -684,7 +734,7 @@ public final class Wyil2Boogie {
 			writeLambda((Location<Bytecode.Lambda>) expr);
 			break;
 		case Bytecode.OPCODE_record:
-			writeRecordConstructor((Location<Bytecode.Operator>) expr, out);
+			writeRecordConstructor((Location<Bytecode.Operator>) expr);
 			break;
 		case Bytecode.OPCODE_newobject:
 			writeNewObject((Location<Bytecode.Operator>) expr);
@@ -800,7 +850,10 @@ public final class Wyil2Boogie {
 	}
 
 	private void writeConvert(Location<Bytecode.Convert> expr) {
-		out.print("(" + expr.getType() + ") ");
+		// TODO: implement the record (and object?) conversion that drops fields?
+		// See tests/valid/Coercion_Valid_9.whiley
+		// TODO: are there any valid conversions in Boogie?
+		// out.print("(" + expr.getType() + ") ");
 		writeExpression(expr.getOperand(0));
 	}
 
@@ -809,10 +862,14 @@ public final class Wyil2Boogie {
 	}
 
 	private void writeFieldLoad(Location<Bytecode.FieldLoad> expr) {
+		out.print("toRecord(");
 		writeBracketedExpression(expr.getOperand(0));
-		out.print("." + expr.getBytecode().fieldName());
+		out.print(")[");
+		out.print(expr.getBytecode().fieldName());
+		out.print("]");
 	}
 
+	// TODO:
 	private void writeIndirectInvoke(Location<Bytecode.IndirectInvoke> expr) {
 		Location<?>[] operands = expr.getOperands();
 		writeExpression(operands[0]);
@@ -868,23 +925,23 @@ public final class Wyil2Boogie {
 		out.print(")");
 	}
 
-	private void writeRecordConstructor(Location<Bytecode.Operator> expr, PrintWriter out) {
+	private void writeRecordConstructor(Location<Bytecode.Operator> expr) {
 		Type.EffectiveRecord t = (Type.EffectiveRecord) expr.getType();
-		ArrayList<String> fields = new ArrayList<String>(t.fields().keySet());
+		List<String> fields = new ArrayList<String>(t.fields().keySet());
 		Collections.sort(fields);
 		Location<?>[] operands = expr.getOperands();
-		out.print("{");
-		for(int i=0;i!=operands.length;++i) {
-			if(i != 0) {
-				out.print(", ");
-			}
+		out.print("fromRecord(empty__record");
+		for(int i = 0; i != operands.length; ++i) {
+			out.print("[");
 			out.print(fields.get(i));
-			out.print(" ");
+			out.print(" := ");
 			writeExpression(operands[i]);
+			out.print("]");
 		}
-		out.print("}");
+		out.print(")");
 	}
 
+	// TODO
 	private void writeNewObject(Location<Bytecode.Operator> expr) {
 		out.print("new ");
 		writeExpression(expr.getOperand(0));
@@ -1064,9 +1121,10 @@ public final class Wyil2Boogie {
 	/**
 	 * Translate the WyIL type into the type in Boogie.
 	 *
-	 * @param var the name of the variable being typed.
+	 * @param var the name of the variable being typed. Example "a".
 	 * @param type the WyIL type
 	 * @return a Boogie typing predicate, such as "isInt(a)".
+	 *    The outermost operator will have precedence of && or tighter.
 	 */
 	public String typePredicate(String var, Type type) {
 		if (type instanceof Type.Nominal) {
@@ -1076,56 +1134,8 @@ public final class Wyil2Boogie {
 		if (type instanceof Type.Int) {
 			return "isInt(" + var + ")";
 		}
-		if (type instanceof Type.Array) {
-			return "isArray(" + var + ")";
-			// TODO: add constraints on the element type
-			//translateType(var, ((Type.Array) type).element(), stores);
-		}
-//		if (type instanceof Type.Void) {
-//			// this should not happen?
-//			return "TODO Type.Void";
-//		}
-		if (type instanceof Type.Record) {
-			// TODO: add constraints about the fields?
-			// HashMap<String, Type> fields = ((Type.Record) type).fields();
-			if (((Type.Record) type).isOpen()) {
-				return "isObject(" + var + ")";
-			} else {
-				return "isRecord(" + var + ")";
-			}
-//			// Check if the field is the function call of print,...
-//			if (fields.containsKey("print") || fields.containsKey("println") || fields.containsKey("print_s")
-//					|| fields.containsKey("println_s")) {
-//				// No need to do the translation.
-//				return "void*";
-//			}
-//
-//			// The input 'type' is input arguments of main method.
-//			if (fields.containsKey("args")) {
-//				return "int argc, char** args";
-//			}
-//			// Get the user-defined type
-//			return Optional.ofNullable(stores.getUserDefinedType(type)).get().name() + "*";
-		}
-		if (type instanceof Type.Union) {
-			// Type.Union u = (Type.Union) type;
-			// TODO: generate the disjunction of all the bounds??
-			// u.bounds()
-			// return Optional.ofNullable(stores.getUserDefinedType(type)).get().name() + "*";
-		}
-		if (type instanceof Type.Reference) {
-			// TODO: add constraints about the type pointed to?
-			// Type.Reference ref = (Type.Reference) type;
-			// translateType(?, ref.element(), stores);
-			return "isRef(" + var + ")";
-		}
-		if (type instanceof Type.Function) {
-			// TODO: add input and output types?
-			return "isFunc(" + var + ")";
-		}
-		if (type instanceof Type.Method) {
-			// TODO: add input and output types?
-			return "isMethod(" + var + ")";
+		if (type instanceof Type.Byte) {
+			return "isByte(" + var + ")";
 		}
 		if (type instanceof Type.Null) {
 			return "isNull(" + var + ")";
@@ -1136,17 +1146,78 @@ public final class Wyil2Boogie {
 		if (type instanceof Type.Any) {
 			return "true";
 		}
+		if (type instanceof Type.Array) {
+			Type.Array t = (Type.Array) type;
+			Type elemType = t.element();
+			String bndVar = var + "__i";
+			String elem = "toArray(" + var + ")[" + bndVar + "]";
+			return String.format("isArray(%s) && (forall %s:int :: 0 <= %s && %s < arraylen(%s) ==> %s)",
+					var, bndVar, bndVar, bndVar, var, typePredicate(elem, elemType));
+		}
+//		if (type instanceof Type.Void) {
+//			// this should not happen?
+//		}
+		if (type instanceof Type.Record) {
+			Type.Record t = (Type.Record) type;
+			Map<String, Type> fields = t.fields();
+			// add constraints about the fields
+			final String objrec;
+			//if (t.isOpen()) {
+			//	objrec = "Object(" + var + ")";
+			//} else {
+			objrec = "Record(" + var + ")";
+			//}
+			final StringBuilder result = new StringBuilder();
+			result.append("is" + objrec);
+			for (Map.Entry<String, Type> field : fields.entrySet()) {
+				result.append(" && ");
+				String elem = "to" + objrec + "[" + field.getKey() + "]";
+				Type elemType = field.getValue();
+				result.append(typePredicate(elem, elemType));
+			}
+			return result.toString();
+		}
+		if (type instanceof Type.Union) {
+			// we generate the disjunction of all the bounds
+			Type.Union u = (Type.Union) type;
+			String result = "(";
+			String sep = "";
+			for (Type element : u.bounds()) {
+				result += sep + typePredicate(var, element);
+				sep = " || ";
+			}
+			return result + ")";
+		}
+		if (type instanceof Type.Negation) {
+			// we negate the type test
+			Type.Negation t = (Type.Negation) type;
+			return "!" + typePredicate(var, t.element());
+		}
+		if (type instanceof Type.Reference) {
+			// TODO: add constraints about the type pointed to.
+			// Type.Reference ref = (Type.Reference) type;
+			// translateType(?, ref.element(), stores);
+			return "isRef(" + var + ")";
+		}
+		if (type instanceof Type.Function) {
+			// TODO: add input and output types.
+			return "isFunc(" + var + ")";
+		}
+		if (type instanceof Type.Method) {
+			// TODO: add input and output types.
+			return "isMethod(" + var + ")";
+		}
 		throw new RuntimeException("TODO: type " + type);
 	}
 
 	/**
-	 * Create a type predicate name, like "isList", from a type name "list".
+	 * Create a user-defined type predicate name, like "is_list", from a type name "list".
 	 *
 	 * @param typeName a non-empty string.
 	 * @return a non-null string.
 	 */
 	private String typePredicateName(String typeName) {
-		return "is" + typeName.substring(0, 1).toUpperCase() + typeName.substring(1);
+		return "is_" + typeName;
 	}
 
 	/**
@@ -1157,24 +1228,38 @@ public final class Wyil2Boogie {
 	 */
 	private String createConstant(Constant cd) {
 		Type type = cd.type();
+		StringBuilder result = new StringBuilder();
 		if (cd instanceof Constant.Integer) {
-			return "fromInt(" + cd.toString() + ")";
-		}
-		if (cd instanceof Constant.Bool) {
-			return "fromBool(" + cd.toString() + ")";
-		}
-		if (cd instanceof Constant.Byte) {
-			return "fromInt(" + cd.toString() + ")";
-		}
-		if (cd instanceof Constant.Array) {
+			result.append("fromInt(" + cd.toString() + ")");
+		} else if (cd instanceof Constant.Bool) {
+			result.append("fromBool(" + cd.toString() + ")");
+		} else if (cd instanceof Constant.Byte) {
+			Constant.Byte b = (Constant.Byte) cd;
+			int val = Byte.toUnsignedInt(b.value());
+			result.append("fromInt(" + val + ")");
+		} else if (cd instanceof Constant.Array) {
 			Constant.Array aconst = (Constant.Array) cd;
 			ArrayList<Constant> values = aconst.values();
-			return createArrayInitialiser(values);
+			result.append(createArrayInitialiser(values));
+		} else if (cd instanceof Constant.Null) {
+			result.append("null"); // already a WVal
+		} else if (cd instanceof Constant.Record) {
+			Constant.Record rec = (Constant.Record) cd;
+			List<String> fields = new ArrayList<String>(rec.values().keySet());
+			Collections.sort(fields);
+			result.append("fromRecord(empty__record");
+			for(String field : fields) {
+				result.append("[");
+				result.append(field);
+				result.append(" := ");
+				result.append(createConstant(rec.values().get(field)));
+				result.append("]");
+			}
+			result.append(")");
+		} else {
+			throw new RuntimeException("TODO: createConstant(" + cd + "):" + type);
 		}
-		if (cd instanceof Constant.Null) {
-			return "null"; // already a WVal
-		}
-		throw new RuntimeException("TODO: constantToWVal(" + cd + "):" + type);
+		return result.toString();
 	}
 
 	private String createArrayInitialiser(ArrayList<Constant> values) {
@@ -1195,6 +1280,63 @@ public final class Wyil2Boogie {
 		out.append(values.size());
 		out.append(")");
 		return out.toString();
+	}
+
+
+	/**
+	 * Recurses into the given type and makes sure all field names are declared.
+	 *
+	 * This should be called on all types, before each output definition.
+	 *
+	 * @param type any kind of Whiley type.
+	 */
+	private void declareFields(Type type) {
+		if (type instanceof Type.Record) {
+			Type.Record t = (Type.Record) type;
+			declareNewFields(t.fields().keySet());
+		} else if (type instanceof Type.Array) {
+			Type.Array t = (Type.Array) type;
+			declareFields(t.element());
+		} else if (type instanceof Type.Reference) {
+			Type.Reference t = (Type.Reference) type;
+			declareFields(t.element());
+		} else if (type instanceof Type.Negation) {
+			Type.Negation t = (Type.Negation) type;
+			declareFields(t.element());
+		} else if (type instanceof Type.Union) {
+			Type.Union t = (Type.Union) type;
+			for (Type b : t.bounds()) {
+				declareFields(b);
+			}
+		} else if (type instanceof Type.FunctionOrMethod) {
+			Type.FunctionOrMethod t = (Type.FunctionOrMethod) type;
+			for (Type b : t.params()) {
+				declareFields(b);
+			}
+			for (Type b : t.returns()) {
+				declareFields(b);
+			}
+		} else if (type instanceof Type.Leaf) {
+			// no fields to declare
+		} else {
+			throw new IllegalArgumentException("unknown type encountered: " + type);
+		}
+	}
+
+	/**
+	 * A helper function that declares all new fields in a complete syntax tree.
+	 *
+	 * This should be called before that syntax tree is output.
+	 *
+	 * @param tree
+	 */
+	private void declareFields(SyntaxTree tree) {
+		for (Location<?> loc : tree.getLocations()) {
+			Type[] types = loc.getTypes();
+			for (Type t : types) {
+				declareFields(t);
+			}
+		}
 	}
 
     /**
