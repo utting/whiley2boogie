@@ -544,9 +544,12 @@ public final class Wyil2Boogie {
 			if (lhs.length > 1) {
 				throw new NotImplementedYet("Multiple array assignments not handled yet.", stmt);
 			}
-			// Instead of a[e] := v, we do a := a[e := v];
+			// Instead of a[e] := rhs, we do a := a[e := rhs];
 			assert lhs[0].numberOfOperands() == 2;
 			Location<?> array = lhs[0].getOperand(0);
+			if (!(array.getBytecode() instanceof Bytecode.VariableAccess)) {
+				throw new NotImplementedYet("array update of complex expression", stmt);
+			}
 			Location<?> index = lhs[0].getOperand(1);
 			writeExpression(array);
 			out.print(" := fromArray(toArray(");
@@ -558,6 +561,25 @@ public final class Wyil2Boogie {
 			out.print("], arraylen(");
 			writeExpression(array);
 			out.print("))");
+		} else if (lhs[0].getBytecode().getOpcode() == Bytecode.OPCODE_fieldload) {
+			if (lhs.length > 1) {
+				throw new NotImplementedYet("Multiple record assignments not handled yet.", stmt);
+			}
+			// Instead of a[e] := rhs, we do a := a[e := rhs];
+			assert lhs[0].numberOfOperands() == 1;
+			Location<?> rec = lhs[0].getOperand(0);
+			String field = ((Bytecode.FieldLoad) (lhs[0].getBytecode())).fieldName();
+			if (!(rec.getBytecode() instanceof Bytecode.VariableAccess)) {
+				throw new NotImplementedYet("record update of complex expression", stmt);
+			}
+			writeExpression(rec);
+			out.print(" := fromRecord(toRecord(");
+			writeExpression(rec);
+			out.print(")[");
+			out.print(field);
+			out.print(" := ");
+			writeExpression(rhs[0]);
+			out.print("])");
 		} else {
 			if (isMethod(rhs[0])) {
 				// Boogie distinguishes method & function calls!
