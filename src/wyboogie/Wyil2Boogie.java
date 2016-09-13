@@ -208,6 +208,7 @@ public final class Wyil2Boogie {
 		assert inDecls.size() == inSize;
 		assert outDecls.size() == outSize;
 		if (ft instanceof Type.Function) {
+			assert outSize > 0;
 			// We generate a Boogie function, as well as a procedure.
 			// The procedure is used to verify the code against pre/post.
 			// The function encodes just the pre=>post properties.
@@ -255,26 +256,54 @@ public final class Wyil2Boogie {
 		out.print(method.name());
 		out.print("(");
 		writeParameters(method.type().params(), inDecls, false);
-		if (!method.type().returns().isEmpty()) {
+		if (method.type().returns().isEmpty()) {
+			out.println(");");
+			throw new IllegalArgumentException("function with no return values: " + method);
+		} else {
 			out.print(") returns (");
 			writeParameters(method.type().returns(), outDecls, false);
-		}
-		out.println(");");
+			out.println(");");
 
-		// write pre => post axiom
-		out.print("axiom (forall ");
-		writeParameters(method.type().params(), inDecls, false);
-		if (inDecls.size() > 0 && outDecls.size() > 0) {
-			out.print(", ");
+			// write axiom: (forall in,out :: f(in)==out && pre ==> post)
+			String inVars = getNames(inDecls);
+			String outVars = getNames(outDecls);
+			out.print("axiom (forall ");
+			writeParameters(method.type().params(), inDecls, false);
+			if (inDecls.size() > 0 && outDecls.size() > 0) {
+				out.print(", ");
+			}
+			writeParameters(method.type().returns(), outDecls, false);
+			out.println(" :: ");
+			out.print("\t(");
+
+			// write f(in)==out && pre
+			String call = String.format("%s(%s) == (%s) && ", method.name(), inVars, outVars);
+			out.print(call);
+			writeConjunction(method.getPrecondition());
+			out.print(")\n\t==> (");
+			// write post
+			writeConjunction(method.getPostcondition());
+			out.println("));");
 		}
-		writeParameters(method.type().returns(), outDecls, false);
-		out.println(" :: ");
-		out.print("\t(");
-		writeConjunction(method.getPrecondition());
-		out.print(")\n\t==> (");
-		writeConjunction(method.getPostcondition());
-		out.println("));");
 		out.println();
+	}
+
+	/**
+	 * Get the names being declared.
+	 *
+	 * @param decls a list of declarations.
+	 * @return a comma-separated string of just the names being declared.
+	 */
+	private String getNames(List<Location<?>> decls) {
+		StringBuilder result = new StringBuilder();
+		for (int i = 0; i != decls.size(); ++i) {
+			if (i != 0) {
+				result.append(", ");
+			}
+			VariableDeclaration locn = (VariableDeclaration) decls.get(i).getBytecode();
+			result.append(locn.getName());
+		}
+		return result.toString();
 	}
 
 	/**
@@ -950,6 +979,7 @@ public final class Wyil2Boogie {
 		out.print(")");
 	}
 
+	// TODO: lambda
 	@SuppressWarnings("unchecked")
 	private void writeLambda(Location<Bytecode.Lambda> expr) {
 		out.print("&[");
@@ -977,6 +1007,7 @@ public final class Wyil2Boogie {
 		out.print(" -> ");
 		writeExpression(expr.getOperand(0));
 		out.print(")");
+		throw new NotImplementedYet("lambda", expr);
 	}
 
 	private void writeRecordConstructor(Location<Bytecode.Operator> expr) {
