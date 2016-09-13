@@ -6,7 +6,7 @@ type WField;      // field names for records and objects.
 type WFuncName;   // names of functions
 type WMethodName; // names of methods
 
-// These typing predicates define various (disjoint) subsets of WVal
+// These typing predicates define various (disjoint) subsets of WVal.
 // For null, there is just one WVal constant.
 const unique null:WVal;
 function isNull(v:WVal) returns (bool) { v == null }
@@ -106,7 +106,7 @@ axiom (forall v:WVal :: isArray(v) ==> 0 <= arraylen(v));
 //
 function arrayconst(val:WVal) returns ([int]WVal);
 axiom (forall val:WVal, i:int :: arrayconst(val)[i] == val);
-    
+
 // A few programs need extensionality of arrays.
 // Boogie does not include this by default (page 12 KRML178).
 // To avoid inconsistencies, we have just a very weak version of extensionality
@@ -120,7 +120,6 @@ axiom (forall val:WVal, i:int :: arrayconst(val)[i] == val);
 //  ==> wa == wb   // if we had a strong extensionality axiom, requiring only 0..100.
 //   && wa != wb   // from a != b plus above axioms.
 // )
-
 axiom (forall a1:WVal, a2:WVal ::
     isArray(a1)
     && isArray(a2)
