@@ -38,7 +38,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -59,6 +58,7 @@ import wyil.lang.Type;
 import wyil.lang.Type.Method;
 import wyil.lang.Bytecode.AliasDeclaration;
 import wyil.lang.Bytecode.Expr;
+import wyil.lang.Bytecode.Stmt;
 import wyil.lang.Bytecode.VariableAccess;
 import wyil.lang.Bytecode.VariableDeclaration;
 import wyil.lang.Constant;
@@ -165,7 +165,7 @@ public final class Wyil2Boogie {
 			writeLocationsAsComments(td.getTree());
 		}
 		Type t = td.type();
-		declareFields(t);
+		declareFields(t, new HashSet<Type>());
 		declareFields(td.getTree());
 		// writeModifiers(td.modifiers());
 		String param = "x";
@@ -188,7 +188,7 @@ public final class Wyil2Boogie {
 		if(verbose) {
 			writeLocationsAsComments(cd.getTree());
 		}
-		declareFields(cd.constant().type());
+		declareFields(cd.constant().type(), new HashSet<Type>());
 		out.println("const " + cd.name() + " : WVal;");
 		out.println("axiom " + cd.name() + " == " + createConstant(cd.constant()) + ";");
 		out.println();
@@ -270,7 +270,6 @@ public final class Wyil2Boogie {
 		writeParameters(method.type().returns(), outDecls, false);
 		out.println(" :: ");
 		out.print("\t(");
-		// TODO: may need more brackets!
 		writeConjunction(method.getPrecondition());
 		out.print(")\n\t==> (");
 		writeConjunction(method.getPostcondition());
@@ -310,33 +309,82 @@ public final class Wyil2Boogie {
 	}
 
 	/**
-	 * Writes just the declarations and type constraints of local variables.
+	 * Writes just the declarations and type constraints of local variables of a function/method.
 	 *
 	 * This is done only at the top level of each procedure.
+	 * Boogie requires all local variables to be declared at the start
+	 * of each function/procedure.  So this writes out just one copy of each
+	 * variable declaration.  If a variable is declared more than once, with
+	 * different types, then we cannot easily translate this to Boogie, so we throw an exception.
+	 *
+	 * It is hard to distinguish local variable declarations from bound variables inside quantifiers
+	 * if we just do a linear scan of the Whiley bytecodes, so this method does a recursive descent
+	 * through the code part of the function or method, looking for local variable declarations,
+	 * and ignoring expressions and quantifiers.
 	 *
 	 * @param locs
-	 * @param out
 	 */
 	private void writeLocalVarDecls(List<Location<?>> locs) {
 		// We start after the input and output parameters.
 		Map<String, Type> locals = new LinkedHashMap<>(); // preserve order, but remove duplicates
-		for (int i = inDecls.size() + outDecls.size(); i < locs.size(); i++) {
-			if (locs.get(i).getBytecode() instanceof VariableDeclaration) {
-				@SuppressWarnings("unchecked")
-				Location<VariableDeclaration> decl = (Location<VariableDeclaration>) locs.get(i);
-				String name = decl.getBytecode().getName();
-				Type prevType = locals.get(name);
-				if (prevType == null) {
-					locals.put(name, decl.getType());
-					tabIndent(1);
-					out.print("var ");
-					out.print(name);
-					out.print(" : WVal where ");
-					out.print(typePredicate(name, decl.getType()));
-					out.println(";");
-				} else if (!prevType.equals(decl.getType())) {
-					throw new IllegalArgumentException("local var " + name + " has multiple types");
-				}
+		writeLocalVarDecls(locs, locs.size() - 1, locals);
+//		for (int i = inDecls.size() + outDecls.size(); i < locs.size(); i++) {
+//			if (locs.get(i).getBytecode() instanceof VariableDeclaration) {
+//				@SuppressWarnings("unchecked")
+//				Location<VariableDeclaration> decl = (Location<VariableDeclaration>) locs.get(i);
+//				String name = decl.getBytecode().getName();
+//				Type prevType = locals.get(name);
+//				if (prevType == null) {
+//					locals.put(name, decl.getType());
+//					tabIndent(1);
+//					out.print("var ");
+//					out.print(name);
+//					out.print(" : WVal where ");
+//					out.print(typePredicate(name, decl.getType()));
+//					out.println(";");
+//				} else if (!prevType.equals(decl.getType())) {
+//					throw new IllegalArgumentException("local var " + name + " has multiple types");
+//				}
+//			}
+//		}
+	}
+
+	/**
+	 * Does a recursive descent through the code of a function/method, looking for local variables.
+	 *
+	 * @param locs all locations in this function/method
+	 * @param pc   the program counter to check for local variables
+	 * @param done a map of all the local variables found (and declared) so far.
+	 */
+	@SuppressWarnings("unchecked")
+	private void writeLocalVarDecls(List<Location<?>> locs, int pc, Map<String, Type> done) {
+		Bytecode bytecode = locs.get(pc).getBytecode();
+		if (bytecode instanceof VariableDeclaration) {
+			Location<VariableDeclaration> decl = (Location<VariableDeclaration>) locs.get(pc);
+			String name = decl.getBytecode().getName();
+			Type prevType = done.get(name);
+			if (prevType == null) {
+				done.put(name, decl.getType());
+				tabIndent(1);
+				out.print("var ");
+				out.print(name);
+				out.print(" : WVal where ");
+				out.print(typePredicate(name, decl.getType()));
+				out.println(";");
+			} else if (!prevType.equals(decl.getType())) {
+				throw new NotImplementedYet("local var " + name + " has multiple types", locs.get(pc));
+			}
+		} else if (bytecode instanceof Bytecode.Block) {
+			// loop through all statements in this block
+			Bytecode.Block block = (Bytecode.Block) bytecode;
+			for (int b : block.getOperands()) {
+				writeLocalVarDecls(locs, b, done);
+			}
+		} else if (bytecode instanceof Stmt) {
+			// loop through all child blocks
+			Stmt code = (Stmt) bytecode;
+			for (int b : code.getBlocks()) {
+				writeLocalVarDecls(locs, b, done);
 			}
 		}
 	}
@@ -434,7 +482,7 @@ public final class Wyil2Boogie {
 			writeVariableInit(indent, (Location<Bytecode.VariableDeclaration>) c);
 			break;
 		default:
-			throw new IllegalArgumentException("unknown bytecode encountered");
+			throw new NotImplementedYet("unknown bytecode encountered", c);
 		}
 	}
 
@@ -463,7 +511,7 @@ public final class Wyil2Boogie {
 		Location<?>[] rhs = stmt.getOperandGroup(SyntaxTree.RIGHTHANDSIDE);
 		if (lhs[0].getBytecode().getOpcode() == Bytecode.OPCODE_arrayindex) {
 			if (lhs.length > 1) {
-				throw new IllegalArgumentException("Multiple array assignments not handled yet.");
+				throw new NotImplementedYet("Multiple array assignments not handled yet.", stmt);
 			}
 			// Instead of a[e] := v, we do a := a[e := v];
 			assert lhs[0].numberOfOperands() == 2;
@@ -578,10 +626,12 @@ public final class Wyil2Boogie {
 		out.println(")");
 	}
 
+	// TODO: named block
 	private void writeNamedBlock(int indent, Location<Bytecode.NamedBlock> b) {
 		out.print(b.getBytecode().getName());
 		out.println(":");
 		writeBlock(indent+1,b.getBlock(0));
+		throw new NotImplementedYet("named block", b);
 	}
 
 	private void writeWhile(int indent, Location<Bytecode.While> b) {
@@ -629,9 +679,10 @@ public final class Wyil2Boogie {
 	}
 
 	private void writeSkip(int indent, Location<Bytecode.Skip> b) {
-		out.println("skip;");
+		// no output needed.  Boogie uses {...} blocks, so empty statements are okay.
 	}
 
+	// TODO
 	private void writeSwitch(int indent, Location<Bytecode.Switch> b) {
 		out.print("switch ");
 		writeExpression(b.getOperand(0));
@@ -655,6 +706,7 @@ public final class Wyil2Boogie {
 			}
 			writeBlock(indent + 2, b.getBlock(i));
 		}
+		throw new NotImplementedYet("switch", b);
 	}
 
 	private void writeVariableAccess(Location<VariableAccess> loc) {
@@ -742,9 +794,8 @@ public final class Wyil2Boogie {
 			writeNewObject((Location<Bytecode.Operator>) expr);
 			break;
 		case Bytecode.OPCODE_dereference:
-			// TODO
-			out.print(" TODO Bytecode.OPCODE_is ");
-			break;
+			// TODO: dereference
+			throw new NotImplementedYet("dereference", expr);
 		case Bytecode.OPCODE_logicalnot:
 			writePrefixLocations("Bool", "Bool", (Location<Bytecode.Operator>) expr);
 			break;
@@ -763,13 +814,14 @@ public final class Wyil2Boogie {
 		case Bytecode.OPCODE_mul:
 		case Bytecode.OPCODE_div:
 		case Bytecode.OPCODE_rem:
+			writeInfixLocations("Int", "Int", (Location<Bytecode.Operator>) expr);
+			break;
 		case Bytecode.OPCODE_bitwiseor:  // TODO
 		case Bytecode.OPCODE_bitwisexor: // TODO
 		case Bytecode.OPCODE_bitwiseand: // TODO
 		case Bytecode.OPCODE_shl:        // TODO
 		case Bytecode.OPCODE_shr:        // TODO
-			writeInfixLocations("Int", "Int", (Location<Bytecode.Operator>) expr);
-			break;
+			throw new NotImplementedYet("bitwise operators not supported yet: " + expr.getBytecode(), expr);
 		case Bytecode.OPCODE_eq:
 		case Bytecode.OPCODE_ne:
 		case Bytecode.OPCODE_lt:
@@ -783,8 +835,7 @@ public final class Wyil2Boogie {
 			writeInfixLocations("Bool", "Bool", (Location<Bytecode.Operator>) expr);
 			break;
 		case Bytecode.OPCODE_is:
-			// TODO: is
-			out.print(" TODO Bytecode.OPCODE_is ");
+			writeIs((Location<Bytecode.Operator>) expr);
 			break;
 		case Bytecode.OPCODE_varaccess:
 			writeVariableAccess((Location<VariableAccess>) expr);
@@ -883,6 +934,7 @@ public final class Wyil2Boogie {
 			writeExpression(operands[i]);
 		}
 		out.print(")");
+		throw new NotImplementedYet("indirect invoke", expr);
 	}
 
 	private void writeInvoke(Location<Bytecode.Invoke> expr) {
@@ -943,10 +995,26 @@ public final class Wyil2Boogie {
 		out.print(")");
 	}
 
-	// TODO
+	// TODO: new object
 	private void writeNewObject(Location<Bytecode.Operator> expr) {
 		out.print("new ");
 		writeExpression(expr.getOperand(0));
+		throw new NotImplementedYet("new record/object", expr);
+	}
+
+	private void writeIs(Location<Bytecode.Operator> c) {
+		Location<?> lhs = c.getOperand(0);
+		Location<?> rhs = c.getOperand(1);
+		if (lhs.getBytecode() instanceof Bytecode.VariableAccess
+				&& rhs.getBytecode() instanceof Bytecode.Const) {
+			Location<VariableDeclaration> vd = getVariableDeclaration(lhs.getOperand(0));
+			final String name = vd.getBytecode().getName();
+			Bytecode.Const constType = (Bytecode.Const) rhs.getBytecode();
+			Constant.Type type = (Constant.Type) constType.constant();
+			out.print("fromBool(" + typePredicate(name, type.value()) + ")");
+		} else {
+			throw new NotImplementedYet("expr is type", c);
+		}
 	}
 
 	private void writePrefixLocations(String resultType, String argType, Location<Bytecode.Operator> expr) {
@@ -1064,9 +1132,17 @@ public final class Wyil2Boogie {
 		case MUL:
 			return "*";
 		case DIV:
-			return "/";
+			// TODO: fix this for negative numbers.
+			// Boogie 'mod' implements Euclidean division, whereas Whiley uses truncated division.
+			// See https://en.wikipedia.org/wiki/Modulo_operation for explanations.
+			// See http://boogie.codeplex.com/discussions/397357 for what Boogie does.
+			return "div";
 		case REM:
-			return "%";
+			// TODO: fix this for negative numbers.
+			// Boogie 'mod' implements Euclidean division, whereas Whiley uses truncated division.
+			// See https://en.wikipedia.org/wiki/Modulo_operation for explanations.
+			// See http://boogie.codeplex.com/discussions/397357 for what Boogie does.
+			return "mod";
 		case EQ:
 			return "==";
 		case NEQ:
@@ -1183,13 +1259,13 @@ public final class Wyil2Boogie {
 		if (type instanceof Type.Union) {
 			// we generate the disjunction of all the bounds
 			Type.Union u = (Type.Union) type;
-			String result = "(";
+			String result = "((";
 			String sep = "";
 			for (Type element : u.bounds()) {
 				result += sep + typePredicate(var, element);
-				sep = " || ";
+				sep = ") || (";
 			}
-			return result + ")";
+			return result + "))";
 		}
 		if (type instanceof Type.Negation) {
 			// we negate the type test
@@ -1210,7 +1286,7 @@ public final class Wyil2Boogie {
 			// TODO: add input and output types.
 			return "isMethod(" + var + ")";
 		}
-		throw new RuntimeException("TODO: type " + type);
+		throw new NotImplementedYet("type: " + type, null);
 	}
 
 	/**
@@ -1260,7 +1336,7 @@ public final class Wyil2Boogie {
 			}
 			result.append(")");
 		} else {
-			throw new RuntimeException("TODO: createConstant(" + cd + "):" + type);
+			throw new NotImplementedYet("createConstant(" + cd + "):" + type, null);
 		}
 		return result.toString();
 	}
@@ -1292,32 +1368,42 @@ public final class Wyil2Boogie {
 	 * This should be called on all types, before each output definition.
 	 *
 	 * @param type any kind of Whiley type.
+	 * @param done the names of the types that have already been processed.
+	 *       (This is used to handle recursive and mutually-recursive types).
 	 */
-	private void declareFields(Type type) {
+	private void declareFields(Type type, Set<Type> done) {
+		if (done.contains(type)) {
+			return;  // this is a recursive type
+		}
 		if (type instanceof Type.Record) {
 			Type.Record t = (Type.Record) type;
 			declareNewFields(t.fields().keySet());
 		} else if (type instanceof Type.Array) {
 			Type.Array t = (Type.Array) type;
-			declareFields(t.element());
+			done.add(t);
+			declareFields(t.element(), done);
 		} else if (type instanceof Type.Reference) {
 			Type.Reference t = (Type.Reference) type;
-			declareFields(t.element());
+			done.add(t);
+			declareFields(t.element(), done);
 		} else if (type instanceof Type.Negation) {
 			Type.Negation t = (Type.Negation) type;
-			declareFields(t.element());
+			done.add(t);
+			declareFields(t.element(), done);
 		} else if (type instanceof Type.Union) {
 			Type.Union t = (Type.Union) type;
+			done.add(t);
 			for (Type b : t.bounds()) {
-				declareFields(b);
+				declareFields(b, done);
 			}
 		} else if (type instanceof Type.FunctionOrMethod) {
 			Type.FunctionOrMethod t = (Type.FunctionOrMethod) type;
+			done.add(t);
 			for (Type b : t.params()) {
-				declareFields(b);
+				declareFields(b, done);
 			}
 			for (Type b : t.returns()) {
-				declareFields(b);
+				declareFields(b, done);
 			}
 		} else if (type instanceof Type.Leaf) {
 			// no fields to declare
@@ -1337,7 +1423,7 @@ public final class Wyil2Boogie {
 		for (Location<?> loc : tree.getLocations()) {
 			Type[] types = loc.getTypes();
 			for (Type t : types) {
-				declareFields(t);
+				declareFields(t, new HashSet<Type>());
 			}
 		}
 	}
