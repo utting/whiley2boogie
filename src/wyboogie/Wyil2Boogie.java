@@ -124,7 +124,7 @@ public final class Wyil2Boogie {
 	protected void declareNewFields(Set<String> fields) {
 		for (String f : fields) {
 			if (!declaredFields.contains(f)) {
-				out.println("const unique " + f + ":WField;");
+				out.println("const unique " + mangleWField(f) + ":WField;");
 				declaredFields.add(f);
 			}
 		}
@@ -170,11 +170,13 @@ public final class Wyil2Boogie {
 		declareFields(t, new HashSet<Type>());
 		declareFields(td.getTree());
 		// writeModifiers(td.modifiers());
-		String param = "x";
+		final String param;
 		if (!td.getTree().getLocations().isEmpty()) {
 			@SuppressWarnings("unchecked")
 			Location<VariableDeclaration> loc = (Location<VariableDeclaration>) td.getTree().getLocation(0);
 			param = loc.getBytecode().getName();
+		} else {
+			param = generateFreshBoundVar("r__");
 		}
 		out.print("function " + typePredicateName(td.name()) + "(" + param + ":WVal) returns (bool) { ");
 		out.print(typePredicate(param, t));
@@ -202,7 +204,7 @@ public final class Wyil2Boogie {
 		}
 		Type.FunctionOrMethod ft = method.type();
 		declareFields(method.getTree());
-		String name = method.name();
+		String name = mangleFunctionMethodName(method.name(), method.type());
 		int inSize = ft.params().size();
 		int outSize = ft.returns().size();
 		inDecls = method.getTree().getLocations().subList(0, inSize);
@@ -210,13 +212,15 @@ public final class Wyil2Boogie {
 		assert inDecls.size() == inSize;
 		assert outDecls.size() == outSize;
 		if (ft instanceof Type.Function) {
-			assert outSize > 0;
+			if (outSize != 1) {
+				throw new NotImplementedYet("functions with multiple return values:" + name, null);
+			}
 			// We generate a Boogie function, as well as a procedure.
 			// The procedure is used to verify the code against pre/post.
 			// The function encodes just the pre=>post properties.
 			// This is because Boogie functions cannot include code,
 			// they are uninterpreted functions or with an expression body only.
-			writeFunction(method);
+			writeFunction(name, method);
 			name = name + "__impln";
 		}
 		out.print("procedure ");
@@ -249,13 +253,13 @@ public final class Wyil2Boogie {
 	/**
 	 * Writes out a Boogie function declaration, plus a pre implies post axiom.
 	 *
-	 * @param method
-	 * @param out
+	 * @param name the mangled name of the function
+	 * @param method all other details of the function
 	 */
-	private void writeFunction(FunctionOrMethod method) {
+	private void writeFunction(String name, FunctionOrMethod method) {
 		assert method.isFunction();
 		out.print("function ");
-		out.print(method.name());
+		out.print(name);
 		out.print("(");
 		writeParameters(method.type().params(), inDecls, false);
 		if (method.type().returns().isEmpty()) {
@@ -279,7 +283,7 @@ public final class Wyil2Boogie {
 			out.print("\t(");
 
 			// write f(in)==out && pre
-			String call = String.format("%s(%s) == (%s) && ", method.name(), inVars, outVars);
+			String call = String.format("%s(%s) == (%s) && ", name, inVars, outVars);
 			out.print(call);
 			writeConjunction(method.getPrecondition());
 			out.print(")\n\t==> (");
@@ -576,7 +580,7 @@ public final class Wyil2Boogie {
 			out.print(" := fromRecord(toRecord(");
 			writeExpression(rec);
 			out.print(")[");
-			out.print(field);
+			out.print(mangleWField(field));
 			out.print(" := ");
 			writeExpression(rhs[0]);
 			out.print("])");
@@ -668,7 +672,7 @@ public final class Wyil2Boogie {
 	}
 
 	private void writeInvoke(int indent, Location<Bytecode.Invoke> stmt) {
-		out.print(stmt.getBytecode().name() + "(");
+		out.print(mangleFunctionMethodName(stmt.getBytecode().name().name(), stmt.getBytecode().type()) + "(");
 		Location<?>[] operands = stmt.getOperands();
 		for(int i=0;i!=operands.length;++i) {
 			if(i!=0) {
@@ -971,7 +975,7 @@ public final class Wyil2Boogie {
 		out.print("toRecord(");
 		writeBracketedExpression(expr.getOperand(0));
 		out.print(")[");
-		out.print(expr.getBytecode().fieldName());
+		out.print(mangleWField(expr.getBytecode().fieldName()));
 		out.print("]");
 	}
 
@@ -992,7 +996,14 @@ public final class Wyil2Boogie {
 
 	private void writeInvoke(Location<Bytecode.Invoke> expr) {
 		// TODO: check that it is safe to use unqualified DeclID names?
-		out.print(expr.getBytecode().name().name() + "(");
+		String name = expr.getBytecode().name().name();
+		Type.FunctionOrMethod type = expr.getBytecode().type();
+		if (type instanceof Method) {
+			// The Whiley language spec 0.3.36, Section 3.5.5, says that because they are impure,
+			// methods cannot be called inside specifications.
+			throw new NotImplementedYet("call to method (" + name + ") from inside an expression", expr);
+		}
+		out.print(mangleFunctionMethodName(name, type) + "(");
 		Location<?>[] operands = expr.getOperands();
 		for(int i=0;i!=operands.length;++i) {
 			if(i!=0) {
@@ -1042,7 +1053,7 @@ public final class Wyil2Boogie {
 		out.print("fromRecord(empty__record");
 		for(int i = 0; i != operands.length; ++i) {
 			out.print("[");
-			out.print(fields.get(i));
+			out.print(mangleWField(fields.get(i)));
 			out.print(" := ");
 			writeExpression(operands[i]);
 			out.print("]");
@@ -1305,7 +1316,7 @@ public final class Wyil2Boogie {
 			result.append("is" + objrec);
 			for (Map.Entry<String, Type> field : fields.entrySet()) {
 				result.append(" && ");
-				String elem = "to" + objrec + "[" + field.getKey() + "]";
+				String elem = "to" + objrec + "[" + mangleWField(field.getKey()) + "]";
 				Type elemType = field.getValue();
 				result.append(typePredicate(elem, elemType));
 			}
@@ -1384,7 +1395,7 @@ public final class Wyil2Boogie {
 			result.append("fromRecord(empty__record");
 			for(String field : fields) {
 				result.append("[");
-				result.append(field);
+				result.append(mangleWField(field));
 				result.append(" := ");
 				result.append(createConstant(rec.values().get(field)));
 				result.append("]");
@@ -1416,6 +1427,36 @@ public final class Wyil2Boogie {
 		return out.toString();
 	}
 
+	/**
+	 * Converts a Whiley field name into a Boogie field name.
+	 * This translation is useful because in Boogie it is possible to have
+	 * fields and variables with the same name, but our encoding in Boogie
+	 * means they are all in the same name space (constants plus variables).
+	 *
+	 * @param field
+	 * @return field prefixed with a dollar.
+	 */
+	protected String mangleWField(String field) {
+		return "$" + field;
+	}
+
+	/**
+	 * Mangles a function/method name, so that simple overloaded functions are possible.
+	 *
+	 * The current implementation supports overloading with different numbers of parameters,
+	 * but not different types, so that names do not become TOO long.
+	 * Note that we currently ignore module names here, as it is not obvious how to get the
+	 * DeclID or the module of a function or method declaration.  This may become an issue
+	 * if we start verifying multi-module programs.
+	 *
+	 * @param method
+	 * @return a human-readable name for the function/method.
+	 */
+	private String mangleFunctionMethodName(String name, Type.FunctionOrMethod type) {
+		String result = name + "$" + type.params().size();
+		// System.err.printf("mangle %s : %s to %s\n", name, type.toString(), result);
+		return result;
+	}
 
 	/**
 	 * Recurses into the given type and makes sure all field names are declared.
