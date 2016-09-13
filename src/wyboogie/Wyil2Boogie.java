@@ -76,12 +76,14 @@ import wyc.util.WycBuildTask;
  *
  * @author David J. Pearce
  * @author Mark Utting
- *
  */
 public final class Wyil2Boogie {
 	private PrintWriter out;
 	private boolean verbose = false;
 	private Set<String> declaredFields = new HashSet<>();
+
+	/** Used to generate unique IDs for bound variables. */
+	private int uniqueId = 0;
 
 	/** Input parameters of current function/procedure. */
 	List<Location<?>> inDecls;
@@ -1259,7 +1261,7 @@ public final class Wyil2Boogie {
 		if (type instanceof Type.Array) {
 			Type.Array t = (Type.Array) type;
 			Type elemType = t.element();
-			String bndVar = var + "__i";
+			String bndVar = generateFreshBoundVar("i__");
 			String elem = "toArray(" + var + ")[" + bndVar + "]";
 			return String.format("isArray(%s) && (forall %s:int :: 0 <= %s && %s < arraylen(%s) ==> %s)",
 					var, bndVar, bndVar, bndVar, var, typePredicate(elem, elemType));
@@ -1457,6 +1459,17 @@ public final class Wyil2Boogie {
 				declareFields(t, new HashSet<Type>());
 			}
 		}
+	}
+
+	/**
+	 * Generate a fresh name for use as a bound variable.
+	 *
+	 * @param base a prefix for the name.
+	 * @return
+	 */
+	private String generateFreshBoundVar(String base) {
+		uniqueId++;
+		return base + uniqueId;
 	}
 
     /**
