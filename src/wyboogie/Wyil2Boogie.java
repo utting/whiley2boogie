@@ -83,6 +83,8 @@ import wyc.util.WycBuildTask;
  * @author Mark Utting
  */
 public final class Wyil2Boogie {
+    private static final String IMMUTABLE_INPUT = "__0";
+
     /** The conjunction operator for pre/post conditions. */
     private static final String AND_OUTER = " &&\n      ";
 
@@ -101,10 +103,10 @@ public final class Wyil2Boogie {
     /** Used to generate unique IDs for bound variables. */
     private int uniqueId = 0;
 
-    /** Input parameters of current function/procedure. */
+    /** Input parameters of the current function/method. */
     List<Location<?>> inDecls;
 
-    /** Output parameters of current function/procedure. */
+    /** Output parameters of the current function/method. */
     List<Location<?>> outDecls;
 
     public Wyil2Boogie(PrintWriter writer) {
@@ -142,22 +144,20 @@ public final class Wyil2Boogie {
     // ======================================================================
 
     public void apply(WyilFile module) throws IOException {
-        try {
-            for(WyilFile.Constant cd : module.constants()) {
-                writeConstant(cd);
-            }
-            if(!module.constants().isEmpty()) {
-                out.println();
-            }
-            for (WyilFile.Type td : module.types()) {
-                writeTypeSynonym(td);
-                out.println();
-            }
-            for(FunctionOrMethod md : module.functionOrMethods()) {
-                writeProcedure(md);
-                out.println();
-            }
-        } finally {
+        for(WyilFile.Constant cd : module.constants()) {
+            writeConstant(cd);
+        }
+        if(!module.constants().isEmpty()) {
+            out.println();
+        }
+        for (WyilFile.Type td : module.types()) {
+            writeTypeSynonym(td);
+            out.println();
+            out.flush();
+        }
+        for(FunctionOrMethod md : module.functionOrMethods()) {
+            writeProcedure(md);
+            out.println();
             out.flush();
         }
     }
@@ -243,7 +243,7 @@ public final class Wyil2Boogie {
             procedureName = name + "__impl";
         }
         out.print("procedure ");
-        writeSignature(procedureName, method);
+        writeSignature(procedureName, method, null);
         out.println(";");
         out.printf("    requires %s(%s);\n", name + METHOD_PRE, getNames(inDecls));
         // Part of the postcondition is the type and type constraints of each output variable.
@@ -261,21 +261,63 @@ public final class Wyil2Boogie {
         if(verbose) {
             writeLocationsAsComments(method.getTree());
         }
-        Map<String, Type> mutated = findMutatedInputs(method);
+        Map<String, Type> mutatedInputs = findMutatedInputs(method);
         out.print("implementation ");
-        writeSignature(procedureName, method);
+        writeSignature(procedureName, method, mutatedInputs);
         if (method.getBody() != null) {
             out.println();
             out.println("{");
             writeLocalVarDecls(method.getTree().getLocations());
+
+            // now create a local copy of each mutated input!
+            for (String naughty : mutatedInputs.keySet()) {
+                tabIndent(1);
+                out.print("var ");
+                out.print(naughty);
+                out.print(" : WVal where ");
+                out.print(typePredicate(naughty, mutatedInputs.get(naughty)));
+                out.println(";");
+            }
+            // now assign the original inputs to the copies.
+            for (String naughty : mutatedInputs.keySet()) {
+                tabIndent(1);
+                out.printf("%s := %s;\n", naughty, naughty + IMMUTABLE_INPUT);
+            }
             writeBlock(0, method.getBody());
             out.println("}");
         }
+        inDecls = null;
+        outDecls = null;
     }
 
     private Map<String, Type> findMutatedInputs(FunctionOrMethod method) {
         Map<String, Type> result = new LinkedHashMap<>();
-
+        List<Location<?>> locations = method.getTree().getLocations();
+        for (Location<?> loc0 : locations) {
+            if (loc0.getBytecode() instanceof Bytecode.Assign) {
+                Bytecode.Assign assign = (Bytecode.Assign) loc0.getBytecode();
+                for (int i : assign.leftHandSide()) {
+                    Location<?> loc = locations.get(i);
+                    int opcode = loc.getBytecode().getOpcode();
+                    while (opcode == Bytecode.OPCODE_arrayindex
+                            || opcode == Bytecode.OPCODE_fieldload
+                            || opcode == Bytecode.OPCODE_varaccess) {
+                        loc = loc.getOperand(0);
+                        opcode = loc.getBytecode().getOpcode();
+                    }
+                    // TODO: add this? loc = getVariableDeclaration(loc);
+                    int index = method.getTree().getIndexOf(loc);
+                    if (index < inDecls.size()) {
+                        // this is a mutated input!
+                        @SuppressWarnings("unchecked")
+                        Location<VariableDeclaration> decl = (Location<VariableDeclaration>) loc;
+                        String name = decl.getBytecode().getName();
+                        System.err.printf("MUTATED INPUT %s : %s\n", name, decl.getType());
+                        result.put(name, decl.getType());
+                    }
+                }
+            }
+        }
         return result;
     }
 
@@ -283,7 +325,7 @@ public final class Wyil2Boogie {
         out.print("function ");
         out.print(name);
         out.print("(");
-        writeParameters(method.type().params(), inDecls);
+        writeParameters(method.type().params(), inDecls, null);
         out.print(") returns (bool) {\n      ");
         List<Type> parameters = method.type().params();
         for (int i = 0; i != parameters.size(); ++i) {
@@ -312,24 +354,24 @@ public final class Wyil2Boogie {
         out.print("function ");
         out.print(name);
         out.print("(");
-        writeParameters(method.type().params(), inDecls);
+        writeParameters(method.type().params(), inDecls, null);
         if (method.type().returns().isEmpty()) {
             out.println(");");
             throw new IllegalArgumentException("function with no return values: " + method);
         } else {
             out.print(") returns (");
-            writeParameters(method.type().returns(), outDecls);
+            writeParameters(method.type().returns(), outDecls, null);
             out.println(");");
 
             // write axiom: (forall in,out :: f(in)==out && f_pre(in) ==> types(out) && post)
             String inVars = getNames(inDecls);
             String outVars = getNames(outDecls);
             out.print("axiom (forall ");
-            writeParameters(method.type().params(), inDecls);
+            writeParameters(method.type().params(), inDecls, null);
             if (inDecls.size() > 0 && outDecls.size() > 0) {
                 out.print(", ");
             }
-            writeParameters(method.type().returns(), outDecls);
+            writeParameters(method.type().returns(), outDecls, null);
             out.print(" ::\n    ");
             // construct f(in)==out && f__pre(in)
             String call = String.format("%s(%s) == (%s) && %s(%s)", name, inVars, outVars,
@@ -395,13 +437,13 @@ public final class Wyil2Boogie {
         }
     }
 
-    private void writeSignature(String name, FunctionOrMethod method) {
+    private void writeSignature(String name, FunctionOrMethod method, Map<String, Type> mutatedInputs) {
         out.print(name);
         out.print("(");
-        writeParameters(method.type().params(), inDecls);
+        writeParameters(method.type().params(), inDecls, mutatedInputs);
         if (!method.type().returns().isEmpty()) {
             out.print(") returns (");
-            writeParameters(method.type().returns(), outDecls);
+            writeParameters(method.type().returns(), outDecls, null);
         }
         out.print(")");
     }
@@ -497,13 +539,16 @@ public final class Wyil2Boogie {
         }
     }
 
-    private void writeParameters(List<Type> parameters, List<Location<?>> decls) {
+    private void writeParameters(List<Type> parameters, List<Location<?>> decls, Map<String, Type> rename) {
         for (int i = 0; i != parameters.size(); ++i) {
             if (i != 0) {
                 out.print(", ");
             }
             VariableDeclaration locn = (VariableDeclaration) decls.get(i).getBytecode();
             String name = locn.getName();
+            if (rename != null && rename.containsKey(name)) {
+                name = name + IMMUTABLE_INPUT;
+            }
             out.print(name + ":WVal");
         }
     }
@@ -1476,7 +1521,7 @@ public final class Wyil2Boogie {
             out.append(createConstant(values.get(0)));
         }
         out.append(")");
-        for (int i = 1; i != values.size(); ++i) {
+        for (int i = 1; i < values.size(); ++i) {
             out.append("[" + i + " := ");
             out.append(createConstant(values.get(i)));
             out.append("]");
