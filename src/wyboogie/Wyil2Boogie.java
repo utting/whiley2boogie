@@ -218,9 +218,6 @@ public final class Wyil2Boogie {
 	 * @param method
 	 */
 	private void writeProcedure(FunctionOrMethod method) {
-		if(verbose) {
-			writeLocationsAsComments(method.getTree());
-		}
 		Type.FunctionOrMethod ft = method.type();
 		declareFields(method.getTree());
 		String name = mangleFunctionMethodName(method.name(), method.type());
@@ -255,6 +252,9 @@ public final class Wyil2Boogie {
 			out.print("    ensures toBool(");
 			writeExpression(postcondition);
 			out.println(");");
+		}
+		if(verbose) {
+			writeLocationsAsComments(method.getTree());
 		}
 		out.print("implementation ");
 		writeSignature(procedureName, method);
