@@ -78,8 +78,19 @@ import wyc.util.WycBuildTask;
  * @author Mark Utting
  */
 public final class Wyil2Boogie {
-	private PrintWriter out;
-	private boolean verbose = false;
+	/** The conjunction operator for pre/post conditions. */
+	private static final String AND_OUTER = " &&\n      ";
+
+	/** This is appended to each function/method name, for the precondition of that function. */
+	private static final String METHOD_PRE = "__pre";
+
+	/** Where the Boogie output is written. */
+	protected PrintWriter out;
+
+	/** If true, then the Whiley bytecodes are printed as comments. */
+	protected boolean verbose = false;
+
+	/** Keeps track of which (non-mangled) WField names have already been declared. */
 	private Set<String> declaredFields = new HashSet<>();
 
 	/** Used to generate unique IDs for bound variables. */
@@ -108,15 +119,6 @@ public final class Wyil2Boogie {
 	}
 
 	/**
-	 *
-	 * @param field a non-null field name.
-	 * @return true iff that field has already been declared.
-	 */
-	protected boolean isDeclaredField(String field) {
-		return declaredFields.contains(field);
-	}
-
-	/**
 	 * Declare any new record fields that have not already been declared.
 	 *
 	 * This should be called with all fields in a definition, before that definition is output.
@@ -135,22 +137,24 @@ public final class Wyil2Boogie {
 	// ======================================================================
 
 	public void apply(WyilFile module) throws IOException {
-		out.println();
-		for(WyilFile.Constant cd : module.constants()) {
-			writeConstant(cd);
+		try {
+			for(WyilFile.Constant cd : module.constants()) {
+				writeConstant(cd);
+			}
+			if(!module.constants().isEmpty()) {
+				out.println();
+			}
+			for (WyilFile.Type td : module.types()) {
+				writeTypeSynonym(td);
+				out.println();
+			}
+			for(FunctionOrMethod md : module.functionOrMethods()) {
+				writeProcedure(md);
+				out.println();
+			}
+		} finally {
+			out.flush();
 		}
-		if(!module.constants().isEmpty()) {
-			out.println();
-		}
-		for (WyilFile.Type td : module.types()) {
-			writeTypeSynonym(td);
-		}
-
-		for(FunctionOrMethod md : module.functionOrMethods()) {
-			writeProcedure(md);
-			out.println();
-		}
-		out.flush();
 	}
 
 	/**
@@ -178,12 +182,11 @@ public final class Wyil2Boogie {
 		} else {
 			param = generateFreshBoundVar("r__");
 		}
-		out.print("function " + typePredicateName(td.name()) + "(" + param + ":WVal) returns (bool) { ");
+		out.print("function " + typePredicateName(td.name()) + "(" + param + ":WVal) returns (bool) {\n    ");
 		out.print(typePredicate(param, t));
 		if (!td.getInvariant().isEmpty()) {
-			out.print(" && (");
-			writeConjunction(td.getInvariant());
-			out.println(")");
+			out.print(AND_OUTER);
+			writeConjunction(td.getInvariant(), AND_OUTER);
 		}
 		out.println(" }");
 	}
@@ -198,6 +201,22 @@ public final class Wyil2Boogie {
 		out.println();
 	}
 
+	/**
+	 * Generates a Boogie procedure (and implementation) for the given Whiley function or method.
+	 *
+	 * We also generate a 'precondition function' called f__pre, which is true if the inputs
+	 * satisfy all the typing conditions and preconditions of the function or method.
+	 *
+	 * For a function f, we generate a Boogie function f, as well as a procedure f_impl.
+	 * The procedure is used to verify the code against pre/post.
+	 * This is because Boogie functions cannot include code,
+	 * they are uninterpreted functions or with an expression body only.
+	 *
+	 * The function encodes just the pre=>post properties,
+	 * and is callable from parts of the specification.
+	 *
+	 * @param method
+	 */
 	private void writeProcedure(FunctionOrMethod method) {
 		if(verbose) {
 			writeLocationsAsComments(method.getTree());
@@ -211,36 +230,34 @@ public final class Wyil2Boogie {
 		outDecls = method.getTree().getLocations().subList(inSize, inSize + outSize);
 		assert inDecls.size() == inSize;
 		assert outDecls.size() == outSize;
+		// define a function for the precondition of this method.
+		writeMethodPre(name + METHOD_PRE, method, method.getPrecondition());
+		String procedureName = name;
 		if (ft instanceof Type.Function) {
 			if (outSize != 1) {
 				throw new NotImplementedYet("functions with multiple return values:" + name, null);
 			}
-			// We generate a Boogie function, as well as a procedure.
-			// The procedure is used to verify the code against pre/post.
-			// The function encodes just the pre=>post properties.
-			// This is because Boogie functions cannot include code,
-			// they are uninterpreted functions or with an expression body only.
 			writeFunction(name, method);
-			name = name + "__impln";
+			procedureName = name + "__impl";
 		}
 		out.print("procedure ");
-		writeSignature(name, method, true);
-		out.print(";");
-		for (Location<Expr> precondition : method.getPrecondition()) {
-			out.println();
-			out.print("requires toBool(");
-			writeExpression(precondition);
-			out.print(");");
+		writeSignature(procedureName, method);
+		out.println(";");
+		out.printf("    requires %s(%s);\n", name + METHOD_PRE, getNames(inDecls));
+		// Part of the postcondition is the type and type constraints of each output variable.
+		List<Type> outputs = method.type().returns();
+		for (int i = 0; i != outputs.size(); ++i) {
+			VariableDeclaration locn = (VariableDeclaration) outDecls.get(i).getBytecode();
+			String inName = locn.getName();
+			out.printf("    ensures %s;\n", typePredicate(inName, outputs.get(i)));
 		}
 		for (Location<Expr> postcondition : method.getPostcondition()) {
-			out.println();
-			out.print("ensures toBool(");
+			out.print("    ensures toBool(");
 			writeExpression(postcondition);
-			out.print(");");
+			out.println(");");
 		}
-		out.println();
 		out.print("implementation ");
-		writeSignature(name, method, false);
+		writeSignature(procedureName, method);
 		if (method.getBody() != null) {
 			out.println();
 			out.println("{");
@@ -248,6 +265,28 @@ public final class Wyil2Boogie {
 			writeBlock(0, method.getBody());
 			out.println("}");
 		}
+	}
+
+	private void writeMethodPre(String name, FunctionOrMethod method, List<Location<Bytecode.Expr>> pre) {
+		out.print("function ");
+		out.print(name);
+		out.print("(");
+		writeParameters(method.type().params(), inDecls);
+		out.print(") returns (bool) {\n      ");
+		List<Type> parameters = method.type().params();
+		for (int i = 0; i != parameters.size(); ++i) {
+			if (i != 0) {
+				out.print(AND_OUTER);
+			}
+			VariableDeclaration locn = (VariableDeclaration) inDecls.get(i).getBytecode();
+			String inName = locn.getName();
+			out.print(typePredicate(inName, parameters.get(i)));
+		}
+		if (parameters.size() > 0) {
+			out.print(AND_OUTER);
+		}
+		writeConjunction(pre, AND_OUTER);
+		out.println(" }");
 	}
 
 	/**
@@ -261,35 +300,45 @@ public final class Wyil2Boogie {
 		out.print("function ");
 		out.print(name);
 		out.print("(");
-		writeParameters(method.type().params(), inDecls, false);
+		writeParameters(method.type().params(), inDecls);
 		if (method.type().returns().isEmpty()) {
 			out.println(");");
 			throw new IllegalArgumentException("function with no return values: " + method);
 		} else {
 			out.print(") returns (");
-			writeParameters(method.type().returns(), outDecls, false);
+			writeParameters(method.type().returns(), outDecls);
 			out.println(");");
 
-			// write axiom: (forall in,out :: f(in)==out && pre ==> post)
+			// write axiom: (forall in,out :: f(in)==out && f_pre(in) ==> types(out) && post)
 			String inVars = getNames(inDecls);
 			String outVars = getNames(outDecls);
 			out.print("axiom (forall ");
-			writeParameters(method.type().params(), inDecls, false);
+			writeParameters(method.type().params(), inDecls);
 			if (inDecls.size() > 0 && outDecls.size() > 0) {
 				out.print(", ");
 			}
-			writeParameters(method.type().returns(), outDecls, false);
-			out.println(" :: ");
-			out.print("\t(");
-
-			// write f(in)==out && pre
-			String call = String.format("%s(%s) == (%s) && ", name, inVars, outVars);
-			out.print(call);
-			writeConjunction(method.getPrecondition());
-			out.print(")\n\t==> (");
-			// write post
-			writeConjunction(method.getPostcondition());
-			out.println("));");
+			writeParameters(method.type().returns(), outDecls);
+			out.print(" ::\n    ");
+			// construct f(in)==out && f__pre(in)
+			String call = String.format("%s(%s) == (%s) && %s(%s)", name, inVars, outVars,
+					name + METHOD_PRE, getNames(inDecls));
+			out.println(call);
+			out.print("    ==>\n      ");
+			// Now write the type and type constraints of each output variable.
+			List<Type> outputs = method.type().returns();
+			for (int i = 0; i != outputs.size(); ++i) {
+				if (i != 0) {
+					out.print(AND_OUTER);
+				}
+				VariableDeclaration locn = (VariableDeclaration) outDecls.get(i).getBytecode();
+				String inName = locn.getName();
+				out.print(typePredicate(inName, outputs.get(i)));
+			}
+			if (outputs.size() > 0) {
+				out.print(AND_OUTER);
+			}
+			writeConjunction(method.getPostcondition(), AND_OUTER);
+			out.println(");");
 		}
 		out.println();
 	}
@@ -316,15 +365,17 @@ public final class Wyil2Boogie {
 	 * Writes a conjunction, and leaves it as a Boogie boolean value.
 	 *
 	 * @param preds
+	 * @param op the conjunction operator, as a String.
+	 *    (This may include newlines and indentation to get more readable output).
 	 */
-	private void writeConjunction(List<Location<Bytecode.Expr>> preds) {
+	private void writeConjunction(List<Location<Bytecode.Expr>> preds, String op) {
 		if (preds.isEmpty()) {
 			out.print("true");
 		} else {
 			String sep = "";
 			for (Location<Expr> pred : preds) {
 				out.print(sep);
-				sep = " && ";
+				sep = op;
 				out.print("toBool(");
 				writeExpression(pred);
 				out.print(")");
@@ -332,13 +383,13 @@ public final class Wyil2Boogie {
 		}
 	}
 
-	private void writeSignature(String name, FunctionOrMethod method, boolean full) {
+	private void writeSignature(String name, FunctionOrMethod method) {
 		out.print(name);
 		out.print("(");
-		writeParameters(method.type().params(), inDecls, full);
+		writeParameters(method.type().params(), inDecls);
 		if (!method.type().returns().isEmpty()) {
 			out.print(") returns (");
-			writeParameters(method.type().returns(), outDecls, full);
+			writeParameters(method.type().returns(), outDecls);
 		}
 		out.print(")");
 	}
@@ -434,7 +485,7 @@ public final class Wyil2Boogie {
 		}
 	}
 
-	private void writeParameters(List<Type> parameters, List<Location<?>> decls, boolean withConstraints) {
+	private void writeParameters(List<Type> parameters, List<Location<?>> decls) {
 		for (int i = 0; i != parameters.size(); ++i) {
 			if (i != 0) {
 				out.print(", ");
@@ -442,10 +493,6 @@ public final class Wyil2Boogie {
 			VariableDeclaration locn = (VariableDeclaration) decls.get(i).getBytecode();
 			String name = locn.getName();
 			out.print(name + ":WVal");
-			if (withConstraints) {
-				out.print(" where ");
-				out.print(typePredicate(name, parameters.get(i)));
-			}
 		}
 	}
 
@@ -541,6 +588,7 @@ public final class Wyil2Boogie {
 		out.println(");");
 	}
 
+	// TODO: handle more complex updates, like a[i][j] = val and a[i].foo = val;
 	private void writeAssign(int indent, Location<Bytecode.Assign> stmt) {
 		Location<?>[] lhs = stmt.getOperandGroup(SyntaxTree.LEFTHANDSIDE);
 		Location<?>[] rhs = stmt.getOperandGroup(SyntaxTree.RIGHTHANDSIDE);
