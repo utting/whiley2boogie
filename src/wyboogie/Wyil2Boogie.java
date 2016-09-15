@@ -35,7 +35,9 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -74,7 +76,7 @@ import wyc.util.WycBuildTask;
  * <b>NOTE:</b> the output file is put in the same place as the
  * Whiley file, but with the file extension ".bpl".
  *
- * TODO: handle overloading more gracefully.  Leave first one unchanged, and postfix $2, $3... to others.
+ * TODO: mangle Whiley var names to avoid Boogie reserved words and keywords?
  *
  * TODO: pretty output by avoiding type coercions?
  *       change writeXXX methods to return string+type+precedence, and then insert coercions lazily.
@@ -102,6 +104,9 @@ public final class Wyil2Boogie {
 
     /** Used to generate unique IDs for bound variables. */
     private int uniqueId = 0;
+
+    /** Keeps track of the mangled names for every function and method. */
+    private Map<String, Map<Type.FunctionOrMethod, String>> functionOverloads;
 
     /** Input parameters of the current function/method. */
     List<Location<?>> inDecls;
@@ -144,6 +149,7 @@ public final class Wyil2Boogie {
     // ======================================================================
 
     public void apply(WyilFile module) throws IOException {
+        resolveFunctionOverloading(module.functionOrMethods());
         for(WyilFile.Constant cd : module.constants()) {
             writeConstant(cd);
         }
@@ -326,7 +332,7 @@ public final class Wyil2Boogie {
         out.print(name);
         out.print("(");
         writeParameters(method.type().params(), inDecls, null);
-        out.print(") returns (bool) {\n      ");
+        out.print(") returns (bool)\n{\n      ");
         List<Type> parameters = method.type().params();
         for (int i = 0; i != parameters.size(); ++i) {
             if (i != 0) {
@@ -340,7 +346,7 @@ public final class Wyil2Boogie {
             out.print(AND_OUTER);
         }
         writeConjunction(pre, AND_OUTER);
-        out.println(" }");
+        out.println("\n}");
     }
 
     /**
@@ -467,37 +473,18 @@ public final class Wyil2Boogie {
     private void writeLocalVarDecls(List<Location<?>> locs) {
         // We start after the input and output parameters.
         Map<String, Type> locals = new LinkedHashMap<>(); // preserve order, but remove duplicates
-        writeLocalVarDecls(locs, locs.size() - 1, locals);
-        //		for (int i = inDecls.size() + outDecls.size(); i < locs.size(); i++) {
-        //			if (locs.get(i).getBytecode() instanceof VariableDeclaration) {
-        //				@SuppressWarnings("unchecked")
-        //				Location<VariableDeclaration> decl = (Location<VariableDeclaration>) locs.get(i);
-        //				String name = decl.getBytecode().getName();
-        //				Type prevType = locals.get(name);
-        //				if (prevType == null) {
-        //					locals.put(name, decl.getType());
-        //					tabIndent(1);
-        //					out.print("var ");
-        //					out.print(name);
-        //					out.print(" : WVal where ");
-        //					out.print(typePredicate(name, decl.getType()));
-        //					out.println(";");
-        //				} else if (!prevType.equals(decl.getType())) {
-        //					throw new IllegalArgumentException("local var " + name + " has multiple types");
-        //				}
-        //			}
-        //		}
+        writeLocalVarDeclsRecursive(locs, locs.size() - 1, locals);
     }
 
     /**
-     * Does a recursive descent through the code of a function/method, looking for local variables.
+     * Does a recursive descent through all the statements in a function/method, looking for local variables.
      *
      * @param locs all locations in this function/method
-     * @param pc   the program counter to check for local variables
+     * @param pc   the program counter of the block or statement to check for local variables
      * @param done a map of all the local variables found (and declared) so far.
      */
     @SuppressWarnings("unchecked")
-    private void writeLocalVarDecls(List<Location<?>> locs, int pc, Map<String, Type> done) {
+    private void writeLocalVarDeclsRecursive(List<Location<?>> locs, int pc, Map<String, Type> done) {
         Bytecode bytecode = locs.get(pc).getBytecode();
         if (bytecode instanceof VariableDeclaration) {
             Location<VariableDeclaration> decl = (Location<VariableDeclaration>) locs.get(pc);
@@ -518,13 +505,13 @@ public final class Wyil2Boogie {
             // loop through all statements in this block
             Bytecode.Block block = (Bytecode.Block) bytecode;
             for (int b : block.getOperands()) {
-                writeLocalVarDecls(locs, b, done);
+                writeLocalVarDeclsRecursive(locs, b, done);
             }
         } else if (bytecode instanceof Stmt) {
             // loop through all child blocks
             Stmt code = (Stmt) bytecode;
             for (int b : code.getBlocks()) {
-                writeLocalVarDecls(locs, b, done);
+                writeLocalVarDeclsRecursive(locs, b, done);
             }
         }
     }
@@ -785,7 +772,7 @@ public final class Wyil2Boogie {
             }
             writeExpression(operands[i]);
         }
-        out.println(")");
+        out.println(");");
     }
 
     // TODO: named block
@@ -1451,7 +1438,7 @@ public final class Wyil2Boogie {
         }
         if (type instanceof Type.Function) {
             // TODO: add input and output types.
-            return "isFunc(" + var + ")";
+            return "isFunction(" + var + ")";
         }
         if (type instanceof Type.Method) {
             // TODO: add input and output types.
@@ -1546,10 +1533,31 @@ public final class Wyil2Boogie {
     }
 
     /**
+     * Determines which functions/methods need renaming to resolve overloading.
+     *
+     * @param functionOrMethods
+     */
+    private void resolveFunctionOverloading(Collection<WyilFile.FunctionOrMethod> functionOrMethods) {
+        functionOverloads = new HashMap<>();
+        for (WyilFile.FunctionOrMethod m : functionOrMethods) {
+            String name = m.name();
+            Map<Type.FunctionOrMethod, String> map = functionOverloads.get(name);
+            if (map == null) {
+                // first one with this name needs no mangling!
+                map = new HashMap<>();
+                map.put(m.type(), name);
+                functionOverloads.put(name, map);
+            } else if (!map.containsKey(m.type())) {
+                String mangled = name + "$" + (map.size() + 1);
+                map.put(m.type(), mangled);
+                System.err.printf("mangle %s : %s to %s\n", name, m.type().toString(), mangled);
+            }
+        }
+    }
+
+    /**
      * Mangles a function/method name, so that simple overloaded functions are possible.
      *
-     * The current implementation supports overloading with different numbers of parameters,
-     * but not different types, so that names do not become TOO long.
      * Note that we currently ignore module names here, as it is not obvious how to get the
      * DeclID or the module of a function or method declaration.  This may become an issue
      * if we start verifying multi-module programs.
@@ -1558,8 +1566,18 @@ public final class Wyil2Boogie {
      * @return a human-readable name for the function/method.
      */
     private String mangleFunctionMethodName(String name, Type.FunctionOrMethod type) {
-        String result = name + "$" + type.params().size();
-        // System.err.printf("mangle %s : %s to %s\n", name, type.toString(), result);
+        Map<Type.FunctionOrMethod, String> map = functionOverloads.get(name);
+        if (map == null) {
+            System.err.printf("Warning: function/method %s : %s assumed to be external, so not mangled.\n",
+                    name, type);
+            return name;  // no mangling!
+        }
+        String result = map.get(type);
+        if (result == null) {
+            System.err.printf("Warning: unknown overload of function/method %s : %s was not mangled.\n",
+                    name, type);
+            return name;  // no mangling!
+        }
         return result;
     }
 

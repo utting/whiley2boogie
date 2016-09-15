@@ -12,7 +12,6 @@ const unique null:WVal;
 function isNull(v:WVal) returns (bool) { v == null }
 function isInt(WVal) returns (bool);
 function isBool(WVal) returns (bool);
-function isString(WVal) returns (bool);
 function isArray(WVal) returns (bool);
 function isRecord(WVal) returns (bool);
 function isObject(WVal) returns (bool);   // Not used yet.
@@ -25,34 +24,31 @@ function isByte(b:WVal) returns (bool) { isInt(b) && 0 <= toInt(b) && toInt(b) <
 
 // Now make sure these subsets of WVal are disjoint.
 axiom (forall v:WVal :: isNull(v) ==>
-         !isInt(v) && !isBool(v) && !isString(v) && !isArray(v)
+         !isInt(v) && !isBool(v) && !isArray(v)
          && !isRecord(v) && !isObject(v) && !isRef(v) && !isFunction(v) && !isMethod(v));
 axiom (forall v:WVal :: isInt(v) ==>
-         !isNull(v) && !isBool(v) && !isString(v) && !isArray(v)
+         !isNull(v) && !isBool(v) && !isArray(v)
          && !isRecord(v) && !isObject(v) && !isRef(v) && !isFunction(v) && !isMethod(v));
 axiom (forall v:WVal :: isBool(v) ==>
-         !isNull(v) && !isInt(v) && !isString(v) && !isArray(v)
-         && !isRecord(v) && !isObject(v) && !isRef(v) && !isFunction(v) && !isMethod(v));
-axiom (forall v:WVal :: isString(v) ==>
-         !isNull(v) && !isInt(v) && !isBool(v) && !isArray(v)
+         !isNull(v) && !isInt(v) && !isArray(v)
          && !isRecord(v) && !isObject(v) && !isRef(v) && !isFunction(v) && !isMethod(v));
 axiom (forall v:WVal :: isArray(v) ==>
-         !isNull(v) && !isInt(v) && !isBool(v) && !isString(v)
+         !isNull(v) && !isInt(v) && !isBool(v)
          && !isRecord(v) && !isObject(v) && !isRef(v) && !isFunction(v) && !isMethod(v));
 axiom (forall v:WVal :: isRecord(v) ==>
-         !isNull(v) && !isInt(v) && !isBool(v) && !isString(v)
+         !isNull(v) && !isInt(v) && !isBool(v)
          && !isArray(v) && !isObject(v) && !isRef(v) && !isFunction(v) && !isMethod(v));
 axiom (forall v:WVal :: isObject(v) ==>
-         !isNull(v) && !isInt(v) && !isBool(v) && !isString(v)
+         !isNull(v) && !isInt(v) && !isBool(v)
          && !isArray(v) && !isRecord(v) && !isRef(v) && !isFunction(v) && !isMethod(v));
 axiom (forall v:WVal :: isRef(v) ==>
-         !isNull(v) && !isInt(v) && !isBool(v) && !isString(v)
+         !isNull(v) && !isInt(v) && !isBool(v)
          && !isArray(v) && !isRecord(v) && !isObject(v) && !isFunction(v) && !isMethod(v));
 axiom (forall v:WVal :: isFunction(v) ==>
-         !isNull(v) && !isInt(v) && !isBool(v) && !isString(v)
+         !isNull(v) && !isInt(v) && !isBool(v)
          && !isArray(v) && !isRecord(v) && !isObject(v) && !isRef(v) && !isMethod(v));
 axiom (forall v:WVal :: isMethod(v) ==>
-         !isNull(v) && !isInt(v) && !isBool(v) && !isString(v)
+         !isNull(v) && !isInt(v) && !isBool(v)
          && !isArray(v) && !isRecord(v) && !isObject(v) && !isRef(v) && !isFunction(v));
 
 // int injection and extraction functions
@@ -62,13 +58,6 @@ axiom (forall i:int :: isInt(fromInt(i)));
 axiom (forall i:int :: toInt(fromInt(i)) == i);
 axiom (forall v:WVal :: isInt(v) ==> fromInt(toInt(v)) == v);
 
-// Boogie recommends these axioms for Java-like modulo.
-//axiom (forall x:int, y:int :: { x % y } { x / y } x % y == x - x / y * y);
-//axiom (forall x:int, y:int :: {x % y}
-//    (0 < y) ==> 0 <= x % y && x % y < y) &&
-//    (y < 0) ==> y <  x % y && x % y <= 0)
-//);
-
 // bool injection and extraction functions
 function toBool(WVal) returns (bool);
 function fromBool(bool) returns (WVal);
@@ -77,16 +66,16 @@ axiom (forall b:bool :: toBool(fromBool(b)) == b);
 axiom (forall v:WVal :: isBool(v) ==> fromBool(toBool(v)) == v);
 
 // string injection and extraction functions
-type Unicode = int;
+//type Unicode = int;
 // const UnicodeMax int = 65536;
-function toString(WVal) returns ([int]Unicode);
-function strlen(WVal) returns (int);
-function fromString([int]Unicode,int) returns (WVal);
-axiom (forall s:[int]Unicode, len:int :: 0 <= len ==> isString(fromString(s,len)));
-axiom (forall s:[int]Unicode, len:int :: 0 <= len ==> toString(fromString(s,len)) == s);
-axiom (forall s:[int]Unicode, len:int :: 0 <= len ==> strlen(fromString(s,len)) == len);
-axiom (forall v:WVal :: isString(v) ==> fromString(toString(v), strlen(v)) == v);
-axiom (forall v:WVal :: isString(v) ==> strlen(v) >= 0);
+//function toString(WVal) returns ([int]Unicode);
+//function strlen(WVal) returns (int);
+//function fromString([int]Unicode,int) returns (WVal);
+//axiom (forall s:[int]Unicode, len:int :: 0 <= len ==> isString(fromString(s,len)));
+//axiom (forall s:[int]Unicode, len:int :: 0 <= len ==> toString(fromString(s,len)) == s);
+//axiom (forall s:[int]Unicode, len:int :: 0 <= len ==> strlen(fromString(s,len)) == len);
+//axiom (forall v:WVal :: isString(v) ==> fromString(toString(v), strlen(v)) == v);
+//axiom (forall v:WVal :: isString(v) ==> strlen(v) >= 0);
 
 // general array injection and extraction functions
 function toArray(WVal) returns ([int]WVal);
