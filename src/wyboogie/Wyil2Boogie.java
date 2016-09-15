@@ -57,8 +57,6 @@ import wyil.Main.Registry;
 import wyil.io.WyilFileReader;
 import wyil.lang.*;
 import wyil.lang.Type;
-import wyil.lang.Type.Function;
-import wyil.lang.Type.Method;
 import wyil.lang.Bytecode.AliasDeclaration;
 import wyil.lang.Bytecode.Expr;
 import wyil.lang.Bytecode.Stmt;
@@ -81,6 +79,18 @@ import wyc.util.WycBuildTask;
  *
  * TODO: pretty output by avoiding type coercions?
  *       change writeXXX methods to return string+type+precedence, and then insert coercions lazily.
+ *
+ * TODO: implement missing language features, such as:
+ * <ul>
+ *   <li>references, new, and dereferencing</li>
+ *   <li>bitwise operators</li>
+ *   <li>functions/methods with multiple return values</li>
+ *   <li>lambda functions</li>
+ *   <li>continue statements and named blocks</li>
+ *   <li>switch</li>
+ *   <li>indirect invoke</li>
+ *   <li>some kinds of complex constants</li>
+ * </ul>
  *
  * @author David J. Pearce
  * @author Mark Utting
@@ -242,13 +252,13 @@ public final class Wyil2Boogie {
         outDecls = method.getTree().getLocations().subList(inSize, inSize + outSize);
         assert inDecls.size() == inSize;
         assert outDecls.size() == outSize;
+        if (outSize > 1) {
+            throw new NotImplementedYet("multiple return values:" + name, null);
+        }
         // define a function for the precondition of this method.
         writeMethodPre(name + METHOD_PRE, method, method.getPrecondition());
         String procedureName = name;
         if (ft instanceof Type.Function) {
-            if (outSize != 1) {
-                throw new NotImplementedYet("functions with multiple return values:" + name, null);
-            }
             writeFunction(name, method);
             procedureName = name + "__impl";
         }
@@ -710,7 +720,7 @@ public final class Wyil2Boogie {
 
     private boolean isMethod(Location<?> loc) {
         if (loc.getBytecode().getOpcode() == Bytecode.OPCODE_invoke
-                && ((Bytecode.Invoke)loc.getBytecode()).type() instanceof Method) {
+                && ((Bytecode.Invoke)loc.getBytecode()).type() instanceof Type.Method) {
             return true;
         }
         return false;
@@ -720,8 +730,11 @@ public final class Wyil2Boogie {
         out.println("break;");
     }
 
+    // TODO: implement continue by breaking out of a labelled block?
+    // But 'continue' is used to carry on to next case of switch too, which requires different handling!
     private void writeContinue(int indent, Location<Bytecode.Continue> b) {
         out.println("continue;");
+        throw new NotImplementedYet("continue", b);
     }
 
     private void writeDebug(int indent, Location<Bytecode.Debug> b) {
@@ -984,8 +997,8 @@ public final class Wyil2Boogie {
             writePrefixLocations("Int", "Int", (Location<Bytecode.Operator>) expr);
             break;
         case Bytecode.OPCODE_bitwiseinvert:
-            writePrefixLocations("Int", "Int", (Location<Bytecode.Operator>) expr);
-            break;
+            // writePrefixLocations("Int", "Int", (Location<Bytecode.Operator>) expr);
+            throw new NotImplementedYet("bitwise operators not supported yet: " + expr.getBytecode(), expr);
         case Bytecode.OPCODE_all:
         case Bytecode.OPCODE_some:
             writeQuantifier((Location<Bytecode.Quantifier>) expr);
@@ -1003,6 +1016,8 @@ public final class Wyil2Boogie {
         case Bytecode.OPCODE_shl:        // TODO
         case Bytecode.OPCODE_shr:        // TODO
             throw new NotImplementedYet("bitwise operators not supported yet: " + expr.getBytecode(), expr);
+
+        // TODO: handle comparison of non-integer values
         case Bytecode.OPCODE_eq:
         case Bytecode.OPCODE_ne:
         case Bytecode.OPCODE_lt:
@@ -1122,8 +1137,8 @@ public final class Wyil2Boogie {
         // TODO: check that it is safe to use unqualified DeclID names?
         String name = expr.getBytecode().name().name();
         Type.FunctionOrMethod type = expr.getBytecode().type();
-        if (type instanceof Method) {
-            // The Whiley language spec 0.3.36, Section 3.5.5, says that because they are impure,
+        if (type instanceof Type.Method) {
+            // The Whiley language spec 0.3.38, Section 3.5.5, says that because they are impure,
             // methods cannot be called inside specifications.
             throw new NotImplementedYet("call to method (" + name + ") from inside an expression", expr);
         }
@@ -1139,6 +1154,7 @@ public final class Wyil2Boogie {
     }
 
     // TODO: lambda
+    // Question: some lambda expressions capture surrounding variables - how can we represent this in Boogie?
     @SuppressWarnings("unchecked")
     private void writeLambda(Location<Bytecode.Lambda> expr) {
         out.print("&[");
@@ -1241,7 +1257,7 @@ public final class Wyil2Boogie {
             predOp = " ==> ";
             break;
         default:
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("quantifier " + c.getOpcode());
         }
         // first pass just declares the bound variables
         for (int i = 0; i != c.numberOfOperandGroups(); ++i) {
@@ -1813,8 +1829,10 @@ public final class Wyil2Boogie {
             System.exit(1);
         }
         String path = args[argnum];
+        boolean removeWyil = false;
         if (path.endsWith(".whiley")) {
-            System.out.println("compiling " + path);
+            // System.out.println("compiling " + path);
+            removeWyil = true;
             Pair<Integer,String> ok = compile(path);
             if (ok.first() != 0) {
                 System.err.println("Error compiling " + path);
@@ -1822,11 +1840,11 @@ public final class Wyil2Boogie {
                 System.exit(2);
             }
             path = path.replaceAll("\\.whiley", ".wyil");
-            System.out.println("path set to " + path);
+            // System.out.println("path set to " + path);
         }
         if (path.endsWith(".wyil")) {
             String bplPath = path.substring(0, path.length() - 5) + ".bpl";
-            System.out.println("loading " + path);
+            // System.out.println("loading " + path);
             try {
                 PrintWriter out = new PrintWriter(new File(bplPath));
                 FileInputStream fin = new FileInputStream(path);
@@ -1834,17 +1852,24 @@ public final class Wyil2Boogie {
                 Wyil2Boogie translator = new Wyil2Boogie(out);
                 translator.setVerbose(verbose);
                 translator.apply(wf);
+                if (removeWyil) {
+                    // try to remove the temporary .wyil file that we created
+                    new File(path).delete();
+                }
             } catch (InternalFailure e) {
                 e.outputSourceError(System.err);
                 e.printStackTrace(System.err);
+                System.exit(6);
             } catch (SyntaxError e) {
                 e.outputSourceError(System.err);
+                System.exit(5);
             }
             catch (RuntimeException e) {
                 e.printStackTrace(System.err);
+                System.exit(4);
             }
         } else {
-            System.err.println("Unknown file: " + path);
+            System.err.println("ERROR: Unknown file: " + path);
             System.exit(3);
         }
     }
