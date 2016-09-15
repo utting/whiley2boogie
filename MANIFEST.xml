@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Main-Class: wyboogie.Wyil2Boogie
+Name: wyboogie
+Specification-Title: Mark's Whiley to Boogie translator
+Specification-Version: 2016.09.15
+Specification-Vendor: University of the Sunshine Coast
+Implementation-Title: Whiley to Boogie translator
+Implementation-Version: 2016.09.15
+Implementation-Vendor: Mark Utting

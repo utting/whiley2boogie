@@ -1,0 +1,40 @@
+===================================
+In tests/valid
+===================================
+
+Tests where Whiley verifier passes, but Boogie fails.
+
+===== Complex_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Complex_Valid_2.bpl(185,9): Error BP5003: A postcondition might not hold on this return path.
+Complex_Valid_2.bpl(176,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    Complex_Valid_2.bpl(180,5): anon0
+    Complex_Valid_2.bpl(181,13): anon11_Then
+Boogie program verifier finished with 4 verified, 1 error
+
+===== Complex_Valid_8.whiley =====
+Boogie program verifier finished with 5 verified, 1 error
+
+===== DoWhile_Valid_6.whiley =====
+Boogie program verifier finished with 1 verified, 1 error
+
+===== DoWhile_Valid_8.whiley =====
+Boogie program verifier finished with 1 verified, 2 errors
+
+===== Fail_Valid_1.whiley =====
+Boogie program verifier finished with 1 verified, 1 error
+  This is not valid, because when f(null) is called, the 'fail' is reachable.
+  Boogie correctly detects this.
+
+===== RecordAssign_Valid_6.whiley =====
+Boogie program verifier finished with 0 verified, 1 error
+
+
+
+====================================
+Whiley Language Questions
+====================================
+1. What types can be compared using '==' and '!='?
+    What types can be compared using '<', '<=' etc.?
+
