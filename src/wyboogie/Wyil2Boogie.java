@@ -57,6 +57,7 @@ import wyil.Main.Registry;
 import wyil.io.WyilFileReader;
 import wyil.lang.*;
 import wyil.lang.Type;
+import wyil.lang.Type.Function;
 import wyil.lang.Type.Method;
 import wyil.lang.Bytecode.AliasDeclaration;
 import wyil.lang.Bytecode.Expr;
@@ -1566,10 +1567,50 @@ public final class Wyil2Boogie {
     /**
      * Determines which functions/methods need renaming to resolve overloading.
      *
+     * This should be called once at the beginning of each file/module.
+     *
      * @param functionOrMethods
      */
     private void resolveFunctionOverloading(Collection<WyilFile.FunctionOrMethod> functionOrMethods) {
+        // some common types
+        List<Type> any1 = Collections.singletonList(Type.T_ANY);
+        List<Type> bool1 = Collections.singletonList(Type.T_BOOL);
+        List<Type> int1 = Collections.singletonList(Type.T_INT);
+        List<Type> array1 = Collections.singletonList(Type.T_ARRAY_ANY);
+        List<Type> ref1 = Collections.singletonList(Type.Reference(Type.T_ANY, "*"));
+        List<Type> record1 = Collections.singletonList(Type.Record(false, Collections.emptyMap()));
+        List<Type> object1 = Collections.singletonList(Type.Record(true, Collections.emptyMap()));
+        // the following types are approximate - the params or returns are more specific than needed.
+        Type.FunctionOrMethod typePredicate = Type.Function(bool1, any1);
+        Type.FunctionOrMethod castFunction = Type.Function(any1, any1);
+        Type.FunctionOrMethod anyMethod = Type.Method(any1, Collections.emptySet(), Collections.emptyList(), any1);
+
         functionOverloads = new HashMap<>();
+
+        // Now predefine all the functions in wval.bpl (as unmangled).
+        // This is so that any user-defined functions with those names will be forced to use mangled names!
+        for (String predef : new String[] {
+                "isNull", "isInt", "isBool", "isArray", "isRecord",
+                "isObject", "isRef", "isFunction", "isMethod", "isByte",
+                }) {
+
+            predefinedFunction(predef, typePredicate);
+        }
+        for (String predef : new String[] {
+                "toNull", "toInt", "toBool", "toArray", "toRecord",
+                "toObject", "toRef", "toFunction", "toMethod", "toByte",
+                }) {
+            predefinedFunction(predef, castFunction);
+        }
+        predefinedFunction("fromInt", Type.Function(any1, int1));
+        predefinedFunction("fromBool", Type.Function(any1, bool1));
+        predefinedFunction("fromArray", Type.Function(any1, array1));
+        predefinedFunction("fromRecord", Type.Function(any1, record1));
+        predefinedFunction("fromObject", Type.Function(any1, object1));
+        predefinedFunction("fromRef", Type.Function(any1, ref1));
+        predefinedFunction("fromFunction", Type.Function(any1, Collections.singletonList(castFunction)));
+        predefinedFunction("fromMethod", Type.Function(any1, Collections.singletonList(anyMethod)));
+
         for (WyilFile.FunctionOrMethod m : functionOrMethods) {
             String name = m.name();
             Map<Type.FunctionOrMethod, String> map = functionOverloads.get(name);
@@ -1584,6 +1625,13 @@ public final class Wyil2Boogie {
                 System.err.printf("mangle %s : %s to %s\n", name, m.type().toString(), mangled);
             }
         }
+    }
+
+    private void predefinedFunction(String predef, wyil.lang.Type.FunctionOrMethod type) {
+        Map<Type.FunctionOrMethod, String> map = new HashMap<>();
+        // System.err.printf("ADDING %s : %s as predefined.\n", predef, type);
+        map.put(type, predef); // no name mangling, because this is a predefined function.
+        functionOverloads.put(predef, map);
     }
 
     /**
@@ -1788,13 +1836,16 @@ public final class Wyil2Boogie {
                 translator.apply(wf);
             } catch (InternalFailure e) {
                 e.outputSourceError(System.err);
+                e.printStackTrace(System.err);
             } catch (SyntaxError e) {
                 e.outputSourceError(System.err);
+            }
+            catch (RuntimeException e) {
+                e.printStackTrace(System.err);
             }
         } else {
             System.err.println("Unknown file: " + path);
             System.exit(3);
         }
     }
-
 }

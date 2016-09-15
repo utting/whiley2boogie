@@ -6,6 +6,8 @@ import wyil.lang.SyntaxTree.Location;
 /**
  * Not Implemented errors, with some context information.
  *
+ * TODO: add the file name?
+ *
  * @author Mark Utting
  */
 @SuppressWarnings("serial")
@@ -41,17 +43,19 @@ public class NotImplementedYet extends RuntimeException {
 	@Override
 	public String getMessage() {
 		String msg = super.getMessage();
+		String context = "";
 		Source src = null;
 		if (location != null) {
+		    context = " in " + location.toString();
 			src = location.attribute(Source.class);
 			if (src == null) {
+			    // try again
 				src = location.getEnclosingTree().getEnclosingDeclaration().attribute(Source.class);
 			}
+			if (src != null) {
+			    context = " at (" + src.line + "," + src.start + ")";
+			}
 		}
-		if (src == null) {
-			return msg + " in " + location.toString();
-		} else {
-			return msg + " at " + src.toString();
-		}
+		return msg + context;
 	}
 }
