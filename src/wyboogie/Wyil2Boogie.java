@@ -755,8 +755,16 @@ public final class Wyil2Boogie {
         out.println("}");
     }
 
+    /**
+     * Whiley fail means this point in the code should be unreachable.
+     *
+     * In the refinement calculus, and Boogie, 'assert false' forces the verifier to check this.
+     *
+     * @param indent
+     * @param c
+     */
     private void writeFail(int indent, Location<Bytecode.Fail> c) {
-        out.println("fail");
+        out.println("assert false;");
     }
 
     private void writeIf(int indent, Location<Bytecode.If> b) {
