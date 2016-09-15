@@ -93,6 +93,9 @@ public final class Wyil2Boogie {
     /** This is appended to each function/method name, for the precondition of that function. */
     private static final String METHOD_PRE = "__pre";
 
+    /** Special boolean variable used to emulate do-while loops. */
+    private static final Object DO_WHILE_VAR = "do__while";
+
     /** Where the Boogie output is written. */
     protected PrintWriter out;
 
@@ -274,13 +277,15 @@ public final class Wyil2Boogie {
             out.println();
             out.println("{");
             writeLocalVarDecls(method.getTree().getLocations());
+            if (containsDoWhile(method.getTree())) {
+                tabIndent(1);
+                out.printf("var %s : bool;\n", DO_WHILE_VAR);
+            }
 
             // now create a local copy of each mutated input!
             for (String naughty : mutatedInputs.keySet()) {
                 tabIndent(1);
-                out.print("var ");
-                out.print(naughty);
-                out.print(" : WVal where ");
+                out.printf("var %s : WVal where ", naughty);
                 out.print(typePredicate(naughty, mutatedInputs.get(naughty)));
                 out.println(";");
             }
@@ -294,6 +299,15 @@ public final class Wyil2Boogie {
         }
         inDecls = null;
         outDecls = null;
+    }
+
+    private boolean containsDoWhile(SyntaxTree tree) {
+        for (Location<?> loc : tree.getLocations()) {
+            if (loc.getBytecode() instanceof Bytecode.DoWhile) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private Map<String, Type> findMutatedInputs(FunctionOrMethod method) {
@@ -713,20 +727,29 @@ public final class Wyil2Boogie {
         // out.println("debug;");
     }
 
+    /**
+     * Generate Boogie code for do-while.
+     *
+     * NOTE: Boogie does not have a do{S}while(C) command,
+     * so we generate a while loop and use a boolean variable to force entry the first time.
+     *
+     * @param indent
+     * @param b
+     */
     private void writeDoWhile(int indent, Location<Bytecode.DoWhile> b) {
         Location<?>[] loopInvariant = b.getOperandGroup(0);
         // Location<?>[] modifiedOperands = b.getOperandGroup(1);
-        // NOTE: Boogie does not have a do{S}while(C),
-        // so we write: S;while(C){S};
-        writeBlock(indent+1, b.getBlock(0));
+        out.printf("%s := true;\n", DO_WHILE_VAR);
         tabIndent(indent+1);
-        out.print("while (toBool(");
+        out.printf("while (%s || toBool(", DO_WHILE_VAR);
         writeExpression(b.getOperand(0));
         out.print("))");
         writeLoopInvariant(indent + 2, loopInvariant);
         out.println();
         tabIndent(indent+1);
         out.println("{");
+        tabIndent(indent+2);
+        out.printf("%s := false;\n", DO_WHILE_VAR);
         writeBlock(indent+1, b.getBlock(0));
         tabIndent(indent+1);
         out.println("}");
