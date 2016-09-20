@@ -1019,7 +1019,11 @@ public final class Wyil2Boogie {
 
         // TODO: handle comparison of non-integer values
         case Bytecode.OPCODE_eq:
+            writeEquality(false, (Location<Bytecode.Operator>) expr);
+            break;
         case Bytecode.OPCODE_ne:
+            writeEquality(true, (Location<Bytecode.Operator>) expr);
+            break;
         case Bytecode.OPCODE_lt:
         case Bytecode.OPCODE_le:
         case Bytecode.OPCODE_gt:
@@ -1241,6 +1245,102 @@ public final class Wyil2Boogie {
         out.print(" to" + argType + "(");
         writeBracketedExpression(c.getOperand(1));
         out.print("))");
+    }
+
+    /**
+     * Equality and inequality requires type-dependent expansion.
+     *
+     * @param resultType
+     * @param argType
+     * @param c
+     */
+    private void writeEquality(boolean negated, Location<Bytecode.Operator> c) {
+        Location<?> left = c.getOperand(0);
+        Location<?> right = c.getOperand(1);
+        Type leftType = c.getOperand(0).getType();
+        Type rightType = c.getOperand(1).getType();
+        Type eqType = Type.intersect(leftType, rightType);
+        if (eqType instanceof Type.Void) {
+            throw new NotImplementedYet("comparison of void intersection type: " + leftType + " and " + rightType, c);
+        }
+        out.print("fromBool(");
+        if (negated) {
+            out.print("!(");
+        }
+        writeTypedEquality(eqType, left, right, "", "");
+        if (negated) {
+            out.print(")");
+        }
+        out.print(")");
+    }
+
+    /**
+     * A recursive helper function for writeEquality.
+     *
+     * This writes a Boogie boolean condition.
+     *
+     * NOTE: it is pretty horrible the way we have to use prefix/postfix strings to wrap each
+     * expression each time we print it.  This will become slightly more elegant if writeExpression
+     * is changed to return a String etc.
+     *
+     * @param eqType both left and right must belong to this type for the equality to be true.
+     * @param left the LHS expression
+     * @param right the RHS expression
+     * @param prefix a string to add before each expression
+     * @param postfix a string to add after each expression
+     */
+    private void writeTypedEquality(Type eqType, Location<?> left, Location<?> right, String prefix, String postfix) {
+        if (eqType instanceof Type.Null) {
+            // This requires special handling, since we do not have toNull and fromNull functions.
+            // Instead, we just compare both sides to the WVal 'null' constant.
+            // TODO: an alternative would be to just compare the WVals using '=='?
+            writeBracketedExpression(left);
+            out.print(" == null && ");
+            writeBracketedExpression(right);
+            out.print(" == null");
+        } else if (eqType instanceof Type.Int
+                || eqType instanceof Type.Byte
+                || eqType instanceof Type.Bool) {
+            final String argType = eqType instanceof Type.Bool ? "Bool" : "Int";
+            out.print("to" + argType + "(" + prefix);
+            writeExpression(left);
+            out.print(postfix + ") == ");
+            out.print(" to" + argType + "(" + prefix);
+            writeExpression(right);
+            out.print(postfix + ")");
+        } else if (eqType instanceof Type.Record) {
+            Type.Record recType = (Type.Record) eqType;
+            List<String> fields = new ArrayList<>(recType.keys());
+            fields.sort(null);
+            for (String f : fields) {
+                String pre = "toRecord(" + prefix;
+                String post = postfix + ")[" + mangleWField(f) + "]";
+                writeTypedEquality(recType.fields().get(f), left, right, pre, post);
+                out.print(" && ");
+            }
+            out.print("true");
+        } else if (eqType instanceof Type.Array) {
+            Type.Array arrayType = (Type.Array) eqType;
+            Type elemType = arrayType.element();
+            // we check the length and all the values:
+            //    arraylen(left) == arraylen(right)
+            //    && (forall i:int :: 0 <= i && i < arraylen(a) ==> left[i] == right[i])
+            out.print("arraylen(" + prefix);
+            writeExpression(left);
+            out.print(postfix + ") == arraylen(" + prefix);
+            writeExpression(right);
+            out.print(postfix + ")");
+            String index = generateFreshBoundVar("idx");
+            out.printf(" && (forall %s:int :: 0 <= %s && %s < arraylen(%s", index, index, index, prefix);
+            writeExpression(left);
+            out.print(") ==> ");
+            String pre = "toArray(" + prefix;
+            String post = postfix + ")[" + index + "]";
+            writeTypedEquality(elemType, left, right, pre, post);
+            out.print(")");
+        } else {
+            throw new NotImplementedYet("comparison of values of type: " + eqType, left);
+        }
     }
 
     @SuppressWarnings("unchecked")
