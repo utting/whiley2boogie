@@ -1181,11 +1181,27 @@ public final class Wyil2Boogie {
         Type leftType = c.getOperand(0).getType();
         Type rightType = c.getOperand(1).getType();
         Type eqType = Type.intersect(leftType, rightType);
-        if (eqType instanceof Type.Void) {
-            throw new NotImplementedYet("comparison of void intersection type: " + leftType + " and " + rightType, c);
+        if (!isUsableEqualityType(eqType)) {
+            if (isUsableEqualityType(leftType)) {
+                eqType = leftType;
+            } else if (isUsableEqualityType(rightType)) {
+                eqType = rightType;
+            } else {
+                throw new NotImplementedYet("comparison of void intersection type: " + leftType + " and " + rightType, c);
+            }
         }
         BoogieExpr eq = writeTypedEquality(eqType, expr(left), expr(right)).as(BOOL);
         return eq;
+    }
+
+    /** True for the types that our equality code generator can handle. */
+    private boolean isUsableEqualityType(Type type) {
+        return type instanceof Type.Bool
+            || type instanceof Type.Int
+            || type instanceof Type.Byte
+            || type instanceof Type.Null
+            || (type instanceof Type.Array && isUsableEqualityType(((Type.Array) type).element()))
+            || type instanceof Type.Record;  // should check all the field types too?
     }
 
     /**
