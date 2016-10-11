@@ -2,8 +2,129 @@
 In tests/valid
 ===================================
 
+ListAccess_Valid_1.whiley has a function with no return value?
+
+
 Tests where Whiley verifier passes, but Boogie fails.
 
+===== ConstrainedList_Valid_28.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ConstrainedList_Valid_28.bpl(35,13): Error BP5003: A postcondition might not hold on this return path.
+ConstrainedList_Valid_28.bpl(23,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    ConstrainedList_Valid_28.bpl(28,5): anon0
+    ConstrainedList_Valid_28.bpl(32,14): anon5_Else
+    ConstrainedList_Valid_28.bpl(34,15): anon6_Then
+ConstrainedList_Valid_28.bpl(38,13): Error BP5003: A postcondition might not hold on this return path.
+ConstrainedList_Valid_28.bpl(20,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    ConstrainedList_Valid_28.bpl(28,5): anon0
+    ConstrainedList_Valid_28.bpl(32,14): anon5_Else
+    ConstrainedList_Valid_28.bpl(37,15): anon6_Else
+ConstrainedList_Valid_28.bpl(38,13): Error BP5003: A postcondition might not hold on this return path.
+ConstrainedList_Valid_28.bpl(21,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    ConstrainedList_Valid_28.bpl(28,5): anon0
+    ConstrainedList_Valid_28.bpl(32,14): anon5_Else
+    ConstrainedList_Valid_28.bpl(37,15): anon6_Else
+ConstrainedList_Valid_28.bpl(38,13): Error BP5003: A postcondition might not hold on this return path.
+ConstrainedList_Valid_28.bpl(24,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    ConstrainedList_Valid_28.bpl(28,5): anon0
+    ConstrainedList_Valid_28.bpl(32,14): anon5_Else
+    ConstrainedList_Valid_28.bpl(37,15): anon6_Else
+
+Boogie program verifier finished with 1 verified, 4 errors
+
+NOTE: this is a recursive function call, so might require induction?
+
+===== DoWhile_Valid_6.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+DoWhile_Valid_6.bpl(25,9): Error BP5004: This loop invariant might not hold on entry.
+Execution trace:
+    DoWhile_Valid_6.bpl(22,7): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+
+NOTE: Boogie is correct - i < |items| is not true initially.
+My encoding of do-while loops breaks the loop invariant, in this case,
+because it checks the invariant before the first iteration.
+But shouldn't an invariant be true at the beginning and end of EVERY
+iteration?  In that case, this loop invariant is incorrect.
+
+===== DoWhile_Valid_8.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+DoWhile_Valid_8.bpl(24,9): Error BP5004: This loop invariant might not hold on entry.
+Execution trace:
+    DoWhile_Valid_8.bpl(21,7): anon0
+DoWhile_Valid_8.bpl(24,9): Error BP5005: This loop invariant might not be maintained by the loop.
+Execution trace:
+    DoWhile_Valid_8.bpl(21,7): anon0
+    DoWhile_Valid_8.bpl(23,5): anon5_LoopHead
+    DoWhile_Valid_8.bpl(26,19): anon5_LoopBody
+    DoWhile_Valid_8.bpl(27,9): anon6_Else
+
+Boogie program verifier finished with 1 verified, 2 errors
+
+NOTE: same issue.
+
+===== Ensures_Valid_3.whiley =====
+$ boogie wval.bpl Ensures_Valid_3.bpl 
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Ensures_Valid_3.bpl(52,5): Error BP5003: A postcondition might not hold on this return path.
+Ensures_Valid_3.bpl(18,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    Ensures_Valid_3.bpl(26,7): anon0
+    Ensures_Valid_3.bpl(29,5): anon9_LoopHead
+    Ensures_Valid_3.bpl(29,5): anon9_LoopDone
+    Ensures_Valid_3.bpl(41,5): anon11_LoopHead
+    Ensures_Valid_3.bpl(41,5): anon11_LoopDone
+
+Boogie program verifier finished with 1 verified, 1 error
+
+NOTE: this will require looking at the counter-example model.
+Probably an array equality issue?
+(My WVal theory needs stronger equality axioms for arrays)
+
+===== Fail_Valid_1.whiley =====
+$ boogie wval.bpl Fail_Valid_1.bpl 
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Fail_Valid_1.bpl(34,13): Error BP5001: This assertion might not hold.
+Execution trace:
+    Fail_Valid_1.bpl(26,5): anon0
+    Fail_Valid_1.bpl(30,9): anon5_Else
+    Fail_Valid_1.bpl(34,13): anon6_Else
+
+Boogie program verifier finished with 1 verified, 1 error
+
+NOTE: here the test seems to be invalid?
+Because fail will be reached when input x is null.
+This test works if we change the 'fail' to:
+        assert x is null
+        return x
+
+===== While_Valid_22.whiley =====
+mangle max : function(int[])->(int) to max$2
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+While_Valid_22.bpl(54,9): Error BP5005: This loop invariant might not be maintained by the loop.
+Execution trace:
+    While_Valid_22.bpl(50,7): anon0
+    While_Valid_22.bpl(52,5): anon3_LoopHead
+    While_Valid_22.bpl(57,11): anon3_LoopBody
+While_Valid_22.bpl(55,9): Error BP5005: This loop invariant might not be maintained by the loop.
+Execution trace:
+    While_Valid_22.bpl(50,7): anon0
+    While_Valid_22.bpl(52,5): anon3_LoopHead
+    While_Valid_22.bpl(57,11): anon3_LoopBody
+
+Boogie program verifier finished with 2 verified, 2 errors
+
+NOTE: probably an array equality issue.
+
+
+
+
+OLDER RESULTS (before implementing equality fully)
 ===== Complex_Valid_2.whiley =====
 Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
 Complex_Valid_2.bpl(185,9): Error BP5003: A postcondition might not hold on this return path.
