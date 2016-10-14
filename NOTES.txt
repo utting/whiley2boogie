@@ -1,3 +1,29 @@
+2016-10-14: OUT32_array_checks.txt
+
+$ wystats OUT32_array_checks.txt 
+Error Compiling:          21
+NotImplementedYet:       132
+Other Exceptions:          2
+Errors in BPL:            12
+Fully Verified:          325
+Verify time outs:          3
+Verify errors:            23
+
+$ grep -i 'bpl.*error:' OUT32_array_checks.txt
+DoWhile_Valid_6.bpl(24,39): error: ")" expected
+RecursiveType_Valid_7.bpl(136,72): error: invalid Type
+String_Valid_4.bpl(1,20): error: ")" expected
+TypeEquals_Valid_35.bpl(28,10): Error: command assigns to an immutable variable: e
+UnionType_Valid_15.bpl(7,265): Error: undeclared identifier: $dum
+While_Valid_22.bpl(53,22): Error: undeclared identifier: j
+While_Valid_22.bpl(53,34): Error: undeclared identifier: j
+While_Valid_23.bpl(25,22): Error: undeclared identifier: j
+While_Valid_23.bpl(25,34): Error: undeclared identifier: j
+While_Valid_42.bpl(28,19): Error: more than one declaration of variable name: j
+While_Valid_42.bpl(32,19): Error: more than one declaration of variable name: j
+While_Valid_42.bpl(38,26): Error: more than one declaration of variable name: j
+
+
 ===================================
 In tests/valid
 ===================================
