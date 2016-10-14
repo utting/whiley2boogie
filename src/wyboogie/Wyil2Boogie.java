@@ -84,21 +84,23 @@ import static wyboogie.BoogieType.*;
  * and <pre>toInt(toArray(aa)[toInt(ii)]) == 1</pre> to compare that value with one.
  * See <pre>wval.bpl</pre> for the full model of WVal (Whiley values).
  *
- * TODO: mangle Whiley var names to avoid Boogie reserved words and keywords?
+ * TODO: generate in-context assertions for function preconditions, array bounds, etc.
  *
  * TODO: change do-while translation so that invariant is not checked before first loop.
  *
- * TODO: generate in-context assertions for function preconditions, array bounds, etc.
+ * TODO: improve assign to nested substructures - make it recursive.  (18 tests).
+ *
+ * TODO: mangle Whiley var names to avoid Boogie reserved words and keywords?
  *
  * TODO: implement missing language features, such as:
  * <ul>
- *   <li>references, new, and dereferencing</li>
- *   <li>bitwise operators</li>
- *   <li>functions/methods with multiple return values</li>
- *   <li>lambda functions</li>
- *   <li>continue statements and named blocks</li>
- *   <li>switch</li>
- *   <li>indirect invoke</li>
+ *   <li>indirect invoke (12 tests)</li>
+ *   <li>references, new (17 tests), and dereferencing (17 tests)</li>
+ *   <li>switch (14 tests)</li>
+ *   <li>functions/methods with multiple return values (4 tests)</li>
+ *   <li>lambda functions (12 tests)</li>
+ *   <li>continue statements and named blocks (3 tests)</li>
+ *   <li>bitwise operators (13 tests)</li>
  *   <li>some kinds of complex constants</li>
  * </ul>
  *
@@ -138,12 +140,16 @@ public final class Wyil2Boogie {
     /** Output parameters of the current function/method. */
     List<Location<?>> outDecls;
 
+    private final AssertionGenerator vcg;
+
+
     public Wyil2Boogie(PrintWriter writer) {
         this.out = writer;
+        vcg = new AssertionGenerator(this);
     }
 
     public Wyil2Boogie(OutputStream stream) {
-        this.out = new PrintWriter(new OutputStreamWriter(stream));
+        this(new PrintWriter(new OutputStreamWriter(stream)));
     }
 
     // ======================================================================
@@ -584,12 +590,18 @@ public final class Wyil2Boogie {
             writeAliasDeclaration(indent, (Location<Bytecode.AliasDeclaration>) c);
             break;
         case Bytecode.OPCODE_assert:
+            vcg.checkPredicate(indent, c.getOperand(0));
             writeAssert(indent, (Location<Bytecode.Assert>) c);
             break;
         case Bytecode.OPCODE_assume:
+            vcg.checkPredicate(indent, c.getOperand(0));
             writeAssume(indent, (Location<Bytecode.Assume>) c);
             break;
         case Bytecode.OPCODE_assign:
+            Location<?>[] lhs = c.getOperandGroup(SyntaxTree.LEFTHANDSIDE);
+            Location<?>[] rhs = c.getOperandGroup(SyntaxTree.RIGHTHANDSIDE);
+            vcg.checkPredicates(indent, lhs);
+            vcg.checkPredicates(indent, rhs);
             writeAssign(indent, (Location<Bytecode.Assign>) c);
             break;
         case Bytecode.OPCODE_break:
@@ -602,6 +614,7 @@ public final class Wyil2Boogie {
             writeDebug(indent, (Location<Bytecode.Debug>) c);
             break;
         case Bytecode.OPCODE_dowhile:
+            // TODO: check the condition, but at the appropriate place!
             writeDoWhile(indent, (Location<Bytecode.DoWhile>) c);
             break;
         case Bytecode.OPCODE_fail:
@@ -609,12 +622,15 @@ public final class Wyil2Boogie {
             break;
         case Bytecode.OPCODE_if:
         case Bytecode.OPCODE_ifelse:
+            vcg.checkPredicate(indent, c.getOperand(0));
             writeIf(indent, (Location<Bytecode.If>) c);
             break;
         case Bytecode.OPCODE_indirectinvoke:
+            // TODO: check arguments against the precondition?
             writeIndirectInvoke(indent, (Location<Bytecode.IndirectInvoke>) c);
             break;
         case Bytecode.OPCODE_invoke:
+            // TODO: check arguments against the precondition!
             out.print("call "); // it should be a method, not a function
             writeInvoke(indent, (Location<Bytecode.Invoke>) c);
             break;
@@ -622,19 +638,27 @@ public final class Wyil2Boogie {
             writeNamedBlock(indent, (Location<Bytecode.NamedBlock>) c);
             break;
         case Bytecode.OPCODE_while:
+            vcg.checkPredicate(indent, c.getOperand(0));
+            Location<?>[] invars = c.getOperandGroup(0);
+            vcg.checkPredicates(indent, invars);
             writeWhile(indent, (Location<Bytecode.While>) c);
             break;
         case Bytecode.OPCODE_return:
+            vcg.checkPredicates(indent, c.getOperands());
             writeReturn(indent, (Location<Bytecode.Return>) c);
             break;
         case Bytecode.OPCODE_skip:
             writeSkip(indent, (Location<Bytecode.Skip>) c);
             break;
         case Bytecode.OPCODE_switch:
+            vcg.checkPredicate(indent, c.getOperand(0));
             writeSwitch(indent, (Location<Bytecode.Switch>) c);
             break;
-        case Bytecode.OPCODE_vardecl:
         case Bytecode.OPCODE_vardeclinit:
+            vcg.checkPredicate(indent, c.getOperand(0));
+            // fall through into the non-init case.
+        case Bytecode.OPCODE_vardecl:
+            // TODO: check the init expression
             writeVariableInit(indent, (Location<Bytecode.VariableDeclaration>) c);
             break;
         default:
@@ -649,6 +673,46 @@ public final class Wyil2Boogie {
         Location<VariableDeclaration> aliased = getVariableDeclaration(loc);
         out.print(aliased.getBytecode().getName());
         out.println(";");
+    }
+
+    /**
+     * Generates a Boogie assertion to check the given conjecture.
+     *
+     * This is a helper function for AssertionGenerator.
+     *
+     * @param indent
+     * @param bndVars
+     * @param assumps a list of predicates we can assume to prove the conjecture.
+     * @param conj a Boolean Boogie expression.
+     */
+    protected void generateAssertion(int indent, List<String> bndVars, List<BoogieExpr> assumps, BoogieExpr conj) {
+        String close = ";";
+        out.print("assert ");
+        if (!bndVars.isEmpty()) {
+            out.print("(forall ");
+            close = ");";
+            for (int i = 0; i < bndVars.size(); i++) {
+                if (i > 0) {
+                    out.print(", ");
+                }
+                out.print(bndVars.get(i) + ":WVal");
+            }
+            out.print(" :: ");
+        }
+        for (int i = 0; i < assumps.size(); i++) {
+            if (i > 0) {
+                out.print("&& ");
+            }
+            out.println(assumps.get(i).as(BOOL).withBrackets(" && ").toString());
+            tabIndent(indent+2);
+        }
+        if (assumps.size() > 0) {
+            out.print("==> ");
+        }
+        // finally, print the main assertion.
+        out.print(conj.as(BOOL).withBrackets(" ==> ").toString());
+        out.println(close);
+        tabIndent(indent+1); // get ready for next statement.
     }
 
     private void writeAssert(int indent, Location<Bytecode.Assert> c) {
@@ -886,17 +950,17 @@ public final class Wyil2Boogie {
     }
 
     /** Convenience: equivalent to expr(_).as(BOOL). */
-    private BoogieExpr boolExpr(Location<?> expr) {
+    protected BoogieExpr boolExpr(Location<?> expr) {
         return expr(expr).as(BOOL);
     }
 
     /** Convenience: equivalent to expr(_).as(INT). */
-    private BoogieExpr intExpr(Location<?> expr) {
+    protected BoogieExpr intExpr(Location<?> expr) {
         return expr(expr).as(INT);
     }
 
     @SuppressWarnings("unchecked")
-    private BoogieExpr expr(Location<?> expr) {
+    protected BoogieExpr expr(Location<?> expr) {
         switch (expr.getOpcode()) {
         case Bytecode.OPCODE_arraylength:
             return writeArrayLength((Location<Bytecode.Operator>) expr);
@@ -1276,7 +1340,6 @@ public final class Wyil2Boogie {
 
     @SuppressWarnings("unchecked")
     private BoogieExpr writeQuantifier(String quant, String predOp, Location<Bytecode.Quantifier> c) {
-        // first pass just declares the bound variables
         BoogieExpr decls = new BoogieExpr(BOOL);
         BoogieExpr constraints = new BoogieExpr(BOOL);
         for (int i = 0; i != c.numberOfOperandGroups(); ++i) {
