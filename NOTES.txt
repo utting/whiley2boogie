@@ -64,6 +64,30 @@ Boogie program verifier finished with 1 verified, 4 errors
 
 NOTE: this is a recursive function call, so might require induction?
 
+
+===== ConstrainedList_Valid_8.whiley =====
+MUTATED INPUT list : ConstrainedList_Valid_8:nat[]
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ConstrainedList_Valid_8.bpl(44,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ConstrainedList_Valid_8.bpl(41,8): anon0
+ConstrainedList_Valid_8.bpl(46,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ConstrainedList_Valid_8.bpl(41,8): anon0
+ConstrainedList_Valid_8.bpl(48,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ConstrainedList_Valid_8.bpl(41,8): anon0
+
+Boogie program verifier finished with 1 verified, 3 errors
+
+This modifies xs each time xs = update(xs, ..., ...) is called.
+So the update function needs a postcondition to say that it
+returns a list with the same length as the input list:
+
+    ensures |out| == |list|:
+
+With this added, all assertions verify.
+
 ===== DoWhile_Valid_6.whiley =====
 Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
 DoWhile_Valid_6.bpl(25,9): Error BP5004: This loop invariant might not hold on entry.

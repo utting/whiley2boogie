@@ -114,7 +114,7 @@ public final class Wyil2Boogie {
     private static final String AND_OUTER = " &&\n      ";
 
     /** This is appended to each function/method name, for the precondition of that function. */
-    private static final String METHOD_PRE = "__pre";
+    public static final String METHOD_PRE = "__pre";
 
     /** Special boolean variable used to emulate do-while loops. */
     private static final Object DO_WHILE_VAR = "do__while";
@@ -1657,7 +1657,7 @@ public final class Wyil2Boogie {
      * @param method
      * @return a human-readable name for the function/method.
      */
-    private String mangleFunctionMethodName(String name, Type.FunctionOrMethod type) {
+    protected String mangleFunctionMethodName(String name, Type.FunctionOrMethod type) {
         Map<Type.FunctionOrMethod, String> map = functionOverloads.get(name);
         if (map == null) {
             System.err.printf("Warning: function/method %s : %s assumed to be external, so not mangled.\n",
