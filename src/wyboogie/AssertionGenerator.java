@@ -8,6 +8,8 @@ import java.util.List;
 
 import wyil.lang.Bytecode;
 import wyil.lang.SyntaxTree;
+import wyil.lang.Type;
+import wyil.lang.Bytecode.VariableAccess;
 import wyil.lang.Bytecode.VariableDeclaration;
 import wyil.lang.SyntaxTree.Location;
 
@@ -115,14 +117,14 @@ public class AssertionGenerator {
 
         case Bytecode.OPCODE_arrayindex:
             // check that 0 <= index < arraylen(array).
-            BoogieExpr out = new BoogieExpr(BOOL);
+            BoogieExpr indexInBounds = new BoogieExpr(BOOL);
             BoogieExpr array = expr(expr.getOperand(0)).asWVal();
             BoogieExpr arraylen = new BoogieExpr(INT, "arraylen(" + array.toString() + ")");
             BoogieExpr index = expr(expr.getOperand(1)).as(INT);
-            out.addOp(ZERO, " <= ", index);
-            out.addOp(" && ", new BoogieExpr(BOOL, index, " < ", arraylen));
-            assert out.getOp().equals(" && ");
-            generateCheck(out);
+            indexInBounds.addOp(ZERO, " <= ", index);
+            indexInBounds.addOp(" && ", new BoogieExpr(BOOL, index, " < ", arraylen));
+            assert indexInBounds.getOp().equals(" && ");
+            generateCheck(indexInBounds);
             break;
 
 //        case Bytecode.OPCODE_arraygen:
@@ -131,10 +133,29 @@ public class AssertionGenerator {
 //
 //        case Bytecode.OPCODE_indirectinvoke:
 //            return writeIndirectInvoke((Location<Bytecode.IndirectInvoke>) expr);
-//
-//        case Bytecode.OPCODE_invoke:
-//            return writeInvoke((Location<Bytecode.Invoke>) expr);
-//
+
+        case Bytecode.OPCODE_invoke:
+            Bytecode.Invoke funCall = (Bytecode.Invoke) expr.getBytecode();
+            String name = funCall.name().name();
+            Type.FunctionOrMethod type = funCall.type();
+            if (type instanceof Type.Method) {
+                // The Whiley language spec 0.3.38, Section 3.5.5, says that because they are impure,
+                // methods cannot be called inside specifications.
+                throw new NotImplementedYet("call to method (" + name + ") from inside an expression", expr);
+            }
+            String funName = wy2b.mangleFunctionMethodName(name, type);
+            Location<?>[] operands = expr.getOperands();
+            BoogieExpr funPre = new BoogieExpr(BOOL, funName + Wyil2Boogie.METHOD_PRE + "(");
+            for(int i=0;i!=operands.length;++i) {
+                if(i!=0) {
+                    funPre.print(", ");
+                }
+                funPre.addExpr(expr(operands[i]).asWVal());
+            }
+            funPre.print(")");
+            generateCheck(funPre);
+            break;  // continue checking all subexpressions too.
+
 //        case Bytecode.OPCODE_lambda:
 //            return writeLambda((Location<Bytecode.Lambda>) expr);
 //
@@ -160,18 +181,18 @@ public class AssertionGenerator {
                 // declare the bound variable: v:WVal
                 @SuppressWarnings("unchecked")
                 Location<VariableDeclaration>  v = (Location<VariableDeclaration>) range[SyntaxTree.VARIABLE];
-                String name = v.getBytecode().getName();
-                vars.add(name);
+                String bndName = v.getBytecode().getName();
+                vars.add(bndName);
 
                 // and add the constraint: isInt(v) && start <= v && v <= end
-                BoogieExpr vExpr = new BoogieExpr(WVAL, name).as(INT);
+                BoogieExpr vExpr = new BoogieExpr(WVAL, bndName).as(INT);
                 Location<?> low = range[SyntaxTree.START];
                 Location<?> high = range[SyntaxTree.END];
                 check(low);
                 check(high);
                 BoogieExpr lowExpr = expr(low).as(INT);
                 BoogieExpr highExpr = expr(high).as(INT);
-                constraints.add(new BoogieExpr(BOOL, "isInt(" + name + ")"));
+                constraints.add(new BoogieExpr(BOOL, "isInt(" + bndName + ")"));
                 constraints.add(new BoogieExpr(BOOL, lowExpr, " <= ", vExpr));
                 constraints.add(new BoogieExpr(BOOL, vExpr, " < ", highExpr));
             }
@@ -180,21 +201,15 @@ public class AssertionGenerator {
 
 //        case Bytecode.OPCODE_some:
 //            return writeQuantifier("exists", " && ", (Location<Bytecode.Quantifier>) expr);
-//
-//        case Bytecode.OPCODE_div:
-//            // TODO: fix this for negative numbers.
-//            // Boogie 'mod' implements Euclidean division, whereas Whiley uses truncated division.
-//            // See https://en.wikipedia.org/wiki/Modulo_operation for explanations.
-//            // See http://boogie.codeplex.com/discussions/397357 for what Boogie does.
-//            return infixOp(INT, expr, " div ", INT);
-//
-//        case Bytecode.OPCODE_rem:
-//            // TODO: fix this for negative numbers.
-//            // Boogie 'mod' implements Euclidean division, whereas Whiley uses truncated division.
-//            // See https://en.wikipedia.org/wiki/Modulo_operation for explanations.
-//            // See http://boogie.codeplex.com/discussions/397357 for what Boogie does.
-//            return infixOp(INT, expr, " mod ", INT);
-//
+
+        case Bytecode.OPCODE_div:
+        case Bytecode.OPCODE_rem:
+            // check constraint: rhs != 0
+            BoogieExpr rhs = expr(expr.getOperand(1)).as(INT).withBrackets(" != ");
+            BoogieExpr rhsNonZero = new BoogieExpr(BOOL, rhs.toString() + " != 0");
+            generateCheck(rhsNonZero);
+            break;  // carry on checking subexpressions.
+
 //        case Bytecode.OPCODE_logicalnot:
               // TODO: does this upset our context calculations?
 //            return prefixOp(BOOL, expr, "! ", BOOL);
@@ -215,6 +230,10 @@ public class AssertionGenerator {
             assert negLhs.getOp().equals("! ");
             assumeAndCheck(Collections.singletonList(negLhs), expr.getOperand(1));
             return;
+
+        case Bytecode.OPCODE_varaccess:
+            return; // we must NOT go back to the declaration, since we've already checked that earlier.
+
         }
         // The default behaviour is to check all sub-expressions.
         // System.out.println("  looping thru " + expr.numberOfOperands() + " args of " + expr);
