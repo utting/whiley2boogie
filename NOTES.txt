@@ -1,3 +1,26 @@
+Workflow
+========
+(See my bin directory for the shell scripts)
+1. Run all valid tests through Wyil2Boogie and Boogie:
+
+   wyboogie *.whiley >OUTXX.txt 2>&1
+
+2. See how many tests passed/failed etc.
+
+   wystats OUTXX.txt
+
+3. Analyse the result for each valid test program:
+
+   wyresults OUTXX.txt >OUTXX.results
+
+4. Compare those results against the Whiley verifier:
+   (It shows all those that differ, plus summary stats at the end).
+
+   wydiff OUTXX.results
+
+
+Results
+=======
 2016-10-14: OUT32_array_checks.txt
 
 $ wystats OUT32_array_checks.txt 
@@ -63,6 +86,7 @@ Execution trace:
 Boogie program verifier finished with 1 verified, 4 errors
 
 NOTE: this is a recursive function call, so might require induction?
+Whiley verifier does not verify this one either.
 
 
 ===== ConstrainedList_Valid_8.whiley =====

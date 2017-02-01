@@ -84,7 +84,7 @@ import static wyboogie.BoogieType.*;
  * and <pre>toInt(toArray(aa)[toInt(ii)]) == 1</pre> to compare that value with one.
  * See <pre>wval.bpl</pre> for the full model of WVal (Whiley values).
  *
- * TODO: generate in-context assertions for function preconditions, array bounds, etc.
+ * DONE: generate in-context assertions for function preconditions, array bounds, etc.
  *
  * TODO: change do-while translation so that invariant is not checked before first loop.
  *
@@ -92,13 +92,15 @@ import static wyboogie.BoogieType.*;
  *
  * TODO: mangle Whiley var names to avoid Boogie reserved words and keywords?
  *
+ * TODO: generate axiom for each function, as Boogie does not seem to unfold functions bodies.
+ *
  * TODO: implement missing language features, such as:
  * <ul>
- *   <li>indirect invoke (12 tests)</li>
+ *   <li>(!) indirect invoke (12 tests)</li>
  *   <li>references, new (17 tests), and dereferencing (17 tests)</li>
  *   <li>switch (14 tests)</li>
  *   <li>functions/methods with multiple return values (4 tests)</li>
- *   <li>lambda functions (12 tests)</li>
+ *   <li>(!) lambda functions (12 tests)</li>
  *   <li>continue statements and named blocks (3 tests)</li>
  *   <li>bitwise operators (13 tests)</li>
  *   <li>some kinds of complex constants</li>
@@ -723,40 +725,37 @@ public final class Wyil2Boogie {
         out.printf("assume %s;\n", boolExpr(c.getOperand(0)).toString());
     }
 
-    // TODO: handle more complex updates, like a[i][j] = val and a[i].foo = val;
+    /**
+     * Generates code for an assignment statement.
+     *
+     * For assignments with complex LHS, like a[i], this always updates the whole structure.
+     * For example:
+     * <ol>
+     *   <li>Instead of a[e] := rhs, we do a := a[e := rhs]; (see ListAssign_Valid_1.whiley)</li>
+     *   <li>Instead of a.field := rhs, we do a := a[$field := rhs]; (see RecordAssign_Valid_1.whiley)</li>
+     *   <li>Instead of a[e].field := rhs, we do a := a[e := a[e][field := rhs]]; (see Subtype_Valid_3.whiley)</li>
+     *   <li>Instead of a.field[e] := rhs, we do a := a[$field := a[$field][e := rhs]]; (see Complex_Valid_5.whiley)</li>
+     *   <li>And so on, recursively, for deeper nested LHS.</li>
+     * <ol>
+     * In addition to the above, we have to add type conversions from WVal to array or record types, and back again.
+     *
+     * Calls a helper function to generate TODO: handle more complex updates, like a[i][j] = val and a[i].foo = val;
+     * @param indent
+     * @param stmt
+     */
     private void writeAssign(int indent, Location<Bytecode.Assign> stmt) {
         Location<?>[] lhs = stmt.getOperandGroup(SyntaxTree.LEFTHANDSIDE);
         Location<?>[] rhs = stmt.getOperandGroup(SyntaxTree.RIGHTHANDSIDE);
-        if (lhs[0].getBytecode().getOpcode() == Bytecode.OPCODE_arrayindex) {
+        List<Index> indexes = new ArrayList<>();
+        String base = extractBase(lhs[0], indexes);
+        System.out.println("indexes=" + indexes);
+        if (base != null) {
             if (lhs.length > 1) {
-                throw new NotImplementedYet("Multiple array assignments not handled yet.", stmt);
+                throw new NotImplementedYet("Multiple complex LHS assignments not handled yet.", stmt);
             }
-            // Instead of a[e] := rhs, we do a := a[e := rhs];
-            assert lhs[0].numberOfOperands() == 2;
-            Location<?> array = lhs[0].getOperand(0);
-            if (!(array.getBytecode() instanceof Bytecode.VariableAccess)) {
-                throw new NotImplementedYet("array update of complex expression", stmt);
-            }
-            String wval = expr(array).asWVal().toString();
-            String a = expr(array).as(ARRAY).toString();
-            String index = intExpr(lhs[0].getOperand(1)).toString();
-            String value = expr(rhs[0]).asWVal().toString();
-            out.printf("%s := fromArray(%s[%s := %s], arraylen(%s))", wval, a, index, value, wval);
-        } else if (lhs[0].getBytecode().getOpcode() == Bytecode.OPCODE_fieldload) {
-            if (lhs.length > 1) {
-                throw new NotImplementedYet("Multiple record assignments not handled yet.", stmt);
-            }
-            // Instead of a[e] := rhs, we do a := a[e := rhs];
-            assert lhs[0].numberOfOperands() == 1;
-            Location<?> rec = lhs[0].getOperand(0);
-            String field = ((Bytecode.FieldLoad) (lhs[0].getBytecode())).fieldName();
-            if (!(rec.getBytecode() instanceof Bytecode.VariableAccess)) {
-                throw new NotImplementedYet("record update of complex expression", stmt);
-            }
-            String wval = expr(rec).asWVal().toString();
-            String r = expr(rec).as(RECORD).toString();
-            String value = expr(rhs[0]).asWVal().toString();
-            out.printf("%s := fromRecord(%s[%s := %s])", wval, r, mangleWField(field), value);
+            String newValue = expr(rhs[0]).asWVal().toString();
+            final String result = build_rhs(base, indexes, 0, newValue);
+            out.printf("%s := %s", base, result);
         } else {
             if (isMethod(rhs[0])) {
                 // Boogie distinguishes method & function calls!
@@ -779,6 +778,94 @@ public final class Wyil2Boogie {
             }
         }
         out.println(";");
+    }
+
+    /** Some kind of index into a data structure. */
+    interface Index {
+    }
+
+    class IntIndex implements Index {
+        Location<?> index;
+
+        public IntIndex(Location<?> i) {
+            this.index = i;
+        }
+
+        @Override
+        public String toString() {
+            return "IntIndex(" + index + ")";
+        }
+    }
+
+    class FieldIndex implements Index {
+        String field;
+        public FieldIndex(String f) {
+            this.field = f;
+        }
+
+        @Override
+        public String toString() {
+            return "FieldIndex(" + field + ")";
+        }
+    }
+
+    /**
+     * Extracts base variable that is being assigned to.
+     * Builds a list of all indexes into the 'indexes' list.
+     * @param loc the LHS expression AST.
+     * @param indexes non-null list to append index bytecodes.
+     * @return null if LHS is not an assignment to a (possibly indexed) variable.
+     */
+    private String extractBase(Location<?> loc, List<Index> indexes) {
+        if (loc.getBytecode().getOpcode() == Bytecode.OPCODE_arrayindex) {
+            assert loc.getBytecode().numberOfOperands() == 2;
+            indexes.add(0, new IntIndex(loc.getOperand(1)));
+            System.out.println("arrayindex=" + loc.getOperand(1) + " base=" + loc.getOperand(0));
+            return extractBase(loc.getOperand(0), indexes);
+        } else if (loc.getBytecode().getOpcode() == Bytecode.OPCODE_fieldload) {
+            assert loc.getBytecode().numberOfOperands() == 1;
+            String field = ((Bytecode.FieldLoad) (loc.getBytecode())).fieldName();
+            indexes.add(0, new FieldIndex(field));
+            System.out.println("field=" + field + " base=" + loc.getOperand(0));
+            return extractBase(loc.getOperand(0), indexes);
+        } else if (loc.getBytecode() instanceof Bytecode.VariableAccess) {
+            String base = expr(loc).asWVal().toString();
+            System.out.println("base=" + base);
+            return base;
+        }
+        return null;
+    }
+
+    /**
+     * Recursively builds a new RHS expression that updates one value inside a structure.
+     *
+     * @param wval_base is the Boogie string form of the structure that must be updated.
+     * @param indexes is the array of all the indexes into the value that must be updated.
+     * @param pos is which index (starting from 0) we are about to process.
+     * @param newValue is the new value that must be assigned to the deepest part inside the structure.
+     * @return a Boogie expression that will evaluate to the updated structure.
+     */
+    private String build_rhs(final String wval_base, List<Index> indexes, int pos, String newValue) {
+        final String result;
+        if (pos == indexes.size()) {
+            result = newValue;
+        } else if (indexes.get(pos) instanceof IntIndex) {
+            Location<?> index = ((IntIndex) indexes.get(pos)).index;
+            // Instead of a[e] := rhs, we do a := a[e := rhs];
+            String a = "toArray(" + wval_base + ")";
+            String indexStr = intExpr(index).toString();
+            String newWValBase = String.format("%s[%s]", a, indexStr);
+            String recValue = build_rhs(newWValBase, indexes, pos + 1, newValue);
+            result = String.format("fromArray(%s[%s := %s], arraylen(%s))", a, indexStr, recValue, wval_base);
+        } else {
+            // Instead of a.field := rhs, we do a := a[$field := rhs];
+            String field = ((FieldIndex) indexes.get(pos)).field;
+            String r = "toRecord(" + wval_base + ")";
+            String newWValBase = String.format("%s[%s]", r, mangleWField(field));
+            String recValue = build_rhs(newWValBase, indexes, pos + 1, newValue);
+            result = String.format("fromRecord(%s[%s := %s])", r, mangleWField(field), recValue);
+        }
+        return result;
     }
 
     private boolean isMethod(Location<?> loc) {
@@ -809,6 +896,18 @@ public final class Wyil2Boogie {
      *
      * NOTE: Boogie does not have a do{S}while(C) command,
      * so we generate a while loop and use a boolean variable to force entry the first time.
+     * This allows break/continue statements to work with the body S.
+     * But means that the invariant is checked too soon (before whole loop).
+     * <pre>
+     *     do__while := true;
+     *     while (do__while || C) invar I { S; do__while := false; }
+     * </pre>
+     * TODO: change to this?  (But it duplicates S, which can create verbose output).
+     * <pre>
+     *     do__while := true;
+     *     while (do__while) invar true { S; do__while := false; }
+     *     while (C) invar I { S }
+     * </pre>
      *
      * @param indent
      * @param b
