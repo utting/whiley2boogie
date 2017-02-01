@@ -748,7 +748,6 @@ public final class Wyil2Boogie {
         Location<?>[] rhs = stmt.getOperandGroup(SyntaxTree.RIGHTHANDSIDE);
         List<Index> indexes = new ArrayList<>();
         String base = extractBase(lhs[0], indexes);
-        System.out.println("indexes=" + indexes);
         if (base != null) {
             if (lhs.length > 1) {
                 throw new NotImplementedYet("Multiple complex LHS assignments not handled yet.", stmt);
@@ -820,17 +819,14 @@ public final class Wyil2Boogie {
         if (loc.getBytecode().getOpcode() == Bytecode.OPCODE_arrayindex) {
             assert loc.getBytecode().numberOfOperands() == 2;
             indexes.add(0, new IntIndex(loc.getOperand(1)));
-            System.out.println("arrayindex=" + loc.getOperand(1) + " base=" + loc.getOperand(0));
             return extractBase(loc.getOperand(0), indexes);
         } else if (loc.getBytecode().getOpcode() == Bytecode.OPCODE_fieldload) {
             assert loc.getBytecode().numberOfOperands() == 1;
             String field = ((Bytecode.FieldLoad) (loc.getBytecode())).fieldName();
             indexes.add(0, new FieldIndex(field));
-            System.out.println("field=" + field + " base=" + loc.getOperand(0));
             return extractBase(loc.getOperand(0), indexes);
         } else if (loc.getBytecode() instanceof Bytecode.VariableAccess) {
             String base = expr(loc).asWVal().toString();
-            System.out.println("base=" + base);
             return base;
         }
         return null;
@@ -869,11 +865,8 @@ public final class Wyil2Boogie {
     }
 
     private boolean isMethod(Location<?> loc) {
-        if (loc.getBytecode().getOpcode() == Bytecode.OPCODE_invoke
-                && ((Bytecode.Invoke)loc.getBytecode()).type() instanceof Type.Method) {
-            return true;
-        }
-        return false;
+        return (loc.getBytecode().getOpcode() == Bytecode.OPCODE_invoke
+                && ((Bytecode.Invoke)loc.getBytecode()).type() instanceof Type.Method);
     }
 
     private void writeBreak(int indent, Location<Bytecode.Break> b) {
