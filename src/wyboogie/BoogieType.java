@@ -6,8 +6,10 @@ public enum BoogieType {
     INT("Int"),
     BOOL("Bool"),
     ARRAY("Array"),
-    RECORD("Record");
-    // TODO REF, FUNCTION, METHOD
+    RECORD("Record"),
+    FUNCTION("Function"),
+    METHOD("Method");
+    // TODO REF
 
     private final String boogieName;
 

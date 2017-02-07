@@ -19,6 +19,11 @@ import java.util.Set;
  * you should call setOp(outer) manually at the end to ensure that the expression has the
  * correct (weakest) outer operator.
  *
+ * The precedence of the outermost operator (as returned by getOp()) ranges from the
+ * Boogie equivalence operator up to the array index operator.  So it is always safe
+ * to separate these BoogieExpr objects with commas.
+ *
+ *
  * @author Mark Utting
  */
 public class BoogieExpr {
