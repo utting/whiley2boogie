@@ -86,17 +86,26 @@ import static wyboogie.BoogieType.*;
  *
  * DONE: generate in-context assertions for function preconditions, array bounds, etc.
  *
- * TODO: change do-while translation so that invariant is not checked before first loop.
+ * TODO: change do-while translation so that invariant is NOT checked before first iteration.
+ * <pre> e.g.
+ *           do S: while C where Inv
+ *       becomes
+ *           first:=true;
+ *           while (first || C) where (first || Inv): first := false; {S}
+ * </pre>
  *
- * TODO: improve assign to nested substructures - make it recursive.  (18 tests).
+ * DONE: improve assign to nested substructures - make it recursive.  (18 tests).
  *
  * TODO: mangle Whiley var names to avoid Boogie reserved words and keywords?
  *
- * TODO: generate axiom for each function, as Boogie does not seem to unfold functions bodies.
+ * TODO: generate f(x)==e axiom for each Whiley function that is just 'return e'?
+ *       (Because current translation only generates e into the __impl code of the function,
+ *       so the semantics of the function are not visible elsewhere in the program.
+ *       But this is a bit ad-hoc - the semantics should really be given in the postcondition!)
  *
  * TODO: implement missing language features, such as:
  * <ul>
- *   <li>(!) indirect invoke (12 tests)</li>
+ *   <li>(DONE!) indirect invoke (12 tests)</li>
  *   <li>references, new (17 tests), and dereferencing (17 tests)</li>
  *   <li>switch (14 tests)</li>
  *   <li>functions/methods with multiple return values (4 tests)</li>
@@ -110,6 +119,9 @@ import static wyboogie.BoogieType.*;
  * @author Mark Utting
  */
 public final class Wyil2Boogie {
+    /** Prefix for the function/method names namespace (the WFuncName Boogie type). */
+    public static final String CONST_FUNC = "func__";
+
     private static final String IMMUTABLE_INPUT = "__0";
 
     /** The conjunction operator for pre/post conditions. */
@@ -124,11 +136,17 @@ public final class Wyil2Boogie {
     /** Where the Boogie output is written. */
     protected PrintWriter out;
 
-    /** If true, then the Whiley bytecodes are printed as comments. */
+    /**
+     * If true, then the Whiley bytecodes are printed as comments.
+     * Note: this must be set via the '-v' flag in the main method.
+     */
     protected boolean verbose = false;
 
     /** Keeps track of which (non-mangled) WField names have already been declared. */
     private Set<String> declaredFields = new HashSet<>();
+
+    /** Keeps track of which (non-mangled) function/method names have had their address taken. */
+    private Set<NameID> referencedFunctions = new HashSet<>();
 
     /** Used to generate unique IDs for bound variables. */
     private int uniqueId = 0;
@@ -176,6 +194,47 @@ public final class Wyil2Boogie {
         }
     }
 
+    /**
+     * Declare any function or method names whose address is taken.
+     *
+     * This is careful to only declare a function the first time its name is seen.
+     * So it is safe to call it on every function and method constant.
+     */
+    protected void declareNewFunction(NameID name, Type.FunctionOrMethod type) {
+        if (!referencedFunctions.contains(name)) {
+            String func_const = CONST_FUNC + name.name();
+            out.printf("const unique %s:WFuncName;\n", func_const);
+            // At the moment, we assume indirect-invoke is used rarely, so for ONE type of function in each program.
+            // TODO: extend this to handle more than one type of indirect-invoke result (different applyTo operators?)
+            if (type.returns().size() != 1) {
+                throw new NotImplementedYet("multi-valued constant functions", null);
+            }
+            Type ret = type.returns().get(0);
+            ArrayList<Type> args = type.params();
+            StringBuilder vDecl = new StringBuilder();
+            StringBuilder vCall = new StringBuilder();
+            for (int i = 1; i <= args.size(); i++) {
+                if (i > 1) {
+                    vDecl.append(", ");
+                    vCall.append(", ");
+                }
+                vDecl.append("v" + i + ":WVal");
+                vCall.append("v" + i);
+            }
+            String call = String.format("applyTo%d(toFunction(f), %s)", args.size(), vCall.toString());
+            System.err.println("WARNING: assuming that all indirect function calls of arity " + args.size() +
+                    " return type " + ret);
+            out.printf("axiom (forall f:WVal, %s :: isFunction(f) ==> ", vDecl.toString());
+            out.print(typePredicate(call, ret));
+            out.printf(");\n");
+            out.printf("axiom (forall %s :: applyTo%d(%s, %s) == %s(%s));\n\n",
+                    vDecl.toString(), args.size(),
+                    func_const, vCall.toString(),
+                    name.name(), vCall.toString());
+            referencedFunctions.add(name);
+        }
+    }
+
     // ======================================================================
     // Apply Method
     // ======================================================================
@@ -216,6 +275,7 @@ public final class Wyil2Boogie {
         Type t = td.type();
         declareFields(t, new HashSet<Type>());
         declareFields(td.getTree());
+        declareFuncConstants(td.getTree());
         // writeModifiers(td.modifiers());
         final String param;
         if (!td.getTree().getLocations().isEmpty()) {
@@ -239,6 +299,7 @@ public final class Wyil2Boogie {
             writeLocationsAsComments(cd.getTree());
         }
         declareFields(cd.constant().type(), new HashSet<Type>());
+        declareFuncConstants(cd.constant());
         out.println("const " + cd.name() + " : WVal;");
         out.println("axiom " + cd.name() + " == " + createConstant(cd.constant()).asWVal() + ";");
         out.println();
@@ -263,6 +324,7 @@ public final class Wyil2Boogie {
     private void writeProcedure(FunctionOrMethod method) {
         Type.FunctionOrMethod ft = method.type();
         declareFields(method.getTree());
+        declareFuncConstants(method.getTree());
         String name = mangleFunctionMethodName(method.name(), method.type());
         int inSize = ft.params().size();
         int outSize = ft.returns().size();
@@ -946,7 +1008,7 @@ public final class Wyil2Boogie {
         out.println("}");
     }
 
-    // TODO: decide how to encode indirect calls
+    // TODO: decide how to encode indirect method calls
     private void writeIndirectInvoke(int indent, Location<Bytecode.IndirectInvoke> stmt) {
         Location<?>[] operands = stmt.getOperands();
         out.print(expr(operands[0]).toString());
@@ -1078,7 +1140,7 @@ public final class Wyil2Boogie {
             return writeFieldLoad((Location<Bytecode.FieldLoad>) expr);
 
         case Bytecode.OPCODE_indirectinvoke:
-            return writeIndirectInvoke((Location<Bytecode.IndirectInvoke>) expr);
+            return writeIndirectInvokeExpr((Location<Bytecode.IndirectInvoke>) expr);
 
         case Bytecode.OPCODE_invoke:
             return writeInvoke((Location<Bytecode.Invoke>) expr);
@@ -1247,9 +1309,16 @@ public final class Wyil2Boogie {
         return out;
     }
 
-    // TODO:
-    private BoogieExpr writeIndirectInvoke(Location<Bytecode.IndirectInvoke> expr) {
-        throw new NotImplementedYet("indirect invoke", expr);
+    private BoogieExpr writeIndirectInvokeExpr(Location<Bytecode.IndirectInvoke> expr) {
+        Bytecode.IndirectInvoke invoke = expr.getBytecode();
+        int[] args = invoke.arguments();
+        if (args.length != 1) {
+            throw new NotImplementedYet("indirect invoke with " + args.length + " args", expr);
+        }
+        BoogieExpr func = expr(expr.getOperand(0)).as(FUNCTION);
+        BoogieExpr arg = expr(expr.getOperandGroup(0)[0]).asWVal();
+        BoogieExpr out = new BoogieExpr(WVAL, "applyTo1(" + func + ", " + arg + ")");
+        return out;
     }
 
     private BoogieExpr writeInvoke(Location<Bytecode.Invoke> expr) {
@@ -1278,6 +1347,32 @@ public final class Wyil2Boogie {
     // Question: some lambda expressions capture surrounding variables - how can we represent this in Boogie?
     private BoogieExpr writeLambda(Location<Bytecode.Lambda> expr) {
         throw new NotImplementedYet("lambda", expr);
+        /*
+         * This Whiley lambda:
+         * function g() -> func:
+         *     return &(int x -> x + 1)
+    generates the following bytecodes:
+    Q1: Can we pre-generate a global function for most lambdas?
+    Q2: How do we determine start of lambda body?  Input decls?
+
+        procedure g__impl() returns ($:WVal);
+        requires g__pre();
+        ensures is_func($);
+    //  #0 [tests/valid/Lambda_Valid_1:func] decl $
+    //  #1 [int]    decl x
+    //  #2 [int]    read (%1)
+    //  #3 [int]    const 1
+    //  #4 [int]    add (%2, %3)
+    //  #5 [function(int)->(int)] lambda (%4) function(int)->(int)
+    //  #6 []       return (%5)
+    //  #7 []       block (%6)
+    implementation g__impl() returns ($:WVal)
+    {
+        $ := lambda TODO;
+        return;
+    }
+    */
+        // return new BoogieExpr(WVAL, "lambda TODO");
     }
 
     // TODO: new object
@@ -1609,6 +1704,9 @@ public final class Wyil2Boogie {
             Collections.sort(fields); // sort fields alphabetically
             BoogieExpr[] vals = fields.stream().map(f -> createConstant(rec.values().get(f))).toArray(BoogieExpr[]::new);
             return createRecordConstructor((Type.EffectiveRecord) cd.type(), vals);
+        } else if (cd instanceof Constant.FunctionOrMethod) {
+            Constant.FunctionOrMethod fm = (Constant.FunctionOrMethod) cd;
+            return new BoogieExpr(WVAL, "fromFunction(" + CONST_FUNC + fm.name().name() + ")");
         } else {
             throw new NotImplementedYet("createConstant(" + cd + "):" + type, null);
         }
@@ -1715,6 +1813,7 @@ public final class Wyil2Boogie {
         predefinedFunction("fromRef", Type.Function(any1, ref1));
         predefinedFunction("fromFunction", Type.Function(any1, Collections.singletonList(castFunction)));
         predefinedFunction("fromMethod", Type.Function(any1, Collections.singletonList(anyMethod)));
+        predefinedFunction("applyTo1", Type.Function(any1, any1)); // should take TWO inputs
 
         for (WyilFile.FunctionOrMethod m : functionOrMethods) {
             String name = m.name();
@@ -1827,6 +1926,38 @@ public final class Wyil2Boogie {
             Type[] types = loc.getTypes();
             for (Type t : types) {
                 declareFields(t, new HashSet<Type>());
+            }
+        }
+    }
+
+    /** Walks recursively through a constant and declares any function constants. */
+    private void declareFuncConstants(Constant cd) {
+        if (cd instanceof Constant.Array) {
+            Constant.Array aconst = (Constant.Array) cd;
+            for (Constant c : aconst.values()) {
+                declareFuncConstants(c);
+            }
+        } else if (cd instanceof Constant.Record) {
+            Constant.Record rec = (Constant.Record) cd;
+            for (Constant c : rec.values().values()) {
+                declareFuncConstants(c);
+            }
+        } else if (cd instanceof Constant.FunctionOrMethod) {
+            Constant.FunctionOrMethod fm = (Constant.FunctionOrMethod) cd;
+            declareNewFunction(fm.name(), fm.type());
+        }
+    }
+
+    /** Walks through bytecode and declares any function constants. */
+    private void declareFuncConstants(SyntaxTree tree) {
+        List<Location<?>> locations = tree.getLocations();
+        for (int i = 0; i != locations.size(); ++i) {
+            Location<?> loc = locations.get(i);
+            if (loc.getBytecode().getOpcode() == Bytecode.OPCODE_const
+              && ((Bytecode.Const) loc.getBytecode()).constant() instanceof Constant.FunctionOrMethod) {
+                Bytecode.Const con = (Bytecode.Const) loc.getBytecode();
+                Constant.FunctionOrMethod bc = (Constant.FunctionOrMethod) con.constant();
+                declareNewFunction(bc.name(), bc.type());
             }
         }
     }

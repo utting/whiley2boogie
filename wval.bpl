@@ -141,3 +141,18 @@ axiom (forall v:WVal :: isRecord(v) ==> fromRecord(toRecord(v)) == v);
 const unique empty__record : [WField]WVal;
 const unique undef__field:WVal; // undefined fields map to this value
 axiom (forall f:WField :: empty__record[f] == undef__field);
+
+
+// Higher-order functions (whose names are stored as expressions)
+function toFunction(WVal) returns (WFuncName);
+function fromFunction(WFuncName) returns (WVal);
+axiom (forall f:WFuncName :: isFunction(fromFunction(f)));
+axiom (forall f:WFuncName :: toFunction(fromFunction(f)) == f);
+axiom (forall v:WVal :: isFunction(v) ==> fromFunction(toFunction(v)) == v);
+
+// NOTE: we use a different applyTo<arity> function for each arity.
+//  this only supports very simple overloading.
+//  To support more, we could overload by type too?
+function applyTo1(WFuncName, WVal) returns (WVal);
+function applyTo2(WFuncName, WVal, WVal) returns (WVal);
+function applyTo3(WFuncName, WVal, WVal, WVal) returns (WVal);
