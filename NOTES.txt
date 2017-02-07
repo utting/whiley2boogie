@@ -126,6 +126,11 @@ because it checks the invariant before the first iteration.
 But shouldn't an invariant be true at the beginning and end of EVERY
 iteration?  In that case, this loop invariant is incorrect.
 
+7/2/2017 After fixing do-while translation to NOT check inv before first iteration:
+  I cannot see why Boogie still cannot prove the invariants:
+        assert toInt(i) >= - 1;
+        assert toInt(i) < arraylen(items);
+        
 ===== DoWhile_Valid_8.whiley =====
 Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
 DoWhile_Valid_8.bpl(24,9): Error BP5004: This loop invariant might not hold on entry.

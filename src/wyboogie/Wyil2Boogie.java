@@ -33,10 +33,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -86,13 +88,7 @@ import static wyboogie.BoogieType.*;
  *
  * DONE: generate in-context assertions for function preconditions, array bounds, etc.
  *
- * TODO: change do-while translation so that invariant is NOT checked before first iteration.
- * <pre> e.g.
- *           do S: while C where Inv
- *       becomes
- *           first:=true;
- *           while (first || C) where (first || Inv): first := false; {S}
- * </pre>
+ * DONE: change do-while translation so that invariant is NOT checked before first iteration.
  *
  * DONE: improve assign to nested substructures - make it recursive.  (18 tests).
  *
@@ -105,12 +101,12 @@ import static wyboogie.BoogieType.*;
  *
  * TODO: implement missing language features, such as:
  * <ul>
- *   <li>(DONE!) indirect invoke (12 tests)</li>
+ *   <li>DONE: indirect invoke (12 tests)</li>
  *   <li>references, new (17 tests), and dereferencing (17 tests)</li>
  *   <li>switch (14 tests)</li>
  *   <li>functions/methods with multiple return values (4 tests)</li>
  *   <li>(!) lambda functions (12 tests)</li>
- *   <li>continue statements and named blocks (3 tests)</li>
+ *   <li>DONE: continue statements and named blocks (3 tests)</li>
  *   <li>bitwise operators (13 tests)</li>
  *   <li>some kinds of complex constants</li>
  * </ul>
@@ -159,6 +155,14 @@ public final class Wyil2Boogie {
 
     /** Output parameters of the current function/method. */
     List<Location<?>> outDecls;
+
+    /**
+     * A stack of labels for the loops we are inside (innermost label last).
+     *
+     * These labels are prefixed by "CONTINUE__" at the start of the loop body,
+     * and by "BREAK__" after the end of the whole loop statement.
+     */
+    Deque<String> loopLabels = new ArrayDeque<>();
 
     private final AssertionGenerator vcg;
 
@@ -678,7 +682,6 @@ public final class Wyil2Boogie {
             writeDebug(indent, (Location<Bytecode.Debug>) c);
             break;
         case Bytecode.OPCODE_dowhile:
-            // TODO: check the condition, but at the appropriate place!
             writeDoWhile(indent, (Location<Bytecode.DoWhile>) c);
             break;
         case Bytecode.OPCODE_fail:
@@ -932,14 +935,12 @@ public final class Wyil2Boogie {
     }
 
     private void writeBreak(int indent, Location<Bytecode.Break> b) {
-        out.println("break;");
+        out.printf("goto BREAK__%s;\n", loopLabels.getLast());
     }
 
-    // TODO: implement continue by breaking out of a labelled block?
-    // But 'continue' is used to carry on to next case of switch too, which requires different handling!
+    // TODO: also implement 'continue' within switch, if we implement switch.
     private void writeContinue(int indent, Location<Bytecode.Continue> b) {
-        out.println("continue;");
-        throw new NotImplementedYet("continue", b);
+        out.printf("goto CONTINUE__%s;\n", loopLabels.getLast());
     }
 
     private void writeDebug(int indent, Location<Bytecode.Debug> b) {
@@ -949,19 +950,22 @@ public final class Wyil2Boogie {
     /**
      * Generate Boogie code for do-while.
      *
-     * NOTE: Boogie does not have a do{S}while(C) command,
-     * so we generate a while loop and use a boolean variable to force entry the first time.
+     * NOTE: Boogie does not have a do{S}while(C) where I command,
+     * so we used to generate a while loop and use a boolean variable to force entry the first time.
      * This allows break/continue statements to work with the body S.
-     * But means that the invariant is checked too soon (before whole loop).
+     * But this meant that the invariant was checked too soon (before whole loop).
      * <pre>
      *     do__while := true;
      *     while (do__while || C) invar I { S; do__while := false; }
      * </pre>
-     * TODO: change to this?  (But it duplicates S, which can create verbose output).
+     * So now we translate directly to Boogie if and goto label statements:
      * <pre>
-     *     do__while := true;
-     *     while (do__while) invar true { S; do__while := false; }
-     *     while (C) invar I { S }
+     *     if (true) {
+     *         DO__WHILE__BODY:
+     *         S;
+     *         assert I;
+     *         if (C) { goto DO__WHILE__BODY; }
+     *     }
      * </pre>
      *
      * @param indent
@@ -970,18 +974,27 @@ public final class Wyil2Boogie {
     private void writeDoWhile(int indent, Location<Bytecode.DoWhile> b) {
         Location<?>[] loopInvariant = b.getOperandGroup(0);
         // Location<?>[] modifiedOperands = b.getOperandGroup(1);
-        out.printf("%s := true;\n", DO_WHILE_VAR);
-        tabIndent(indent+1);
-        out.printf("while (%s || %s)", DO_WHILE_VAR, boolExpr(b.getOperand(0)).toString());
-        writeLoopInvariant(indent + 2, loopInvariant);
-        out.println();
-        tabIndent(indent+1);
-        out.println("{");
+        loopLabels.addLast("DO__WHILE__" + loopLabels.size());
+        out.printf("if (true) {\n");
         tabIndent(indent+2);
-        out.printf("%s := false;\n", DO_WHILE_VAR);
+        out.printf("CONTINUE__%s:\n", loopLabels.getLast());
         writeBlock(indent+1, b.getBlock(0));
+        tabIndent(indent+2);
+        out.printf("// invariant:");
+        vcg.checkPredicates(indent + 1, loopInvariant);
+        writeLoopInvariant(indent + 2, "assert", loopInvariant);
+        out.println();
+        tabIndent(indent+2);
+        vcg.checkPredicate(indent + 1, b.getOperand(0));
+        out.printf("// while:\n");
+        tabIndent(indent+2);
+        out.printf("if (%s) { goto CONTINUE__%s; }\n",
+                boolExpr(b.getOperand(0)).toString(),
+                loopLabels.getLast());
         tabIndent(indent+1);
         out.println("}");
+        tabIndent(indent+1);
+        out.printf("BREAK__%s:\n", loopLabels.removeLast());
     }
 
     /**
@@ -1045,24 +1058,29 @@ public final class Wyil2Boogie {
     private void writeWhile(int indent, Location<Bytecode.While> b) {
         Location<?>[] loopInvariant = b.getOperandGroup(0);
         // Location<?>[] modifiedOperands = b.getOperandGroup(1);
+        loopLabels.addLast("WHILE__" + loopLabels.size());
+        out.printf("CONTINUE__%s:\n", loopLabels.getLast());
+        tabIndent(indent+1);
         out.printf("while (%s)", boolExpr(b.getOperand(0)).toString());
         // out.print(" modifies ");
         // writeExpressions(modifiedOperands,out);
-        writeLoopInvariant(indent + 2, loopInvariant);
+        writeLoopInvariant(indent + 2, "invariant", loopInvariant);
         out.println();
         tabIndent(indent + 1);
         out.println("{");
         writeBlock(indent+1,b.getBlock(0));
         tabIndent(indent+1);
         out.println("}");
+        tabIndent(indent+1);
+        out.printf("BREAK__%s:\n", loopLabels.removeLast());
     }
 
-    private void writeLoopInvariant(int indent, Location<?>[] loopInvariant) {
+    private void writeLoopInvariant(int indent, String keyword, Location<?>[] loopInvariant) {
         if (loopInvariant.length > 0) {
             for (Location<?> invariant : loopInvariant) {
                 out.println();
                 tabIndent(indent);
-                out.printf("invariant %s;", boolExpr(invariant).toString());
+                out.printf("%s %s;", keyword, boolExpr(invariant).toString());
             }
         }
     }

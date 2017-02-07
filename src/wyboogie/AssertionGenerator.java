@@ -83,7 +83,9 @@ public class AssertionGenerator {
     /**
      * Main entry point for this assertion generator.
      *
-     * @param indent
+     * @param indent indentation of the current assertion line.
+     *              (assumes that this indentation has already been added, but
+     *              similar or greater indentation will be added for subsequent lines).
      * @param expr a predicate/expression to check for well-definedness.
      */
     public void checkPredicate(int indent, Location<?> expr) {
