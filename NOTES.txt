@@ -19,6 +19,10 @@ Workflow
    wydiff OUTXX.results
 
 
+TODO:
+Investigate running output Boogie programs using Boogaloo:
+    https://bitbucket.org/nadiapolikarpova/boogaloo/wiki/Home 
+    
 Results
 =======
 2016-10-14: OUT32_array_checks.txt

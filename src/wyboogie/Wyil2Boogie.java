@@ -60,8 +60,10 @@ import wyil.io.WyilFileReader;
 import wyil.lang.*;
 import wyil.lang.Type;
 import wyil.lang.Bytecode.AliasDeclaration;
+import wyil.lang.Bytecode.Case;
 import wyil.lang.Bytecode.Expr;
 import wyil.lang.Bytecode.Stmt;
+import wyil.lang.Bytecode.Switch;
 import wyil.lang.Bytecode.VariableAccess;
 import wyil.lang.Bytecode.VariableDeclaration;
 import wyil.lang.Constant;
@@ -165,6 +167,9 @@ public final class Wyil2Boogie {
     Deque<String> loopLabels = new ArrayDeque<>();
 
     private final AssertionGenerator vcg;
+
+    /** Used to generate unique labels for each switch statement. */
+    private int switchCount;
 
 
     public Wyil2Boogie(PrintWriter writer) {
@@ -576,8 +581,11 @@ public final class Wyil2Boogie {
      */
     private void writeLocalVarDecls(List<Location<?>> locs) {
         // We start after the input and output parameters.
+        switchCount = 0;
         Map<String, Type> locals = new LinkedHashMap<>(); // preserve order, but remove duplicates
         writeLocalVarDeclsRecursive(locs, locs.size() - 1, locals);
+        // reset to zero so that we generate same numbers as we generate code.
+        switchCount = 0;
     }
 
     /**
@@ -597,11 +605,7 @@ public final class Wyil2Boogie {
             if (prevType == null) {
                 done.put(name, decl.getType());
                 tabIndent(1);
-                out.print("var ");
-                out.print(name);
-                out.print(" : WVal where ");
-                out.print(typePredicate(name, decl.getType()));
-                out.println(";");
+                out.printf("var %s : WVal where %s;\n", name, typePredicate(name, decl.getType()));
             } else if (!prevType.equals(decl.getType())) {
                 throw new NotImplementedYet("local var " + name + " has multiple types", locs.get(pc));
             }
@@ -612,12 +616,23 @@ public final class Wyil2Boogie {
                 writeLocalVarDeclsRecursive(locs, b, done);
             }
         } else if (bytecode instanceof Stmt) {
+            if (bytecode instanceof Switch) {
+                switchCount++;
+                tabIndent(1);
+                // we don't bother recording these in the 'done' map, since each switch has a unique variable.
+                out.printf("var %s : WVal;\n", createSwitchVar(switchCount));
+            }
             // loop through all child blocks
             Stmt code = (Stmt) bytecode;
             for (int b : code.getBlocks()) {
                 writeLocalVarDeclsRecursive(locs, b, done);
             }
         }
+    }
+
+    /** A unique name for each switch statement within a procedure. */
+    private String createSwitchVar(int count) {
+        return "switch" + count + "__value";
     }
 
     private void writeLocationsAsComments(SyntaxTree tree) {
@@ -938,8 +953,11 @@ public final class Wyil2Boogie {
         out.printf("goto BREAK__%s;\n", loopLabels.getLast());
     }
 
-    // TODO: also implement 'continue' within switch, if we implement switch.
     private void writeContinue(int indent, Location<Bytecode.Continue> b) {
+        if (loopLabels.getLast().startsWith("SWITCH")) {
+            // TODO: implement 'continue' within switch.
+            throw new NotImplementedYet("continue inside switch", b);
+        }
         out.printf("goto CONTINUE__%s;\n", loopLabels.getLast());
     }
 
@@ -1102,9 +1120,83 @@ public final class Wyil2Boogie {
         // no output needed.  Boogie uses {...} blocks, so empty statements are okay.
     }
 
-    // TODO: switch
-    private void writeSwitch(int indent, Location<Bytecode.Switch> b) {
-        throw new NotImplementedYet("switch", b);
+    /**
+     * Implements switch as a non-deterministic goto to all the cases.
+     *
+     * Cases are numbered, so that 'continue' can jump to the next case.
+     *
+     * TODO: handle continue in switch.
+     * (This just requires storing current case number i in a field,
+     * so can goto "SWITCH(n)__CASE(i+1)".  But to support nested switches,
+     * we will need a stack of these case numbers!).
+     *
+     * @param indent
+     * @param sw
+     */
+    private void writeSwitch(int indent, Location<Bytecode.Switch> sw) {
+        switchCount++;
+        // we number each switch uniquely, so that nested switches and
+        // non-nested switches in the same body all have distinct labels.
+        loopLabels.addLast("SWITCH" + switchCount);
+        String var = createSwitchVar(switchCount);
+        Case[] cases = sw.getBytecode().cases();
+        out.printf("%s := %s;\n", var, expr(sw.getOperand(0)).asWVal().toString());
+        // build all the case labels we could jump to.
+        StringBuilder labels = new StringBuilder();
+        for (int i = 0; i < cases.length; i++) {
+            if (i > 0) {
+                labels.append(", ");
+            }
+            labels.append(loopLabels.getLast() + "__CASE" + i);
+        }
+        tabIndent(indent + 1);
+        out.printf("goto %s;\n", labels.toString()); // non-deterministic
+        BoogieExpr defaultCond = new BoogieExpr(BoogieType.BOOL, "true");
+        for (int i = 0; i < cases.length; i++) {
+            writeCase(indent + 1, var, i, cases[i], sw.getBlock(i), defaultCond);
+        }
+        tabIndent(indent + 1);
+        // We add a 'skip' statement after the BREAK label, just in case this switch is not inside a block.
+        // For example, Switch_Valid_5.whiley.
+        out.printf("BREAK__%s:\n", loopLabels.removeLast());
+    }
+
+    /**
+     * Write one case (possibly with multiple values) and one block of code.
+     * This could be the default case, which will have zero values.
+     * @param indent
+     * @param varStr the variable that contains the switch value
+     * @param count the position (from zero) of the current case.
+     * @param c the case matching values.
+     * @param b the block of code.
+     * @param defaultCond a Boogie term that is the negation of all matching conditions so far.
+     */
+    private void writeCase(int indent, String varStr, int count, Case c, Location<Bytecode.Block> b,
+            BoogieExpr defaultCond) {
+        // build the match condition:  var == val1 || var == val2 || ...
+        BoogieExpr var = new BoogieExpr(BoogieType.WVAL, varStr);
+        BoogieExpr match = new BoogieExpr(BoogieType.BOOL);
+        String op = null;
+        for (Constant cd : c.values()) {
+            BoogieExpr val = createConstant(cd).asWVal();
+            BoogieExpr test = new BoogieExpr(BoogieType.BOOL, var, " == ", val);
+            BoogieExpr negTest = new BoogieExpr(BoogieType.BOOL, var, " != ", val);
+            defaultCond.addOp(" && ", negTest);
+            if (op == null) {
+                match = test;
+            } else {
+                op = " || ";
+                match.addOp(op, test);
+            }
+        }
+        tabIndent(indent + 1);
+        out.printf(loopLabels.getLast() + "__CASE%d:\n",  count);
+        tabIndent(indent + 2);
+        BoogieExpr assume = c.values().length == 0 ? defaultCond : match;
+        out.printf("assume %s;\n", assume.as(BOOL).toString());
+        writeBlock(indent + 1, b);
+        tabIndent(indent + 2);
+        out.printf("goto BREAK__%s;\n", loopLabels.getLast());
     }
 
     private void writeVariableInit(int indent, Location<VariableDeclaration> loc) {
