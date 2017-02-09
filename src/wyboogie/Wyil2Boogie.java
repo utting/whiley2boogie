@@ -109,7 +109,7 @@ import static wyboogie.BoogieType.*;
  *   <li>functions/methods with multiple return values (4 tests)</li>
  *   <li>(!) lambda functions (12 tests)</li>
  *   <li>DONE: continue statements and named blocks (3 tests)</li>
- *   <li>bitwise operators (13 tests)</li>
+ *   <li>DONE: bitwise operators (13 tests)</li>
  *   <li>some kinds of complex constants</li>
  * </ul>
  *
@@ -1305,21 +1305,29 @@ public final class Wyil2Boogie {
             return infixOp(INT, expr, " mod ", INT);
 
         case Bytecode.OPCODE_bitwiseinvert:
-        case Bytecode.OPCODE_bitwiseor:  // TODO
-        case Bytecode.OPCODE_bitwisexor: // TODO
-        case Bytecode.OPCODE_bitwiseand: // TODO
-        case Bytecode.OPCODE_shl:        // TODO
-        case Bytecode.OPCODE_shr:        // TODO
-            throw new NotImplementedYet("bitwise operators not supported yet: " + expr.getBytecode(), expr);
+            BoogieExpr lhs = expr(expr.getOperand(0)).as(INT);
+            String call = String.format("bitwise_invert(%s)", lhs.toString());
+            return new BoogieExpr(INT, call);
+
+        case Bytecode.OPCODE_bitwiseor:
+            return bitwiseOp(expr, "or");
+        case Bytecode.OPCODE_bitwisexor:
+            return bitwiseOp(expr, "xor");
+        case Bytecode.OPCODE_bitwiseand:
+            return bitwiseOp(expr, "and");
+        case Bytecode.OPCODE_shl:
+            return bitwiseOp(expr, "shift_left");
+        case Bytecode.OPCODE_shr:
+            return bitwiseOp(expr, "shift_right");
 
         case Bytecode.OPCODE_eq:
             return writeEquality((Location<Bytecode.Operator>) expr);
 
         case Bytecode.OPCODE_ne:
             BoogieExpr eq = writeEquality((Location<Bytecode.Operator>) expr);
-            BoogieExpr out = new BoogieExpr(BOOL);
-            out.addOp("! ", eq);
-            return out;
+            BoogieExpr outNE = new BoogieExpr(BOOL);
+            outNE.addOp("! ", eq);
+            return outNE;
 
         case Bytecode.OPCODE_lt:
             return infixOp(INT, expr, " < ", BOOL);
@@ -1362,6 +1370,14 @@ public final class Wyil2Boogie {
         BoogieExpr lhs = expr(c.getOperand(0)).as(argType);
         BoogieExpr rhs = expr(c.getOperand(1)).as(argType);
         out.addOp(lhs, op, rhs);
+        return out;
+    }
+
+    private BoogieExpr bitwiseOp(Location<?> c, String op) {
+        BoogieExpr lhs = expr(c.getOperand(0)).as(INT);
+        BoogieExpr rhs = expr(c.getOperand(1)).as(INT);
+        String call = String.format("bitwise_%s(%s, %s)", op, lhs.toString(), rhs.toString());
+        BoogieExpr out = new BoogieExpr(INT, call);
         return out;
     }
 
