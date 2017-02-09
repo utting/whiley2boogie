@@ -156,3 +156,11 @@ axiom (forall v:WVal :: isFunction(v) ==> fromFunction(toFunction(v)) == v);
 function applyTo1(WFuncName, WVal) returns (WVal);
 function applyTo2(WFuncName, WVal, WVal) returns (WVal);
 function applyTo3(WFuncName, WVal, WVal, WVal) returns (WVal);
+
+// bitwise operators (uninterpreted functions)
+function bitwise_and(int, int) returns (int);
+function bitwise_or(int, int) returns (int);
+function bitwise_xor(int, int) returns (int);
+function bitwise_shift_left(int, int) returns (int);
+function bitwise_shift_right(int, int) returns (int);
+function bitwise_invert(int) returns (int);
