@@ -164,3 +164,14 @@ function bitwise_xor(int, int) returns (int);
 function bitwise_shift_left(int, int) returns (int);
 function bitwise_shift_right(int, int) returns (int);
 function bitwise_invert(int) returns (int);
+
+// typing axioms for bitwise ops?
+// Problem 1: these are inconsistent with bitwise ops on small ints.
+// Problem 2: these seem to cause lots of timeouts (Byte_Valid*.whiley).
+//axiom (forall b:WVal, i:int :: isByte(b) ==> isByte(fromInt(bitwise_and(toInt(b),i))));
+//axiom (forall b:WVal, i:int :: isByte(b) ==> isByte(fromInt(bitwise_or(toInt(b),i))));
+//axiom (forall b:WVal, i:int :: isByte(b) ==> isByte(fromInt(bitwise_xor(toInt(b),i))));
+//axiom (forall b:WVal, i:int :: isByte(b) ==> isByte(fromInt(bitwise_shift_left(toInt(b),i))));
+//axiom (forall b:WVal, i:int :: isByte(b) ==> isByte(fromInt(bitwise_shift_right(toInt(b),i))));
+//axiom (forall b:WVal :: isByte(b) ==> isByte(fromInt(bitwise_invert(toInt(b)))));
+
