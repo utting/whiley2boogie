@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Python module for recording Boogie models and printing them in Whiley syntax.
+Use boogie /printModel:0 wval.bpl prog.bpl
 
 @author: Mark Utting
 """
