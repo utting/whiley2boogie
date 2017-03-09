@@ -22,6 +22,8 @@ Workflow
 TODO:
 Investigate running output Boogie programs using Boogaloo:
     https://bitbucket.org/nadiapolikarpova/boogaloo/wiki/Home 
+    (It doesn't really 'run' the programs - it just searches for counter-examples)
+    
     
 Results
 =======

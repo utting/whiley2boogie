@@ -109,8 +109,8 @@ import static wyboogie.BoogieType.*;
  *   <li>functions/methods with multiple return values (4 tests)</li>
  *   <li>(!) lambda functions (12 tests)</li>
  *   <li>DONE: continue statements and named blocks (3 tests)</li>
- *   <li>DONE: bitwise operators (13 tests)</li>
- *   <li>some kinds of complex constants</li>
+ *   <li>DONE (separate byte and int ops): bitwise operators (13 tests)</li>
+ *   <li>DONE: generate type axioms for constants (tell Boogie the result of Whiley's type inference).</li>
  * </ul>
  *
  * @author David J. Pearce
@@ -309,9 +309,10 @@ public final class Wyil2Boogie {
         }
         declareFields(cd.constant().type(), new HashSet<Type>());
         declareFuncConstants(cd.constant());
-        out.println("const " + cd.name() + " : WVal;");
-        out.println("axiom " + cd.name() + " == " + createConstant(cd.constant()).asWVal() + ";");
-        out.println();
+        out.printf("const %s : WVal;\n", cd.name());
+        out.printf("axiom %s == %s;\n", cd.name(), createConstant(cd.constant()).asWVal());
+        String typePred = typePredicate(cd.name(), cd.constant().type());
+        out.printf("axiom %s;\n\n", typePred);
     }
 
     /**
@@ -1305,8 +1306,9 @@ public final class Wyil2Boogie {
             return infixOp(INT, expr, " mod ", INT);
 
         case Bytecode.OPCODE_bitwiseinvert:
+            String opType = bitwiseType(expr.getOperand(0));
             BoogieExpr lhs = expr(expr.getOperand(0)).as(INT);
-            String call = String.format("bitwise_invert(%s)", lhs.toString());
+            String call = String.format("%s_invert(%s)", opType, lhs.toString());
             return new BoogieExpr(INT, call);
 
         case Bytecode.OPCODE_bitwiseor:
@@ -1374,11 +1376,17 @@ public final class Wyil2Boogie {
     }
 
     private BoogieExpr bitwiseOp(Location<?> c, String op) {
+        String opType = bitwiseType(c.getOperand(0));
         BoogieExpr lhs = expr(c.getOperand(0)).as(INT);
         BoogieExpr rhs = expr(c.getOperand(1)).as(INT);
-        String call = String.format("bitwise_%s(%s, %s)", op, lhs.toString(), rhs.toString());
+        String call = String.format("%s_%s(%s, %s)", opType, op, lhs.toString(), rhs.toString());
         BoogieExpr out = new BoogieExpr(INT, call);
         return out;
+    }
+
+    /** We distinguish bitwise operators on byte values from other int values. */
+    private String bitwiseType(Location<?> operand) {
+        return operand.getType().equals(Type.T_BYTE) ? "byte" : "bitwise";
     }
 
     private BoogieExpr writeVariableAccess(Location<VariableAccess> loc) {
