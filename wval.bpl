@@ -158,6 +158,13 @@ function applyTo2(WFuncName, WVal, WVal) returns (WVal);
 function applyTo3(WFuncName, WVal, WVal, WVal) returns (WVal);
 
 // bitwise operators (uninterpreted functions)
+function byte_and(int, int) returns (int);
+function byte_or(int, int) returns (int);
+function byte_xor(int, int) returns (int);
+function byte_shift_left(int, int) returns (int);
+function byte_shift_right(int, int) returns (int);
+function byte_invert(int) returns (int);
+
 function bitwise_and(int, int) returns (int);
 function bitwise_or(int, int) returns (int);
 function bitwise_xor(int, int) returns (int);
@@ -165,13 +172,12 @@ function bitwise_shift_left(int, int) returns (int);
 function bitwise_shift_right(int, int) returns (int);
 function bitwise_invert(int) returns (int);
 
-// typing axioms for bitwise ops?
-// Problem 1: these are inconsistent with bitwise ops on small ints.
+// typing axioms for the byte bitwise ops
 // Problem 2: these seem to cause lots of timeouts (Byte_Valid*.whiley).
-//axiom (forall b:WVal, i:int :: isByte(b) ==> isByte(fromInt(bitwise_and(toInt(b),i))));
-//axiom (forall b:WVal, i:int :: isByte(b) ==> isByte(fromInt(bitwise_or(toInt(b),i))));
-//axiom (forall b:WVal, i:int :: isByte(b) ==> isByte(fromInt(bitwise_xor(toInt(b),i))));
-//axiom (forall b:WVal, i:int :: isByte(b) ==> isByte(fromInt(bitwise_shift_left(toInt(b),i))));
-//axiom (forall b:WVal, i:int :: isByte(b) ==> isByte(fromInt(bitwise_shift_right(toInt(b),i))));
-//axiom (forall b:WVal :: isByte(b) ==> isByte(fromInt(bitwise_invert(toInt(b)))));
+axiom (forall b:int, i:int :: isByte(fromInt(byte_and(b,i))));
+axiom (forall b:int, i:int :: isByte(fromInt(byte_or(b,i))));
+axiom (forall b:int, i:int :: isByte(fromInt(byte_xor(b,i))));
+axiom (forall b:int, i:int :: isByte(fromInt(byte_shift_left(b,i))));
+axiom (forall b:int, i:int :: isByte(fromInt(byte_shift_right(b,i))));
+axiom (forall b:int :: isByte(fromInt(byte_invert(b))));
 
