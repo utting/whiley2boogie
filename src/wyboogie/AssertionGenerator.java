@@ -143,7 +143,7 @@ public class AssertionGenerator {
             if (type instanceof Type.Method) {
                 // The Whiley language spec 0.3.38, Section 3.5.5, says that because they are impure,
                 // methods cannot be called inside specifications.
-                throw new NotImplementedYet("call to method (" + name + ") from inside an expression", expr);
+                System.err.println("WARNING: call to method (" + name + ") from inside an expression: " + expr);
             }
             String funName = wy2b.mangleFunctionMethodName(name, type);
             Location<?>[] operands = expr.getOperands();

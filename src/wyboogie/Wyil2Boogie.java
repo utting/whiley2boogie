@@ -45,6 +45,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
+
+import javax.xml.transform.stream.StreamSource;
 
 import wybs.lang.Build;
 import wybs.util.StdProject;
@@ -94,6 +97,10 @@ import static wyboogie.BoogieType.*;
  *
  * DONE: improve assign to nested substructures - make it recursive.  (18 tests).
  *
+ * TODO: move all method calls out of expressions?  (35 tests do this!)
+ *
+ * TODO: refactor the BoogieExpr writeXXX() methods to boogieXXX().
+ *
  * TODO: mangle Whiley var names to avoid Boogie reserved words and keywords?
  *
  * TODO: generate f(x)==e axiom for each Whiley function that is just 'return e'?
@@ -119,6 +126,14 @@ import static wyboogie.BoogieType.*;
 public final class Wyil2Boogie {
     /** Prefix for the function/method names namespace (the WFuncName Boogie type). */
     public static final String CONST_FUNC = "func__";
+
+    public static final String HEAP = "w__heap";
+    public static final String ALLOCATED = "w__alloc";
+    public static final String NEW = "new";
+    public static final String NEW_REF = "ref__";
+    // max number of 'new' expressions in a single statement.
+    // TODO: calculate this on the fly within each procedure?
+    public static final int NEW_REF_MAX = 4;
 
     private static final String IMMUTABLE_INPUT = "__0";
 
@@ -171,6 +186,8 @@ public final class Wyil2Boogie {
     /** Used to generate unique labels for each switch statement. */
     private int switchCount;
 
+    /** Records the values within all the 'new' expressions in the current statement. */
+    private List<String> newAllocations = new ArrayList<>();
 
     public Wyil2Boogie(PrintWriter writer) {
         this.out = writer;
@@ -250,6 +267,13 @@ public final class Wyil2Boogie {
 
     public void apply(WyilFile module) throws IOException {
         resolveFunctionOverloading(module.functionOrMethods());
+        out.printf("var %s:[WRef]WVal;\n", HEAP);
+        out.printf("var %s:[WRef]bool;\n", ALLOCATED);
+        // TODO: find a nicer way of making these local?
+        for (int i = 0; i < NEW_REF_MAX; i++) {
+            out.printf("var %s%d : WRef;\n", NEW_REF, i);
+        }
+        out.println();
         for(WyilFile.Constant cd : module.constants()) {
             writeConstant(cd);
         }
@@ -355,6 +379,10 @@ public final class Wyil2Boogie {
         out.print("procedure ");
         writeSignature(procedureName, method, null);
         out.println(";");
+        out.printf("    modifies %s, %s;\n", HEAP, ALLOCATED);
+        for (int i = 0; i < NEW_REF_MAX; i++) {
+            out.printf("    modifies %s%d;\n", NEW_REF, i);
+        }
         out.printf("    requires %s(%s);\n", name + METHOD_PRE, getNames(inDecls));
         // Part of the postcondition is the type and type constraints of each output variable.
         List<Type> outputs = method.type().returns();
@@ -675,11 +703,11 @@ public final class Wyil2Boogie {
             break;
         case Bytecode.OPCODE_assert:
             vcg.checkPredicate(indent, c.getOperand(0));
-            writeAssert(indent, (Location<Bytecode.Assert>) c);
+            writeAssert(indent, (Location<Bytecode.Assert>) c); // should not contain 'new'
             break;
         case Bytecode.OPCODE_assume:
             vcg.checkPredicate(indent, c.getOperand(0));
-            writeAssume(indent, (Location<Bytecode.Assume>) c);
+            writeAssume(indent, (Location<Bytecode.Assume>) c); // should not contain 'new'
             break;
         case Bytecode.OPCODE_assign:
             Location<?>[] lhs = c.getOperandGroup(SyntaxTree.LEFTHANDSIDE);
@@ -710,6 +738,7 @@ public final class Wyil2Boogie {
             break;
         case Bytecode.OPCODE_indirectinvoke:
             // TODO: check arguments against the precondition?
+            out.print("call "); // it should be a method, not a function
             writeIndirectInvoke(indent, (Location<Bytecode.IndirectInvoke>) c);
             break;
         case Bytecode.OPCODE_invoke:
@@ -817,10 +846,12 @@ public final class Wyil2Boogie {
      *   <li>Instead of a[e].field := rhs, we do a := a[e := a[e][field := rhs]]; (see Subtype_Valid_3.whiley)</li>
      *   <li>Instead of a.field[e] := rhs, we do a := a[$field := a[$field][e := rhs]]; (see Complex_Valid_5.whiley)</li>
      *   <li>And so on, recursively, for deeper nested LHS.</li>
+     *   <li>Instead of &a := rhs, we do heap := heap[a := rhs]; (see Reference_Valid_1.whiley)</li>
      * <ol>
      * In addition to the above, we have to add type conversions from WVal to array or record types, and back again.
      *
-     * Calls a helper function to generate TODO: handle more complex updates, like a[i][j] = val and a[i].foo = val;
+     * Calls the helper function <code>build_rhs()</code> to generate the complex RHS expressions.
+     *
      * @param indent
      * @param stmt
      */
@@ -828,12 +859,11 @@ public final class Wyil2Boogie {
         Location<?>[] lhs = stmt.getOperandGroup(SyntaxTree.LEFTHANDSIDE);
         Location<?>[] rhs = stmt.getOperandGroup(SyntaxTree.RIGHTHANDSIDE);
         List<Index> indexes = new ArrayList<>();
-        String base = extractBase(lhs[0], indexes);
-        if (base != null) {
-            if (lhs.length > 1) {
-                throw new NotImplementedYet("Multiple complex LHS assignments not handled yet.", stmt);
-            }
-            String newValue = expr(rhs[0]).asWVal().toString();
+        String base = extractLhsBase(lhs[0], indexes);
+        // TODO: remove this first 'if' since it is subsumed by the general case.
+        if (base != null && lhs.length == 1) {
+            // we have a single assignment with a complex LHS
+            String newValue = writeAllocations(indent, rhs[0]).asWVal().toString();
             final String result = build_rhs(base, indexes, 0, newValue);
             out.printf("%s := %s", base, result);
         } else {
@@ -841,29 +871,72 @@ public final class Wyil2Boogie {
                 // Boogie distinguishes method & function calls!
                 out.print("call ");
             }
+            String[] lhsVars = new String[lhs.length];
+            @SuppressWarnings("unchecked")
+            List<Index>[] lhsIndexes = new List[lhs.length];
+            for (int i = 0; i != lhs.length; ++i) {
+                lhsIndexes[i] = new ArrayList<>();
+                lhsVars[i] = extractLhsBase(lhs[i], lhsIndexes[i]);
+                if(i != 0) {
+                    out.print(", ");
+                }
+                // Was: out.print(expr(lhs[i]).asWVal().toString());
+                out.print(lhsVars[i]);
+            }
             if(lhs.length > 0) {
-                for(int i = 0; i != lhs.length; ++i) {
-                    if(i != 0) {
-                        out.print(", ");
-                    }
-                    out.print(expr(lhs[i]).asWVal().toString());
+                HashSet<String> noDups = new HashSet<String>(Arrays.asList(lhsVars));
+                if (noDups.size() < lhs.length) {
+                    throw new NotImplementedYet("Conflicting LHS assignments not handled yet.", stmt);
                 }
                 out.print(" := ");
+            }
+            if (lhs.length != rhs.length) {
+                if (Stream.of(lhsIndexes).anyMatch(x -> !x.isEmpty())) {
+                    throw new NotImplementedYet("Complex LHS vars in method call not handled yet.", stmt);
+                }
             }
             for (int i = 0; i != rhs.length; ++i) {
                 if (i != 0) {
                     out.print(", ");
                 }
-                out.print(expr(rhs[i]).asWVal().toString());
+                String newValue = expr(rhs[0]).asWVal().toString();
+                final String rhsExpr = build_rhs(base, indexes, 0, newValue);
+                // Was: out.print(expr(rhs[i]).asWVal().toString());
+                out.print(rhsExpr);
             }
         }
         out.println(";");
+    }
+
+    /**
+     * Updates the heap and allocated flags for any 'new' side-effects in expr.
+     * All expressions that could contain 'new' expressions should be processed via this method.
+     * It returns the resulting Boogie expression just like expr(...), but first updates the heap etc.
+     */
+    private BoogieExpr writeAllocations(int indent, Location<?> expr) {
+        newAllocations.clear();
+        BoogieExpr result = expr(expr);
+        if (newAllocations.size() > 0) {
+            String tab = "";  // first tab already done
+            for (int i = 0; i < newAllocations.size(); i++) {
+                String ref = NEW_REF + i;
+                out.printf("%s// allocate %s\n", tab, ref);
+                tab = makeIndent(indent + 1);
+                out.printf("%s%s := %s(%s);\n", tab, ref, NEW, ALLOCATED);
+                out.printf("%s%s := %s[%s := true];\n", tab, ALLOCATED, ALLOCATED, ref);
+                out.printf("%s%s := %s[%s := %s];\n\n", tab, HEAP, HEAP, ref, newAllocations.get(i));
+            }
+            out.printf(tab);
+            newAllocations.clear();
+        }
+        return result;
     }
 
     /** Some kind of index into a data structure. */
     interface Index {
     }
 
+    /** An index into an array. */
     class IntIndex implements Index {
         Location<?> index;
 
@@ -877,6 +950,7 @@ public final class Wyil2Boogie {
         }
     }
 
+    /** An index into a given field within a record/object. */
     class FieldIndex implements Index {
         String field;
         public FieldIndex(String f) {
@@ -889,6 +963,19 @@ public final class Wyil2Boogie {
         }
     }
 
+    /** An index into the heap (via a reference). */
+    class DerefIndex implements Index {
+        String ref;
+        public DerefIndex(String ref) {
+            this.ref = ref;
+        }
+
+        @Override
+        public String toString() {
+            return "DerefIndex(" + ref + ")";
+        }
+    }
+
     /**
      * Extracts base variable that is being assigned to.
      * Builds a list of all indexes into the 'indexes' list.
@@ -896,21 +983,27 @@ public final class Wyil2Boogie {
      * @param indexes non-null list to append index bytecodes.
      * @return null if LHS is not an assignment to a (possibly indexed) variable.
      */
-    private String extractBase(Location<?> loc, List<Index> indexes) {
+    private String extractLhsBase(Location<?> loc, List<Index> indexes) {
         if (loc.getBytecode().getOpcode() == Bytecode.OPCODE_arrayindex) {
             assert loc.getBytecode().numberOfOperands() == 2;
             indexes.add(0, new IntIndex(loc.getOperand(1)));
-            return extractBase(loc.getOperand(0), indexes);
+            return extractLhsBase(loc.getOperand(0), indexes);
         } else if (loc.getBytecode().getOpcode() == Bytecode.OPCODE_fieldload) {
             assert loc.getBytecode().numberOfOperands() == 1;
             String field = ((Bytecode.FieldLoad) (loc.getBytecode())).fieldName();
             indexes.add(0, new FieldIndex(field));
-            return extractBase(loc.getOperand(0), indexes);
+            return extractLhsBase(loc.getOperand(0), indexes);
+        } else if (loc.getBytecode() instanceof Bytecode.Operator
+                && loc.getBytecode().getOpcode() == Bytecode.OPCODE_dereference) {
+            assert loc.getBytecode().numberOfOperands() == 1;
+            String ref = expr(loc.getOperand(0)).as(WREF).toString();
+            indexes.add(0, new DerefIndex(ref));
+            return HEAP;
         } else if (loc.getBytecode() instanceof Bytecode.VariableAccess) {
             String base = expr(loc).asWVal().toString();
             return base;
         }
-        return null;
+        throw new NotImplementedYet("complex assignment left-hand side", loc);
     }
 
     /**
@@ -934,13 +1027,21 @@ public final class Wyil2Boogie {
             String newWValBase = String.format("%s[%s]", a, indexStr);
             String recValue = build_rhs(newWValBase, indexes, pos + 1, newValue);
             result = String.format("fromArray(%s[%s := %s], arraylen(%s))", a, indexStr, recValue, wval_base);
-        } else {
+        } else if (indexes.get(pos) instanceof FieldIndex) {
             // Instead of a.field := rhs, we do a := a[$field := rhs];
             String field = ((FieldIndex) indexes.get(pos)).field;
             String r = "toRecord(" + wval_base + ")";
             String newWValBase = String.format("%s[%s]", r, mangleWField(field));
             String recValue = build_rhs(newWValBase, indexes, pos + 1, newValue);
             result = String.format("fromRecord(%s[%s := %s])", r, mangleWField(field), recValue);
+        } else {
+            if (pos != 0 || !wval_base.equals(HEAP)) {
+                throw new NotImplementedYet("multiple levels of dereference := " + newValue, null);
+            }
+            String ref = ((DerefIndex) indexes.get(pos)).ref;
+            String newWValBase = String.format("%s[%s]", HEAP, ref);
+            String recValue = build_rhs(newWValBase, indexes, pos + 1, newValue);
+            result = String.format("%s[%s := %s]", HEAP, ref, recValue);
         }
         return result;
     }
@@ -1007,9 +1108,8 @@ public final class Wyil2Boogie {
         vcg.checkPredicate(indent + 1, b.getOperand(0));
         out.printf("// while:\n");
         tabIndent(indent+2);
-        out.printf("if (%s) { goto CONTINUE__%s; }\n",
-                boolExpr(b.getOperand(0)).toString(),
-                loopLabels.getLast());
+        String cond = writeAllocations(indent, b.getOperand(0)).as(BOOL).toString();
+        out.printf("if (%s) { goto CONTINUE__%s; }\n", cond, loopLabels.getLast());
         tabIndent(indent+1);
         out.println("}");
         tabIndent(indent+1);
@@ -1029,7 +1129,8 @@ public final class Wyil2Boogie {
     }
 
     private void writeIf(int indent, Location<Bytecode.If> b) {
-        out.printf("if (%s) {\n", boolExpr(b.getOperand(0)).toString());
+        String cond = writeAllocations(indent, b.getOperand(0)).as(BOOL).toString();
+        out.printf("if (%s) {\n", cond);
         writeBlock(indent+1,b.getBlock(0));
         if (b.numberOfBlocks() > 1) {
             tabIndent(indent+1);
@@ -1043,25 +1144,31 @@ public final class Wyil2Boogie {
     // TODO: decide how to encode indirect method calls
     private void writeIndirectInvoke(int indent, Location<Bytecode.IndirectInvoke> stmt) {
         Location<?>[] operands = stmt.getOperands();
-        out.print(expr(operands[0]).toString());
-        out.print("(");
-        for(int i=1;i!=operands.length;++i) {
-            if(i!=1) {
-                out.print(", ");
-            }
-            out.print(expr(operands[i]).asWVal().toString());
+        String[] args = new String[operands.length];
+        args[0] = writeAllocations(indent, operands[0]).as(METHOD).toString();  // and/or as(FUNC)??
+        for (int i = 1; i != operands.length; ++i) {
+            args[i] = writeAllocations(indent, operands[i]).asWVal().toString();
         }
-        out.println(")");
+        writeCall(args);
     }
 
     private void writeInvoke(int indent, Location<Bytecode.Invoke> stmt) {
-        out.print(mangleFunctionMethodName(stmt.getBytecode().name().name(), stmt.getBytecode().type()) + "(");
         Location<?>[] operands = stmt.getOperands();
-        for(int i=0;i!=operands.length;++i) {
-            if(i!=0) {
+        String[] args = new String[operands.length + 1];
+        args[0] = mangleFunctionMethodName(stmt.getBytecode().name().name(), stmt.getBytecode().type());
+        for (int i = 0; i != operands.length; ++i) {
+            args[i + 1] = writeAllocations(indent, operands[i]).asWVal().toString();
+        }
+        writeCall(args);
+    }
+
+    private void writeCall(String[] args) {
+        out.printf("%s(", args[0]);
+        for (int i = 1; i != args.length; ++i) {
+            if(i != 1) {
                 out.print(", ");
             }
-            out.print(expr(operands[i]).asWVal().toString());
+            out.print(args[i]);
         }
         out.println(");");
     }
@@ -1077,10 +1184,11 @@ public final class Wyil2Boogie {
     private void writeWhile(int indent, Location<Bytecode.While> b) {
         Location<?>[] loopInvariant = b.getOperandGroup(0);
         // Location<?>[] modifiedOperands = b.getOperandGroup(1);
+        String cond = writeAllocations(indent, b.getOperand(0)).as(BOOL).toString();
         loopLabels.addLast("WHILE__" + loopLabels.size());
         out.printf("CONTINUE__%s:\n", loopLabels.getLast());
         tabIndent(indent+1);
-        out.printf("while (%s)", boolExpr(b.getOperand(0)).toString());
+        out.printf("while (%s)", cond);
         // out.print(" modifies ");
         // writeExpressions(modifiedOperands,out);
         writeLoopInvariant(indent + 2, "invariant", loopInvariant);
@@ -1108,10 +1216,14 @@ public final class Wyil2Boogie {
         // Boogie return does not take any expressions.
         // Instead, we must write to the result variables.
         Location<?>[] operands = b.getOperands();
+        String[] args = new String[operands.length];
+        for (int i = 0; i != operands.length; ++i) {
+            args[i] = writeAllocations(indent, operands[i]).asWVal().toString();
+        }
         for (int i = 0; i != operands.length; ++i) {
             VariableDeclaration locn = (VariableDeclaration) outDecls.get(i).getBytecode();
             String name = locn.getName();
-            out.printf("%s := %s;\n", name, expr(operands[i]).asWVal().toString());
+            out.printf("%s := %s;\n", name, args[i]);
             tabIndent(indent+1);
         }
         out.println("return;");
@@ -1141,7 +1253,8 @@ public final class Wyil2Boogie {
         loopLabels.addLast("SWITCH" + switchCount);
         String var = createSwitchVar(switchCount);
         Case[] cases = sw.getBytecode().cases();
-        out.printf("%s := %s;\n", var, expr(sw.getOperand(0)).asWVal().toString());
+        String value = writeAllocations(indent, sw.getOperand(0)).asWVal().toString();
+        out.printf("%s := %s;\n", var, value);
         // build all the case labels we could jump to.
         StringBuilder labels = new StringBuilder();
         for (int i = 0; i < cases.length; i++) {
@@ -1202,13 +1315,13 @@ public final class Wyil2Boogie {
 
     private void writeVariableInit(int indent, Location<VariableDeclaration> loc) {
         Location<?>[] operands = loc.getOperands();
-        // out.print(loc.getType());
-        // out.print(" ");
         if (operands.length > 0) {
-            out.print(loc.getBytecode().getName());
-            out.print(" := ");
-            out.print(expr(operands[0]).asWVal().toString());
-            out.println(";");
+            BoogieExpr rhs = writeAllocations(indent, operands[0]).asWVal();
+            if (operands[0].getBytecode() instanceof Bytecode.Invoke
+                    && ((Bytecode.Invoke) operands[0].getBytecode()).type() instanceof Type.Method) {
+                out.printf("call ");
+            }
+            out.printf("%s := %s;\n", loc.getBytecode().getName(), rhs.toString());
         }
         // ELSE
         // TODO: Do we need a havoc here, to mimic non-det initialisation?
@@ -1267,8 +1380,7 @@ public final class Wyil2Boogie {
             return writeNewObject((Location<Bytecode.Operator>) expr);
 
         case Bytecode.OPCODE_dereference:
-            // TODO: dereference
-            throw new NotImplementedYet("dereference", expr);
+            return writeDereference((Location<Bytecode.Operator>) expr);
 
         case Bytecode.OPCODE_logicalnot:
             return prefixOp(BOOL, expr, "! ", BOOL);
@@ -1509,11 +1621,19 @@ public final class Wyil2Boogie {
         // return new BoogieExpr(WVAL, "lambda TODO");
     }
 
-    // TODO: new object
     private BoogieExpr writeNewObject(Location<Bytecode.Operator> expr) {
-        //out.print("new ");
-        //writeExpression(expr.getOperand(0));
-        throw new NotImplementedYet("new record/object", expr);
+        BoogieExpr be = expr(expr.getOperand(0)).asWVal();
+        String ref = NEW_REF + newAllocations.size();
+        // this allocation will be done just BEFORE this expression
+        newAllocations.add(be.toString());
+        return new BoogieExpr(WREF, ref);
+    }
+
+    private BoogieExpr writeDereference(Location<Bytecode.Operator> expr) {
+        BoogieExpr be = expr(expr.getOperand(0)).as(WREF);
+        // TODO: assume the type information of out.
+        BoogieExpr out = new BoogieExpr(WVAL, "w__heap[" + be.toString() + "]");
+        return out;
     }
 
     private BoogieExpr writeIs(Location<Bytecode.Operator> c) {
@@ -1689,11 +1809,16 @@ public final class Wyil2Boogie {
         return out;
     }
 
-    private void tabIndent(int indent) {
+    protected void tabIndent(int indent) {
         indent = indent * 4;
         for(int i=0;i<indent;++i) {
             out.print(" ");
         }
+    }
+
+    /** Returns an indent of the requested number of 'tab' stops. */
+    protected String makeIndent(int indent) {
+        return indent <= 0 ? "" : String.format("%" + (indent * 4) + "s", "");
     }
 
     @SuppressWarnings("unchecked")

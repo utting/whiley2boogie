@@ -5,6 +5,7 @@ type WVal;
 type WField;      // field names for records and objects.
 type WFuncName;   // names of functions
 type WMethodName; // names of methods
+type WRef;        // heap addresses
 
 // These typing predicates define various (disjoint) subsets of WVal.
 // For null, there is just one WVal constant.
@@ -173,7 +174,6 @@ function bitwise_shift_right(int, int) returns (int);
 function bitwise_invert(int) returns (int);
 
 // typing axioms for the byte bitwise ops
-// Problem 2: these seem to cause lots of timeouts (Byte_Valid*.whiley).
 axiom (forall b:int, i:int :: isByte(fromInt(byte_and(b,i))));
 axiom (forall b:int, i:int :: isByte(fromInt(byte_or(b,i))));
 axiom (forall b:int, i:int :: isByte(fromInt(byte_xor(b,i))));
@@ -181,3 +181,12 @@ axiom (forall b:int, i:int :: isByte(fromInt(byte_shift_left(b,i))));
 axiom (forall b:int, i:int :: isByte(fromInt(byte_shift_right(b,i))));
 axiom (forall b:int :: isByte(fromInt(byte_invert(b))));
 
+// New and dereferencing (uninterpreted functions)
+function toRef(WVal) returns (WRef);
+function fromRef(WRef) returns (WVal);
+axiom (forall r:WRef :: isRef(fromRef(r)));
+axiom (forall r:WRef :: toRef(fromRef(r)) == r);
+axiom (forall v:WVal :: isRef(v) ==> fromRef(toRef(v)) == v);
+// this chooses a fresh (unallocated) reference.
+function new([WRef]bool) returns (WRef);
+axiom (forall m : [WRef]bool :: ! m[new(m)]);  
