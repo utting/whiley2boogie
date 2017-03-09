@@ -8,8 +8,8 @@ public enum BoogieType {
     ARRAY("Array"),
     RECORD("Record"),
     FUNCTION("Function"),
-    METHOD("Method");
-    // TODO REF
+    METHOD("Method"),
+    WREF("Ref");
 
     private final String boogieName;
 
