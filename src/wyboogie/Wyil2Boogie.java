@@ -47,8 +47,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import javax.xml.transform.stream.StreamSource;
-
 import wybs.lang.Build;
 import wybs.util.StdProject;
 import wycc.lang.NameID;
@@ -111,10 +109,10 @@ import static wyboogie.BoogieType.*;
  * TODO: implement missing language features, such as:
  * <ul>
  *   <li>DONE: indirect invoke (12 tests)</li>
- *   <li>references, new (17 tests), and dereferencing (17 tests)</li>
- *   <li>switch (14 tests)</li>
+ *   <li>DONE: references, new (17 tests), and dereferencing (17 tests)</li>
+ *   <li>DONE: switch (14 tests)</li>
+ *   <li>(!) lambda functions (17 tests)</li>
  *   <li>functions/methods with multiple return values (4 tests)</li>
- *   <li>(!) lambda functions (12 tests)</li>
  *   <li>DONE: continue statements and named blocks (3 tests)</li>
  *   <li>DONE (separate byte and int ops): bitwise operators (13 tests)</li>
  *   <li>DONE: generate type axioms for constants (tell Boogie the result of Whiley's type inference).</li>
