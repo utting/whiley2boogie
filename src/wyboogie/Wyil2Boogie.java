@@ -95,7 +95,7 @@ import static wyboogie.BoogieType.*;
  *
  * DONE: improve assign to nested substructures - make it recursive.  (18 tests).
  *
- * TODO: move all method calls out of expressions?  (35 tests do this!)
+ * TODO: move ALL method calls out of expressions?  (5 tests do this!)
  *
  * TODO: refactor the BoogieExpr writeXXX() methods to boogieXXX().
  *
@@ -112,7 +112,7 @@ import static wyboogie.BoogieType.*;
  *   <li>DONE: references, new (17 tests), and dereferencing (17 tests)</li>
  *   <li>DONE: switch (14 tests)</li>
  *   <li>(!) lambda functions (17 tests)</li>
- *   <li>functions/methods with multiple return values (4 tests)</li>
+ *   <li>functions/methods with multiple return values (5 tests)</li>
  *   <li>DONE: continue statements and named blocks (3 tests)</li>
  *   <li>DONE (separate byte and int ops): bitwise operators (13 tests)</li>
  *   <li>DONE: generate type axioms for constants (tell Boogie the result of Whiley's type inference).</li>
@@ -170,6 +170,23 @@ public final class Wyil2Boogie {
 
     /** Output parameters of the current function/method. */
     List<Location<?>> outDecls;
+
+    /**
+     * The method (procedure) that we are currently calling.
+     *
+     * Boogie syntax allows us to call a method (procedure) at the statement level only.
+     * But method calls can appear ANYWHERE inside an 'executable' Whiley expression.
+     * (they are not allowed in requires/ensures/assert/assume/inv expressions).
+     * The current implementation of this translator only handles method calls
+     * at the outermost level of an expression.
+     * So while each statement is being translated, this variable points to
+     * the outermost method, which is being 'called' (as a statement).
+     * Any other method invocation inside the expression is illegal.
+     * (Detecting them at this stage is better than generating illegal Boogie).
+     * If this is null, then no outermost method is being called, so ALL
+     * method invocations will be illegal.
+     */
+    private Location<?> outerMethodCall;
 
     /**
      * A stack of labels for the loops we are inside (innermost label last).
@@ -737,12 +754,16 @@ public final class Wyil2Boogie {
         case Bytecode.OPCODE_indirectinvoke:
             // TODO: check arguments against the precondition?
             out.print("call "); // it should be a method, not a function
+            outerMethodCall = c;
             writeIndirectInvoke(indent, (Location<Bytecode.IndirectInvoke>) c);
+            outerMethodCall = null;
             break;
         case Bytecode.OPCODE_invoke:
             // TODO: check arguments against the precondition!
             out.print("call "); // it should be a method, not a function
+            outerMethodCall = c;
             writeInvoke(indent, (Location<Bytecode.Invoke>) c);
+            outerMethodCall = null;
             break;
         case Bytecode.OPCODE_namedblock:
             writeNamedBlock(indent, (Location<Bytecode.NamedBlock>) c);
@@ -856,52 +877,59 @@ public final class Wyil2Boogie {
     private void writeAssign(int indent, Location<Bytecode.Assign> stmt) {
         Location<?>[] lhs = stmt.getOperandGroup(SyntaxTree.LEFTHANDSIDE);
         Location<?>[] rhs = stmt.getOperandGroup(SyntaxTree.RIGHTHANDSIDE);
-        List<Index> indexes = new ArrayList<>();
-        String base = extractLhsBase(lhs[0], indexes);
-        // TODO: remove this first 'if' since it is subsumed by the general case.
-        if (base != null && lhs.length == 1) {
-            // we have a single assignment with a complex LHS
-            String newValue = writeAllocations(indent, rhs[0]).asWVal().toString();
-            final String result = build_rhs(base, indexes, 0, newValue);
-            out.printf("%s := %s", base, result);
-        } else {
-            if (isMethod(rhs[0])) {
-                // Boogie distinguishes method & function calls!
-                out.print("call ");
+        if (isMethod(rhs[0])) {
+            outerMethodCall = rhs[0];
+        }
+        // first break down complex lhs terms, like a[i].f (into a base var and some indexes)
+        String[] lhsVars = new String[lhs.length];
+        @SuppressWarnings("unchecked")
+        List<Index>[] lhsIndexes = new List[lhs.length];
+        for (int i = 0; i != lhs.length; ++i) {
+            lhsIndexes[i] = new ArrayList<>();
+            lhsVars[i] = extractLhsBase(lhs[i], lhsIndexes[i]);
+        }
+        // then build up any complex rhs terms, like a[i := (a[i][$f := ...])]
+        String[] rhsExprs = new String[rhs.length];
+        for (int i = 0; i != rhs.length; ++i) {
+            if (i != 0) {
+                out.print(", ");
             }
-            String[] lhsVars = new String[lhs.length];
-            @SuppressWarnings("unchecked")
-            List<Index>[] lhsIndexes = new List[lhs.length];
-            for (int i = 0; i != lhs.length; ++i) {
-                lhsIndexes[i] = new ArrayList<>();
-                lhsVars[i] = extractLhsBase(lhs[i], lhsIndexes[i]);
-                if(i != 0) {
-                    out.print(", ");
-                }
-                // Was: out.print(expr(lhs[i]).asWVal().toString());
-                out.print(lhsVars[i]);
+            String newValue = writeAllocations(indent, rhs[i]).asWVal().toString();
+            rhsExprs[i] = build_rhs(lhsVars[i], lhsIndexes[i], 0, newValue);
+        }
+
+        // now start printing the assignment
+        if (isMethod(rhs[0])) {
+            // Boogie distinguishes method & function calls!
+            out.print("call ");
+            outerMethodCall = null;
+        }
+        for (int i = 0; i != lhs.length; ++i) {
+            if(i != 0) {
+                out.print(", ");
             }
-            if(lhs.length > 0) {
-                HashSet<String> noDups = new HashSet<String>(Arrays.asList(lhsVars));
-                if (noDups.size() < lhs.length) {
-                    throw new NotImplementedYet("Conflicting LHS assignments not handled yet.", stmt);
-                }
-                out.print(" := ");
+            out.print(lhsVars[i]);
+        }
+        if(lhs.length > 0) {
+            HashSet<String> noDups = new HashSet<String>(Arrays.asList(lhsVars));
+            if (noDups.size() < lhs.length) {
+                throw new NotImplementedYet("Conflicting LHS assignments not handled yet.", stmt);
             }
-            if (lhs.length != rhs.length) {
-                if (Stream.of(lhsIndexes).anyMatch(x -> !x.isEmpty())) {
-                    throw new NotImplementedYet("Complex LHS vars in method call not handled yet.", stmt);
-                }
+            out.print(" := ");
+        }
+        if (lhs.length != rhs.length) {
+            if (Stream.of(lhsIndexes).anyMatch(x -> !x.isEmpty())) {
+                throw new NotImplementedYet("Complex LHS vars in method call not handled yet.", stmt);
             }
-            for (int i = 0; i != rhs.length; ++i) {
-                if (i != 0) {
-                    out.print(", ");
-                }
-                String newValue = expr(rhs[0]).asWVal().toString();
-                final String rhsExpr = build_rhs(base, indexes, 0, newValue);
-                // Was: out.print(expr(rhs[i]).asWVal().toString());
-                out.print(rhsExpr);
+            if (rhs.length != 1) {
+                throw new NotImplementedYet("Assignment with non-matching LHS and RHS lengths.", stmt);
             }
+        }
+        for (int i = 0; i != rhs.length; ++i) {
+            if (i != 0) {
+                out.print(", ");
+            }
+            out.print(rhsExprs[i]);
         }
         out.println(";");
     }
@@ -936,9 +964,9 @@ public final class Wyil2Boogie {
 
     /** An index into an array. */
     class IntIndex implements Index {
-        Location<?> index;
+        String index;
 
-        public IntIndex(Location<?> i) {
+        public IntIndex(String i) {
             this.index = i;
         }
 
@@ -977,6 +1005,10 @@ public final class Wyil2Boogie {
     /**
      * Extracts base variable that is being assigned to.
      * Builds a list of all indexes into the 'indexes' list.
+     *
+     * TODO: wrap writeAllocations(indent, rhs[i]) around each expr(...)
+     * in case the indexes contain 'new' expressions!
+     *
      * @param loc the LHS expression AST.
      * @param indexes non-null list to append index bytecodes.
      * @return null if LHS is not an assignment to a (possibly indexed) variable.
@@ -984,7 +1016,8 @@ public final class Wyil2Boogie {
     private String extractLhsBase(Location<?> loc, List<Index> indexes) {
         if (loc.getBytecode().getOpcode() == Bytecode.OPCODE_arrayindex) {
             assert loc.getBytecode().numberOfOperands() == 2;
-            indexes.add(0, new IntIndex(loc.getOperand(1)));
+            String indexStr = writeAllocations(0, loc.getOperand(1)).as(INT).toString();
+            indexes.add(0, new IntIndex(indexStr));
             return extractLhsBase(loc.getOperand(0), indexes);
         } else if (loc.getBytecode().getOpcode() == Bytecode.OPCODE_fieldload) {
             assert loc.getBytecode().numberOfOperands() == 1;
@@ -1018,10 +1051,9 @@ public final class Wyil2Boogie {
         if (pos == indexes.size()) {
             result = newValue;
         } else if (indexes.get(pos) instanceof IntIndex) {
-            Location<?> index = ((IntIndex) indexes.get(pos)).index;
+            String indexStr = ((IntIndex) indexes.get(pos)).index;
             // Instead of a[e] := rhs, we do a := a[e := rhs];
             String a = "toArray(" + wval_base + ")";
-            String indexStr = intExpr(index).toString();
             String newWValBase = String.format("%s[%s]", a, indexStr);
             String recValue = build_rhs(newWValBase, indexes, pos + 1, newValue);
             result = String.format("fromArray(%s[%s := %s], arraylen(%s))", a, indexStr, recValue, wval_base);
@@ -1215,8 +1247,15 @@ public final class Wyil2Boogie {
         // Instead, we must write to the result variables.
         Location<?>[] operands = b.getOperands();
         String[] args = new String[operands.length];
+        if (operands.length == 1 && isMethod(operands[0])) {
+            outerMethodCall = operands[0];
+        }
         for (int i = 0; i != operands.length; ++i) {
             args[i] = writeAllocations(indent, operands[i]).asWVal().toString();
+        }
+        if (operands.length == 1 && isMethod(operands[0])) {
+            out.print("call ");
+            outerMethodCall = null;
         }
         for (int i = 0; i != operands.length; ++i) {
             VariableDeclaration locn = (VariableDeclaration) outDecls.get(i).getBytecode();
@@ -1314,10 +1353,13 @@ public final class Wyil2Boogie {
     private void writeVariableInit(int indent, Location<VariableDeclaration> loc) {
         Location<?>[] operands = loc.getOperands();
         if (operands.length > 0) {
+            if (isMethod(operands[0])) {
+                outerMethodCall = operands[0];
+            }
             BoogieExpr rhs = writeAllocations(indent, operands[0]).asWVal();
-            if (operands[0].getBytecode() instanceof Bytecode.Invoke
-                    && ((Bytecode.Invoke) operands[0].getBytecode()).type() instanceof Type.Method) {
+            if (isMethod(operands[0])) {
                 out.printf("call ");
+                outerMethodCall = null;
             }
             out.printf("%s := %s;\n", loc.getBytecode().getName(), rhs.toString());
         }
@@ -1561,6 +1603,7 @@ public final class Wyil2Boogie {
         }
         BoogieExpr func = expr(expr.getOperand(0)).as(FUNCTION);
         BoogieExpr arg = expr(expr.getOperandGroup(0)[0]).asWVal();
+        // TODO: decide what to do if func is a method?
         BoogieExpr out = new BoogieExpr(WVAL, "applyTo1(" + func + ", " + arg + ")");
         return out;
     }
@@ -1571,9 +1614,11 @@ public final class Wyil2Boogie {
         String name = expr.getBytecode().name().name();
         Type.FunctionOrMethod type = expr.getBytecode().type();
         if (type instanceof Type.Method) {
-            // The Whiley language spec 0.3.38, Section 3.5.5, says that because they are impure,
-            // methods cannot be called inside specifications.
-            throw new NotImplementedYet("call to method (" + name + ") from inside an expression", expr);
+            if (expr != outerMethodCall) {
+                // The Whiley language spec 0.3.38, Section 3.5.5, says that because they are impure,
+                // methods cannot be called inside specifications.
+                throw new NotImplementedYet("call to method (" + name + ") from inside an expression", expr);
+            }
         }
         out.print(mangleFunctionMethodName(name, type) + "(");
         Location<?>[] operands = expr.getOperands();

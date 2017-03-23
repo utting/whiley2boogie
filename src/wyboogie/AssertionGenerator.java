@@ -140,11 +140,6 @@ public class AssertionGenerator {
             Bytecode.Invoke funCall = (Bytecode.Invoke) expr.getBytecode();
             String name = funCall.name().name();
             Type.FunctionOrMethod type = funCall.type();
-            if (type instanceof Type.Method) {
-                // The Whiley language spec 0.3.38, Section 3.5.5, says that because they are impure,
-                // methods cannot be called inside specifications.
-                System.err.println("WARNING: call to method (" + name + ") from inside an expression: " + expr);
-            }
             String funName = wy2b.mangleFunctionMethodName(name, type);
             Location<?>[] operands = expr.getOperands();
             BoogieExpr funPre = new BoogieExpr(BOOL, funName + Wyil2Boogie.METHOD_PRE + "(");
