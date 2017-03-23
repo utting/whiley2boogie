@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+if [[ "$#" == 1 ]]
+then
+    sdiff WHILEY/ALL.results "$1" \
+    | awk '{ if (NF>4) {\
+                if (!($5 ~ "NotImplYet")) {print $0}\
+                key=$2"\t"$5;\
+             } else {\
+                key=$2"\t"$4;\
+             } \
+             stats[key]+=1\
+           }\
+           END{print "";\
+               print "WhileyVerifier\tBoogie";\
+               print "--------------\t------";\
+               for (k in stats) {print k"\t"stats[k]; sum+=stats[k]}\
+               print "Total\t"sum\
+              }'
+else
+    echo "Usage: $0 OUT*.results"
+    exit 1
+fi
