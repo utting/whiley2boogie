@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+if [[ "$#" > 0 ]]
+then
+    echo -n "Error Compiling:    "
+    grep -i '^Error compiling' "$@" | wc -l
+
+    echo -n "NotImplementedYet:  "
+    grep -i NotImplementedYet: "$@" | wc -l
+
+    echo -n "Other Exceptions:   "
+    grep -i exception "$@" | wc -l
+
+    echo -n "Errors in BPL:      "
+    grep -i 'bpl.*error:' "$@" | wc -l
+
+    echo -n "Fully Verified:     "
+    grep -i ' verified, 0 errors$' "$@" | wc -l
+    
+    echo -n "Verify time outs:   "
+    grep -i ' verified, 0 errors, ' "$@" | wc -l
+    
+    echo -n "Verify errors:      "
+    grep -i ' verified, [^0] error' "$@" | wc -l
+    
+else
+    echo "Usage: $0 OUT*.txt"
+    exit 1
+fi
