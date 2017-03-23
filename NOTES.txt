@@ -23,8 +23,29 @@ TODO:
 Investigate running output Boogie programs using Boogaloo:
     https://bitbucket.org/nadiapolikarpova/boogaloo/wiki/Home 
     (It doesn't really 'run' the programs - it just searches for counter-examples)
-    
-    
+
+Results 2017-03-23
+===== 
+(OUT41_outer_method_calls.txt, in tests_david_2017_03_19/valid)
+Total tests: 531 (tests/valid has only 514)
+
+$ wystats OUT41_outer_method_calls.txt 
+Error Compiling:          34
+NotImplementedYet:        44
+Other Exceptions:          2
+Errors in BPL:            22
+Fully Verified:          406
+Verify time outs:          3
+Verify errors:            28
+
+Yay!  32 method-inside-expr errors went down to just 5!
+MessageSend_Valid_3.whiley  requires unfolding method calls inside exprs. 
+MessageSend_Valid_4.whiley  requires unfolding method calls inside exprs.
+MethodCall_Valid_2.whiley requires unfolding method calls inside exprs.
+MethodCall_Valid_3.whiley requires unfolding method calls inside exprs.
+Process_Valid_6.whiley requires unfolding method calls inside exprs.
+
+
 Results
 =======
 2016-10-14: OUT32_array_checks.txt
