@@ -95,11 +95,14 @@ import static wyboogie.BoogieType.*;
  *
  * DONE: improve assign to nested substructures - make it recursive.  (18 tests).
  *
+ * DONE: refactor the BoogieExpr writeXXX() methods to boogieXXX().
+ *
  * TODO: move ALL method calls out of expressions?  (5 tests do this!)
  *
- * TODO: refactor the BoogieExpr writeXXX() methods to boogieXXX().
- *
  * TODO: mangle Whiley var names to avoid Boogie reserved words and keywords?
+ *
+ * TODO: generate assertions after each assignment, to check 'where' constraints?
+ *       (Boogie checks 'where' constraints only in havoc statements, not for assignments).
  *
  * TODO: generate f(x)==e axiom for each Whiley function that is just 'return e'?
  *       (Because current translation only generates e into the __impl code of the function,
@@ -140,9 +143,6 @@ public final class Wyil2Boogie {
 
     /** This is appended to each function/method name, for the precondition of that function. */
     public static final String METHOD_PRE = "__pre";
-
-    /** Special boolean variable used to emulate do-while loops. */
-    private static final Object DO_WHILE_VAR = "do__while";
 
     /** Where the Boogie output is written. */
     protected PrintWriter out;
@@ -229,7 +229,7 @@ public final class Wyil2Boogie {
     protected void declareNewFields(Set<String> fields) {
         for (String f : fields) {
             if (!declaredFields.contains(f)) {
-                out.println("const unique " + mangleWField(f) + ":WField;");
+                out.println("const unique " + mangledWField(f) + ":WField;");
                 declaredFields.add(f);
             }
         }
@@ -374,7 +374,7 @@ public final class Wyil2Boogie {
         Type.FunctionOrMethod ft = method.type();
         declareFields(method.getTree());
         declareFuncConstants(method.getTree());
-        String name = mangleFunctionMethodName(method.name(), method.type());
+        String name = mangledFunctionMethodName(method.name(), method.type());
         int inSize = ft.params().size();
         int outSize = ft.returns().size();
         inDecls = method.getTree().getLocations().subList(0, inSize);
@@ -407,7 +407,7 @@ public final class Wyil2Boogie {
             out.printf("    ensures %s;\n", typePredicate(inName, outputs.get(i)));
         }
         for (Location<Expr> postcondition : method.getPostcondition()) {
-            out.printf("    ensures %s;\n", boolExpr(postcondition).toString());
+            out.printf("    ensures %s;\n", boogieBoolExpr(postcondition).toString());
         }
         if(verbose) {
             writeLocationsAsComments(method.getTree());
@@ -419,10 +419,6 @@ public final class Wyil2Boogie {
             out.println();
             out.println("{");
             writeLocalVarDecls(method.getTree().getLocations());
-            if (containsDoWhile(method.getTree())) {
-                tabIndent(1);
-                out.printf("var %s : bool;\n", DO_WHILE_VAR);
-            }
 
             // now create a local copy of each mutated input!
             for (String naughty : mutatedInputs.keySet()) {
@@ -441,15 +437,6 @@ public final class Wyil2Boogie {
         }
         inDecls = null;
         outDecls = null;
-    }
-
-    private boolean containsDoWhile(SyntaxTree tree) {
-        for (Location<?> loc : tree.getLocations()) {
-            if (loc.getBytecode() instanceof Bytecode.DoWhile) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private Map<String, Type> findMutatedInputs(FunctionOrMethod method) {
@@ -590,7 +577,7 @@ public final class Wyil2Boogie {
             for (Location<Expr> pred : preds) {
                 out.print(sep);
                 sep = AND_OUTER;
-                BoogieExpr expr = boolExpr(pred);
+                BoogieExpr expr = boogieBoolExpr(pred);
                 out.print(expr.withBrackets(" && ").toString());
             }
         }
@@ -847,11 +834,11 @@ public final class Wyil2Boogie {
     }
 
     private void writeAssert(int indent, Location<Bytecode.Assert> c) {
-        out.printf("assert %s;\n", boolExpr(c.getOperand(0)).toString());
+        out.printf("assert %s;\n", boogieBoolExpr(c.getOperand(0)).toString());
     }
 
     private void writeAssume(int indent, Location<Bytecode.Assume> c) {
-        out.printf("assume %s;\n", boolExpr(c.getOperand(0)).toString());
+        out.printf("assume %s;\n", boogieBoolExpr(c.getOperand(0)).toString());
     }
 
     /**
@@ -941,13 +928,13 @@ public final class Wyil2Boogie {
      */
     private BoogieExpr writeAllocations(int indent, Location<?> expr) {
         newAllocations.clear();
-        BoogieExpr result = expr(expr);
+        BoogieExpr result = boogieExpr(expr);
         if (newAllocations.size() > 0) {
             String tab = "";  // first tab already done
             for (int i = 0; i < newAllocations.size(); i++) {
                 String ref = NEW_REF + i;
                 out.printf("%s// allocate %s\n", tab, ref);
-                tab = makeIndent(indent + 1);
+                tab = createIndent(indent + 1);
                 out.printf("%s%s := %s(%s);\n", tab, ref, NEW, ALLOCATED);
                 out.printf("%s%s := %s[%s := true];\n", tab, ALLOCATED, ALLOCATED, ref);
                 out.printf("%s%s := %s[%s := %s];\n\n", tab, HEAP, HEAP, ref, newAllocations.get(i));
@@ -1027,11 +1014,11 @@ public final class Wyil2Boogie {
         } else if (loc.getBytecode() instanceof Bytecode.Operator
                 && loc.getBytecode().getOpcode() == Bytecode.OPCODE_dereference) {
             assert loc.getBytecode().numberOfOperands() == 1;
-            String ref = expr(loc.getOperand(0)).as(WREF).toString();
+            String ref = boogieExpr(loc.getOperand(0)).as(WREF).toString();
             indexes.add(0, new DerefIndex(ref));
             return HEAP;
         } else if (loc.getBytecode() instanceof Bytecode.VariableAccess) {
-            String base = expr(loc).asWVal().toString();
+            String base = boogieExpr(loc).asWVal().toString();
             return base;
         }
         throw new NotImplementedYet("complex assignment left-hand side", loc);
@@ -1061,9 +1048,9 @@ public final class Wyil2Boogie {
             // Instead of a.field := rhs, we do a := a[$field := rhs];
             String field = ((FieldIndex) indexes.get(pos)).field;
             String r = "toRecord(" + wval_base + ")";
-            String newWValBase = String.format("%s[%s]", r, mangleWField(field));
+            String newWValBase = String.format("%s[%s]", r, mangledWField(field));
             String recValue = build_rhs(newWValBase, indexes, pos + 1, newValue);
-            result = String.format("fromRecord(%s[%s := %s])", r, mangleWField(field), recValue);
+            result = String.format("fromRecord(%s[%s := %s])", r, mangledWField(field), recValue);
         } else {
             if (pos != 0 || !wval_base.equals(HEAP)) {
                 throw new NotImplementedYet("multiple levels of dereference := " + newValue, null);
@@ -1185,7 +1172,7 @@ public final class Wyil2Boogie {
     private void writeInvoke(int indent, Location<Bytecode.Invoke> stmt) {
         Location<?>[] operands = stmt.getOperands();
         String[] args = new String[operands.length + 1];
-        args[0] = mangleFunctionMethodName(stmt.getBytecode().name().name(), stmt.getBytecode().type());
+        args[0] = mangledFunctionMethodName(stmt.getBytecode().name().name(), stmt.getBytecode().type());
         for (int i = 0; i != operands.length; ++i) {
             args[i + 1] = writeAllocations(indent, operands[i]).asWVal().toString();
         }
@@ -1237,7 +1224,7 @@ public final class Wyil2Boogie {
             for (Location<?> invariant : loopInvariant) {
                 out.println();
                 tabIndent(indent);
-                out.printf("%s %s;", keyword, boolExpr(invariant).toString());
+                out.printf("%s %s;", keyword, boogieBoolExpr(invariant).toString());
             }
         }
     }
@@ -1368,198 +1355,198 @@ public final class Wyil2Boogie {
     }
 
     /** Convenience: equivalent to expr(_).as(BOOL). */
-    protected BoogieExpr boolExpr(Location<?> expr) {
-        return expr(expr).as(BOOL);
+    protected BoogieExpr boogieBoolExpr(Location<?> expr) {
+        return boogieExpr(expr).as(BOOL);
     }
 
     /** Convenience: equivalent to expr(_).as(INT). */
-    protected BoogieExpr intExpr(Location<?> expr) {
-        return expr(expr).as(INT);
+    protected BoogieExpr boogieIntExpr(Location<?> expr) {
+        return boogieExpr(expr).as(INT);
     }
 
     @SuppressWarnings("unchecked")
-    protected BoogieExpr expr(Location<?> expr) {
+    protected BoogieExpr boogieExpr(Location<?> expr) {
         switch (expr.getOpcode()) {
         case Bytecode.OPCODE_arraylength:
-            return writeArrayLength((Location<Bytecode.Operator>) expr);
+            return boogieArrayLength((Location<Bytecode.Operator>) expr);
 
         case Bytecode.OPCODE_arrayindex:
-            return writeArrayIndex((Location<Bytecode.Operator>) expr);
+            return boogieArrayIndex((Location<Bytecode.Operator>) expr);
 
         case Bytecode.OPCODE_array:
-            BoogieExpr[] avals = Arrays.stream(expr.getOperands()).map(this::expr).toArray(BoogieExpr[]::new);
+            BoogieExpr[] avals = Arrays.stream(expr.getOperands()).map(this::boogieExpr).toArray(BoogieExpr[]::new);
             return createArrayInitialiser(avals);
 
         case Bytecode.OPCODE_arraygen:
-            return writeArrayGenerator((Location<Bytecode.Operator>) expr);
+            return boogieArrayGenerator((Location<Bytecode.Operator>) expr);
 
         case Bytecode.OPCODE_convert:
-            return writeConvert((Location<Bytecode.Convert>) expr);
+            return boogieConvert((Location<Bytecode.Convert>) expr);
 
         case Bytecode.OPCODE_const:
             Bytecode.Const c = (Bytecode.Const) expr.getBytecode();
             return createConstant(c.constant());
 
         case Bytecode.OPCODE_fieldload:
-            return writeFieldLoad((Location<Bytecode.FieldLoad>) expr);
+            return boogieFieldLoad((Location<Bytecode.FieldLoad>) expr);
 
         case Bytecode.OPCODE_indirectinvoke:
-            return writeIndirectInvokeExpr((Location<Bytecode.IndirectInvoke>) expr);
+            return boogieIndirectInvokeExpr((Location<Bytecode.IndirectInvoke>) expr);
 
         case Bytecode.OPCODE_invoke:
-            return writeInvoke((Location<Bytecode.Invoke>) expr);
+            return boogieInvoke((Location<Bytecode.Invoke>) expr);
 
         case Bytecode.OPCODE_lambda:
-            return writeLambda((Location<Bytecode.Lambda>) expr);
+            return boogieLambda((Location<Bytecode.Lambda>) expr);
 
         case Bytecode.OPCODE_record:
-            BoogieExpr[] rvals = Arrays.stream(expr.getOperands()).map(this::expr).toArray(BoogieExpr[]::new);
+            BoogieExpr[] rvals = Arrays.stream(expr.getOperands()).map(this::boogieExpr).toArray(BoogieExpr[]::new);
             return createRecordConstructor((Type.EffectiveRecord) expr.getType(), rvals);
 
         case Bytecode.OPCODE_newobject:
-            return writeNewObject((Location<Bytecode.Operator>) expr);
+            return allocateNewObject((Location<Bytecode.Operator>) expr);
 
         case Bytecode.OPCODE_dereference:
-            return writeDereference((Location<Bytecode.Operator>) expr);
+            return boogieDereference((Location<Bytecode.Operator>) expr);
 
         case Bytecode.OPCODE_logicalnot:
-            return prefixOp(BOOL, expr, "! ", BOOL);
+            return boogiePrefixOp(BOOL, expr, "! ", BOOL);
 
         case Bytecode.OPCODE_neg:
-            return prefixOp(INT, expr, "- ", INT);
+            return boogiePrefixOp(INT, expr, "- ", INT);
 
         case Bytecode.OPCODE_all:
-            return writeQuantifier("forall", " ==> ", (Location<Bytecode.Quantifier>) expr);
+            return boogieQuantifier("forall", " ==> ", (Location<Bytecode.Quantifier>) expr);
 
         case Bytecode.OPCODE_some:
-            return writeQuantifier("exists", " && ", (Location<Bytecode.Quantifier>) expr);
+            return boogieQuantifier("exists", " && ", (Location<Bytecode.Quantifier>) expr);
 
         case Bytecode.OPCODE_add:
-            return infixOp(INT, expr, " + ", INT);
+            return boogieInfixOp(INT, expr, " + ", INT);
 
         case Bytecode.OPCODE_sub:
-            return infixOp(INT, expr, " - ", INT);
+            return boogieInfixOp(INT, expr, " - ", INT);
 
         case Bytecode.OPCODE_mul:
-            return infixOp(INT, expr, " * ", INT);
+            return boogieInfixOp(INT, expr, " * ", INT);
 
         case Bytecode.OPCODE_div:
             // TODO: fix this for negative numbers.
             // Boogie 'mod' implements Euclidean division, whereas Whiley uses truncated division.
             // See https://en.wikipedia.org/wiki/Modulo_operation for explanations.
             // See http://boogie.codeplex.com/discussions/397357 for what Boogie does.
-            return infixOp(INT, expr, " div ", INT);
+            return boogieInfixOp(INT, expr, " div ", INT);
 
         case Bytecode.OPCODE_rem:
             // TODO: fix this for negative numbers.
             // Boogie 'mod' implements Euclidean division, whereas Whiley uses truncated division.
             // See https://en.wikipedia.org/wiki/Modulo_operation for explanations.
             // See http://boogie.codeplex.com/discussions/397357 for what Boogie does.
-            return infixOp(INT, expr, " mod ", INT);
+            return boogieInfixOp(INT, expr, " mod ", INT);
 
         case Bytecode.OPCODE_bitwiseinvert:
-            String opType = bitwiseType(expr.getOperand(0));
-            BoogieExpr lhs = expr(expr.getOperand(0)).as(INT);
+            String opType = getBitwiseType(expr.getOperand(0));
+            BoogieExpr lhs = boogieExpr(expr.getOperand(0)).as(INT);
             String call = String.format("%s_invert(%s)", opType, lhs.toString());
             return new BoogieExpr(INT, call);
 
         case Bytecode.OPCODE_bitwiseor:
-            return bitwiseOp(expr, "or");
+            return boogieBitwiseOp(expr, "or");
         case Bytecode.OPCODE_bitwisexor:
-            return bitwiseOp(expr, "xor");
+            return boogieBitwiseOp(expr, "xor");
         case Bytecode.OPCODE_bitwiseand:
-            return bitwiseOp(expr, "and");
+            return boogieBitwiseOp(expr, "and");
         case Bytecode.OPCODE_shl:
-            return bitwiseOp(expr, "shift_left");
+            return boogieBitwiseOp(expr, "shift_left");
         case Bytecode.OPCODE_shr:
-            return bitwiseOp(expr, "shift_right");
+            return boogieBitwiseOp(expr, "shift_right");
 
         case Bytecode.OPCODE_eq:
-            return writeEquality((Location<Bytecode.Operator>) expr);
+            return boogieEquality((Location<Bytecode.Operator>) expr);
 
         case Bytecode.OPCODE_ne:
-            BoogieExpr eq = writeEquality((Location<Bytecode.Operator>) expr);
+            BoogieExpr eq = boogieEquality((Location<Bytecode.Operator>) expr);
             BoogieExpr outNE = new BoogieExpr(BOOL);
             outNE.addOp("! ", eq);
             return outNE;
 
         case Bytecode.OPCODE_lt:
-            return infixOp(INT, expr, " < ", BOOL);
+            return boogieInfixOp(INT, expr, " < ", BOOL);
 
         case Bytecode.OPCODE_le:
-            return infixOp(INT, expr, " <= ", BOOL);
+            return boogieInfixOp(INT, expr, " <= ", BOOL);
 
         case Bytecode.OPCODE_gt:
-            return infixOp(INT, expr, " > ", BOOL);
+            return boogieInfixOp(INT, expr, " > ", BOOL);
 
         case Bytecode.OPCODE_ge:
-            return infixOp(INT, expr, " >= ", BOOL);
+            return boogieInfixOp(INT, expr, " >= ", BOOL);
 
         case Bytecode.OPCODE_logicaland:
-            return infixOp(BOOL, expr, " && ", BOOL);
+            return boogieInfixOp(BOOL, expr, " && ", BOOL);
 
         case Bytecode.OPCODE_logicalor:
-            return infixOp(BOOL, expr, " || ", BOOL);
+            return boogieInfixOp(BOOL, expr, " || ", BOOL);
 
         case Bytecode.OPCODE_is:
-            return writeIs((Location<Bytecode.Operator>) expr);
+            return boogieIs((Location<Bytecode.Operator>) expr);
 
         case Bytecode.OPCODE_varaccess:
-            return writeVariableAccess((Location<VariableAccess>) expr);
+            return boogieVariableAccess((Location<VariableAccess>) expr);
 
         default:
             throw new IllegalArgumentException("unknown bytecode encountered: " + expr.getBytecode());
         }
     }
 
-    private BoogieExpr prefixOp(BoogieType argType, Location<?> c, String op, BoogieType resultType) {
+    private BoogieExpr boogiePrefixOp(BoogieType argType, Location<?> c, String op, BoogieType resultType) {
         BoogieExpr out = new BoogieExpr(resultType);
-        BoogieExpr rhs = expr(c.getOperand(0)).as(argType);
+        BoogieExpr rhs = boogieExpr(c.getOperand(0)).as(argType);
         out.addOp(op, rhs);
         return out;
     }
 
-    private BoogieExpr infixOp(BoogieType argType, Location<?> c, String op, BoogieType resultType) {
+    private BoogieExpr boogieInfixOp(BoogieType argType, Location<?> c, String op, BoogieType resultType) {
         BoogieExpr out = new BoogieExpr(resultType);
-        BoogieExpr lhs = expr(c.getOperand(0)).as(argType);
-        BoogieExpr rhs = expr(c.getOperand(1)).as(argType);
+        BoogieExpr lhs = boogieExpr(c.getOperand(0)).as(argType);
+        BoogieExpr rhs = boogieExpr(c.getOperand(1)).as(argType);
         out.addOp(lhs, op, rhs);
         return out;
     }
 
-    private BoogieExpr bitwiseOp(Location<?> c, String op) {
-        String opType = bitwiseType(c.getOperand(0));
-        BoogieExpr lhs = expr(c.getOperand(0)).as(INT);
-        BoogieExpr rhs = expr(c.getOperand(1)).as(INT);
+    private BoogieExpr boogieBitwiseOp(Location<?> c, String op) {
+        String opType = getBitwiseType(c.getOperand(0));
+        BoogieExpr lhs = boogieExpr(c.getOperand(0)).as(INT);
+        BoogieExpr rhs = boogieExpr(c.getOperand(1)).as(INT);
         String call = String.format("%s_%s(%s, %s)", opType, op, lhs.toString(), rhs.toString());
         BoogieExpr out = new BoogieExpr(INT, call);
         return out;
     }
 
     /** We distinguish bitwise operators on byte values from other int values. */
-    private String bitwiseType(Location<?> operand) {
+    private String getBitwiseType(Location<?> operand) {
         return operand.getType().equals(Type.T_BYTE) ? "byte" : "bitwise";
     }
 
-    private BoogieExpr writeVariableAccess(Location<VariableAccess> loc) {
+    private BoogieExpr boogieVariableAccess(Location<VariableAccess> loc) {
         Location<VariableDeclaration> vd = getVariableDeclaration(loc.getOperand(0));
         String name = vd.getBytecode().getName();
         return new BoogieExpr(WVAL, name);
     }
 
-    private BoogieExpr writeArrayLength(Location<Bytecode.Operator> expr) {
+    private BoogieExpr boogieArrayLength(Location<Bytecode.Operator> expr) {
         BoogieExpr out = new BoogieExpr(INT);
-        out.print("arraylen(");
-        out.addExpr(expr(expr.getOperand(0)).asWVal());
-        out.print(")");
+        out.append("arraylen(");
+        out.addExpr(boogieExpr(expr.getOperand(0)).asWVal());
+        out.append(")");
         return out;
     }
 
-    private BoogieExpr writeArrayIndex(Location<Bytecode.Operator> expr) {
+    private BoogieExpr boogieArrayIndex(Location<Bytecode.Operator> expr) {
         BoogieExpr out = new BoogieExpr(WVAL);
-        out.addExpr(expr(expr.getOperand(0)).as(ARRAY));
-        out.addOp("[", intExpr(expr.getOperand(1)));
-        out.print("]");
+        out.addExpr(boogieExpr(expr.getOperand(0)).as(ARRAY));
+        out.addOp("[", boogieIntExpr(expr.getOperand(1)));
+        out.append("]");
         return out;
     }
 
@@ -1570,45 +1557,45 @@ public final class Wyil2Boogie {
      * </pre>
      * @param expr
      */
-    private BoogieExpr writeArrayGenerator(Location<Bytecode.Operator> expr) {
+    private BoogieExpr boogieArrayGenerator(Location<Bytecode.Operator> expr) {
         BoogieExpr out = new BoogieExpr(WVAL);
-        out.print("fromArray(arrayconst(");
-        out.addExpr(expr(expr.getOperand(0)).asWVal());
-        out.print("), ");
-        out.addExpr(expr(expr.getOperand(1)).as(INT));
-        out.print(")");
+        out.append("fromArray(arrayconst(");
+        out.addExpr(boogieExpr(expr.getOperand(0)).asWVal());
+        out.append("), ");
+        out.addExpr(boogieExpr(expr.getOperand(1)).as(INT));
+        out.append(")");
         return out;
     }
 
-    private BoogieExpr writeConvert(Location<Bytecode.Convert> expr) {
+    private BoogieExpr boogieConvert(Location<Bytecode.Convert> expr) {
         // TODO: implement the record (and object?) conversion that drops fields?
         // See tests/valid/Coercion_Valid_9.whiley
         // TODO: are there any valid conversions in Boogie?
         // out.print("(" + expr.getType() + ") ");
-        return expr(expr.getOperand(0));
+        return boogieExpr(expr.getOperand(0));
     }
 
-    private BoogieExpr writeFieldLoad(Location<Bytecode.FieldLoad> expr) {
+    private BoogieExpr boogieFieldLoad(Location<Bytecode.FieldLoad> expr) {
         BoogieExpr out = new BoogieExpr(WVAL);
-        out.addExpr(expr(expr.getOperand(0)).as(RECORD));
-        out.printf("[%s]", mangleWField(expr.getBytecode().fieldName()));
+        out.addExpr(boogieExpr(expr.getOperand(0)).as(RECORD));
+        out.appendf("[%s]", mangledWField(expr.getBytecode().fieldName()));
         return out;
     }
 
-    private BoogieExpr writeIndirectInvokeExpr(Location<Bytecode.IndirectInvoke> expr) {
+    private BoogieExpr boogieIndirectInvokeExpr(Location<Bytecode.IndirectInvoke> expr) {
         Bytecode.IndirectInvoke invoke = expr.getBytecode();
         int[] args = invoke.arguments();
         if (args.length != 1) {
             throw new NotImplementedYet("indirect invoke with " + args.length + " args", expr);
         }
-        BoogieExpr func = expr(expr.getOperand(0)).as(FUNCTION);
-        BoogieExpr arg = expr(expr.getOperandGroup(0)[0]).asWVal();
+        BoogieExpr func = boogieExpr(expr.getOperand(0)).as(FUNCTION);
+        BoogieExpr arg = boogieExpr(expr.getOperandGroup(0)[0]).asWVal();
         // TODO: decide what to do if func is a method?
         BoogieExpr out = new BoogieExpr(WVAL, "applyTo1(" + func + ", " + arg + ")");
         return out;
     }
 
-    private BoogieExpr writeInvoke(Location<Bytecode.Invoke> expr) {
+    private BoogieExpr boogieInvoke(Location<Bytecode.Invoke> expr) {
         // TODO: check that it is safe to use unqualified DeclID names?
         BoogieExpr out = new BoogieExpr(WVAL);
         String name = expr.getBytecode().name().name();
@@ -1620,21 +1607,21 @@ public final class Wyil2Boogie {
                 throw new NotImplementedYet("call to method (" + name + ") from inside an expression", expr);
             }
         }
-        out.print(mangleFunctionMethodName(name, type) + "(");
+        out.append(mangledFunctionMethodName(name, type) + "(");
         Location<?>[] operands = expr.getOperands();
         for(int i=0;i!=operands.length;++i) {
             if(i!=0) {
-                out.print(", ");
+                out.append(", ");
             }
-            out.addExpr(expr(operands[i]).asWVal());
+            out.addExpr(boogieExpr(operands[i]).asWVal());
         }
-        out.print(")");
+        out.append(")");
         return out;
     }
 
     // TODO: lambda
     // Question: some lambda expressions capture surrounding variables - how can we represent this in Boogie?
-    private BoogieExpr writeLambda(Location<Bytecode.Lambda> expr) {
+    private BoogieExpr boogieLambda(Location<Bytecode.Lambda> expr) {
         throw new NotImplementedYet("lambda", expr);
         /*
          * This Whiley lambda:
@@ -1664,22 +1651,28 @@ public final class Wyil2Boogie {
         // return new BoogieExpr(WVAL, "lambda TODO");
     }
 
-    private BoogieExpr writeNewObject(Location<Bytecode.Operator> expr) {
-        BoogieExpr be = expr(expr.getOperand(0)).asWVal();
+    /**
+     * Sets up a heap allocation and returns the result heap reference as an expression.
+     *
+     * @param expr
+     * @return a freshly allocated heap reference.
+     */
+    private BoogieExpr allocateNewObject(Location<Bytecode.Operator> expr) {
+        BoogieExpr be = boogieExpr(expr.getOperand(0)).asWVal();
         String ref = NEW_REF + newAllocations.size();
         // this allocation will be done just BEFORE this expression
         newAllocations.add(be.toString());
         return new BoogieExpr(WREF, ref);
     }
 
-    private BoogieExpr writeDereference(Location<Bytecode.Operator> expr) {
-        BoogieExpr be = expr(expr.getOperand(0)).as(WREF);
+    private BoogieExpr boogieDereference(Location<Bytecode.Operator> expr) {
+        BoogieExpr be = boogieExpr(expr.getOperand(0)).as(WREF);
         // TODO: assume the type information of out.
         BoogieExpr out = new BoogieExpr(WVAL, "w__heap[" + be.toString() + "]");
         return out;
     }
 
-    private BoogieExpr writeIs(Location<Bytecode.Operator> c) {
+    private BoogieExpr boogieIs(Location<Bytecode.Operator> c) {
         BoogieExpr out = new BoogieExpr(BOOL);
         Location<?> lhs = c.getOperand(0);
         Location<?> rhs = c.getOperand(1);
@@ -1689,32 +1682,12 @@ public final class Wyil2Boogie {
             final String name = vd.getBytecode().getName();
             Bytecode.Const constType = (Bytecode.Const) rhs.getBytecode();
             Constant.Type type = (Constant.Type) constType.constant();
-            out.print(typePredicate(name, type.value()));
+            out.append(typePredicate(name, type.value()));
         } else {
             throw new NotImplementedYet("expr is type", c);
         }
         return out;
     }
-
-//    private void writePrefixLocations(String resultType, String argType, Location<Bytecode.Operator> expr) {
-//        // Prefix operators
-//        out.print("from" + resultType + "(");
-//        out.print(opcode(expr.getBytecode().kind()));
-//        out.print("to" + argType + "(");
-//        writeBracketedExpression(expr.getOperand(0));
-//        out.print("))");
-//    }
-//
-//    private void writeInfixLocations(String resultType, String argType, Location<Bytecode.Operator> c) {
-//        out.print("from" + resultType + "(");
-//        out.print("to" + argType + "(");
-//        writeBracketedExpression(c.getOperand(0));
-//        out.print(") ");
-//        out.print(opcode(c.getBytecode().kind()));
-//        out.print(" to" + argType + "(");
-//        writeBracketedExpression(c.getOperand(1));
-//        out.print("))");
-//    }
 
     /**
      * Equality and inequality requires type-dependent expansion.
@@ -1723,7 +1696,7 @@ public final class Wyil2Boogie {
      * @param argType
      * @param c
      */
-    private BoogieExpr writeEquality(Location<Bytecode.Operator> c) {
+    private BoogieExpr boogieEquality(Location<Bytecode.Operator> c) {
         Location<?> left = c.getOperand(0);
         Location<?> right = c.getOperand(1);
         Type leftType = c.getOperand(0).getType();
@@ -1738,7 +1711,7 @@ public final class Wyil2Boogie {
                 throw new NotImplementedYet("comparison of void intersection type: " + leftType + " and " + rightType, c);
             }
         }
-        BoogieExpr eq = writeTypedEquality(eqType, expr(left), expr(right)).as(BOOL);
+        BoogieExpr eq = boogieTypedEquality(eqType, boogieExpr(left), boogieExpr(right)).as(BOOL);
         return eq;
     }
 
@@ -1759,7 +1732,7 @@ public final class Wyil2Boogie {
      * @param left the LHS expression
      * @param right the RHS expression
      */
-    private BoogieExpr writeTypedEquality(Type eqType, BoogieExpr left, BoogieExpr right) {
+    private BoogieExpr boogieTypedEquality(Type eqType, BoogieExpr left, BoogieExpr right) {
         BoogieExpr out = new BoogieExpr(BOOL);
         if (eqType instanceof Type.Null) {
             // This requires special handling, since we do not have toNull and fromNull functions.
@@ -1775,20 +1748,20 @@ public final class Wyil2Boogie {
         } else if (eqType instanceof Type.Bool) {
             out.addOp(left.as(BOOL), " == ", right.as(BOOL));
         } else if (eqType instanceof Type.Record) {
-            BoogieExpr leftRec = left.as(RECORD).atom();
-            BoogieExpr rightRec = right.as(RECORD).atom();
+            BoogieExpr leftRec = left.as(RECORD).asAtom();
+            BoogieExpr rightRec = right.as(RECORD).asAtom();
             Type.Record recType = (Type.Record) eqType;
             List<String> fields = new ArrayList<>(recType.keys());
             fields.sort(null);
             if (fields.isEmpty()) {
-                out.print("true");
+                out.append("true");
             }
             for (int i = 0; i < fields.size(); i++) {
                 String field = fields.get(i);
-                String deref = "[" + mangleWField(field) + "]";
+                String deref = "[" + mangledWField(field) + "]";
                 BoogieExpr leftVal = new BoogieExpr(WVAL, leftRec + deref);
                 BoogieExpr rightVal = new BoogieExpr(WVAL, rightRec + deref);
-                BoogieExpr feq = writeTypedEquality(recType.fields().get(field), leftVal, rightVal).as(BOOL);
+                BoogieExpr feq = boogieTypedEquality(recType.fields().get(field), leftVal, rightVal).as(BOOL);
                 if (i == 0) {
                     out.addExpr(feq);
                 } else {
@@ -1796,8 +1769,8 @@ public final class Wyil2Boogie {
                 }
             }
         } else if (eqType instanceof Type.Array) {
-            BoogieExpr leftArray = left.as(ARRAY).atom();
-            BoogieExpr rightArray = right.as(ARRAY).atom();
+            BoogieExpr leftArray = left.as(ARRAY).asAtom();
+            BoogieExpr rightArray = right.as(ARRAY).asAtom();
             Type.Array arrayType = (Type.Array) eqType;
             Type elemType = arrayType.element();
             // we check the length and all the values:
@@ -1807,13 +1780,13 @@ public final class Wyil2Boogie {
             String deref = "[" + index + "]";
             BoogieExpr leftVal = new BoogieExpr(WVAL, leftArray + deref);
             BoogieExpr rightVal = new BoogieExpr(WVAL, rightArray + deref);
-            out.printf("arraylen(%s) == arraylen(%s) && (forall %s:int :: 0 <= %s && %s < arraylen(%s)",
+            out.appendf("arraylen(%s) == arraylen(%s) && (forall %s:int :: 0 <= %s && %s < arraylen(%s)",
                     left.asWVal().toString(),
                     right.asWVal().toString(),
                     index, index, index,
                     left.asWVal().toString());
-            out.addOp(" ==> ", writeTypedEquality(elemType, leftVal, rightVal).as(BOOL));
-            out.print(")");
+            out.addOp(" ==> ", boogieTypedEquality(elemType, leftVal, rightVal).as(BOOL));
+            out.append(")");
             out.setOp(" && "); // && is outermost, since the ==> is bracketed.
         } else {
             throw new NotImplementedYet("comparison of values of type: " + eqType
@@ -1823,35 +1796,40 @@ public final class Wyil2Boogie {
     }
 
     @SuppressWarnings("unchecked")
-    private BoogieExpr writeQuantifier(String quant, String predOp, Location<Bytecode.Quantifier> c) {
+    private BoogieExpr boogieQuantifier(String quant, String predOp, Location<Bytecode.Quantifier> c) {
         BoogieExpr decls = new BoogieExpr(BOOL);
         BoogieExpr constraints = new BoogieExpr(BOOL);
         for (int i = 0; i != c.numberOfOperandGroups(); ++i) {
             Location<?>[] range = c.getOperandGroup(i);
             if (i != 0) {
-                decls.print(", ");
-                constraints.print(" && ");
+                decls.append(", ");
+                constraints.append(" && ");
             }
             // declare the bound variable: v:WVal
             Location<VariableDeclaration>  v = (Location<VariableDeclaration>) range[SyntaxTree.VARIABLE];
             String name = v.getBytecode().getName();
-            decls.printf("%s:WVal", name);
+            decls.appendf("%s:WVal", name);
 
             // and add the constraint: isInt(v) && start <= v && v <= end
             BoogieExpr vExpr = new BoogieExpr(WVAL, name).as(INT);
-            BoogieExpr start = intExpr(range[SyntaxTree.START]);
-            BoogieExpr end = intExpr(range[SyntaxTree.END]);
-            constraints.print("isInt(" + name + ")");
+            BoogieExpr start = boogieIntExpr(range[SyntaxTree.START]);
+            BoogieExpr end = boogieIntExpr(range[SyntaxTree.END]);
+            constraints.append("isInt(" + name + ")");
             constraints.addOp(" && ", new BoogieExpr(BOOL, start, " <= ", vExpr));
             constraints.addOp(" && ", new BoogieExpr(BOOL, vExpr, " < ", end));
         }
         BoogieExpr out = new BoogieExpr(BOOL);
-        out.printf("(%s %s :: ", quant, decls.toString());
-        out.addOp(constraints, predOp, boolExpr(c.getOperand(SyntaxTree.CONDITION)));
-        out.print(")");
+        out.appendf("(%s %s :: ", quant, decls.toString());
+        out.addOp(constraints, predOp, boogieBoolExpr(c.getOperand(SyntaxTree.CONDITION)));
+        out.append(")");
         return out;
     }
 
+    /**
+     * Writes the given indentation levels into the output.
+     *
+     * @param indent
+     */
     protected void tabIndent(int indent) {
         indent = indent * 4;
         for(int i=0;i<indent;++i) {
@@ -1860,7 +1838,7 @@ public final class Wyil2Boogie {
     }
 
     /** Returns an indent of the requested number of 'tab' stops. */
-    protected String makeIndent(int indent) {
+    protected String createIndent(int indent) {
         return indent <= 0 ? "" : String.format("%" + (indent * 4) + "s", "");
     }
 
@@ -1929,7 +1907,7 @@ public final class Wyil2Boogie {
             result.append("is" + objrec);
             for (Map.Entry<String, Type> field : fields.entrySet()) {
                 result.append(" && ");
-                String elem = "to" + objrec + "[" + mangleWField(field.getKey()) + "]";
+                String elem = "to" + objrec + "[" + mangledWField(field.getKey()) + "]";
                 Type elemType = field.getValue();
                 result.append(typePredicate(elem, elemType));
             }
@@ -1970,6 +1948,9 @@ public final class Wyil2Boogie {
 
     /**
      * Create a user-defined type predicate name, like "is_list", from a type name "list".
+     *
+     * Note: we add the underscore to avoid name clashes with some of the predefined
+     * predicates, like isInt(_).
      *
      * @param typeName a non-empty string.
      * @return a non-null string.
@@ -2025,21 +2006,21 @@ public final class Wyil2Boogie {
      */
     private BoogieExpr createArrayInitialiser(BoogieExpr[] values) {
         BoogieExpr out = new BoogieExpr(WVAL);
-        out.print("fromArray(arrayconst(");
+        out.append("fromArray(arrayconst(");
         if (values.length == 0) {
-            out.print("null"); // the type of values should be irrelevant
+            out.append("null"); // the type of values should be irrelevant
         } else {
             out.addExpr(values[0].asWVal());
         }
-        out.print(")");
+        out.append(")");
         for (int i = 1; i < values.length; ++i) {
-            out.print("[" + i + " := ");
+            out.append("[" + i + " := ");
             out.addExpr(values[i].asWVal()); // no brackets needed
-            out.print("]");
+            out.append("]");
         }
-        out.print(", ");
-        out.print(Integer.toString(values.length));
-        out.print(")");
+        out.append(", ");
+        out.append(Integer.toString(values.length));
+        out.append(")");
         return out;
     }
 
@@ -2048,9 +2029,9 @@ public final class Wyil2Boogie {
         List<String> fields = new ArrayList<String>(type.fields().keySet());
         // the values are presented in order according to the alphabetically sorted field names!
         Collections.sort(fields);
-        out.print("empty__record");
+        out.append("empty__record");
         for(int i = 0; i != values.length; ++i) {
-            out.printf("[%s := %s]", mangleWField(fields.get(i)), values[i].asWVal().toString());
+            out.appendf("[%s := %s]", mangledWField(fields.get(i)), values[i].asWVal().toString());
         }
         out.setOp("[");
         return out;
@@ -2065,7 +2046,7 @@ public final class Wyil2Boogie {
      * @param field
      * @return field prefixed with a dollar.
      */
-    protected String mangleWField(String field) {
+    protected String mangledWField(String field) {
         return "$" + field;
     }
 
@@ -2073,6 +2054,7 @@ public final class Wyil2Boogie {
      * Determines which functions/methods need renaming to resolve overloading.
      *
      * This should be called once at the beginning of each file/module.
+     * It initialises the global <code>functionOverloads</code> map.
      *
      * @param functionOrMethods
      */
@@ -2099,23 +2081,23 @@ public final class Wyil2Boogie {
                 "isObject", "isRef", "isFunction", "isMethod", "isByte",
                 }) {
 
-            predefinedFunction(predef, typePredicate);
+            addPredefinedFunction(predef, typePredicate);
         }
         for (String predef : new String[] {
                 "toNull", "toInt", "toBool", "toArray", "toRecord",
                 "toObject", "toRef", "toFunction", "toMethod", "toByte",
                 }) {
-            predefinedFunction(predef, castFunction);
+            addPredefinedFunction(predef, castFunction);
         }
-        predefinedFunction("fromInt", Type.Function(any1, int1));
-        predefinedFunction("fromBool", Type.Function(any1, bool1));
-        predefinedFunction("fromArray", Type.Function(any1, array1));
-        predefinedFunction("fromRecord", Type.Function(any1, record1));
-        predefinedFunction("fromObject", Type.Function(any1, object1));
-        predefinedFunction("fromRef", Type.Function(any1, ref1));
-        predefinedFunction("fromFunction", Type.Function(any1, Collections.singletonList(castFunction)));
-        predefinedFunction("fromMethod", Type.Function(any1, Collections.singletonList(anyMethod)));
-        predefinedFunction("applyTo1", Type.Function(any1, any1)); // should take TWO inputs
+        addPredefinedFunction("fromInt", Type.Function(any1, int1));
+        addPredefinedFunction("fromBool", Type.Function(any1, bool1));
+        addPredefinedFunction("fromArray", Type.Function(any1, array1));
+        addPredefinedFunction("fromRecord", Type.Function(any1, record1));
+        addPredefinedFunction("fromObject", Type.Function(any1, object1));
+        addPredefinedFunction("fromRef", Type.Function(any1, ref1));
+        addPredefinedFunction("fromFunction", Type.Function(any1, Collections.singletonList(castFunction)));
+        addPredefinedFunction("fromMethod", Type.Function(any1, Collections.singletonList(anyMethod)));
+        addPredefinedFunction("applyTo1", Type.Function(any1, any1)); // should take TWO inputs
 
         for (WyilFile.FunctionOrMethod m : functionOrMethods) {
             String name = m.name();
@@ -2133,7 +2115,7 @@ public final class Wyil2Boogie {
         }
     }
 
-    private void predefinedFunction(String predef, wyil.lang.Type.FunctionOrMethod type) {
+    private void addPredefinedFunction(String predef, wyil.lang.Type.FunctionOrMethod type) {
         Map<Type.FunctionOrMethod, String> map = new HashMap<>();
         // System.err.printf("ADDING %s : %s as predefined.\n", predef, type);
         map.put(type, predef); // no name mangling, because this is a predefined function.
@@ -2150,7 +2132,7 @@ public final class Wyil2Boogie {
      * @param method
      * @return a human-readable name for the function/method.
      */
-    protected String mangleFunctionMethodName(String name, Type.FunctionOrMethod type) {
+    protected String mangledFunctionMethodName(String name, Type.FunctionOrMethod type) {
         Map<Type.FunctionOrMethod, String> map = functionOverloads.get(name);
         if (map == null) {
             System.err.printf("Warning: function/method %s : %s assumed to be external, so not mangled.\n",
