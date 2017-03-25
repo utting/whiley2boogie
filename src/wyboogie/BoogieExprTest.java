@@ -9,8 +9,8 @@ public class BoogieExprTest {
     @Test
     public void testWVal() {
         BoogieExpr expr = new BoogieExpr();
-        expr.print("v");
-        expr.print("__1");
+        expr.append("v");
+        expr.append("__1");
         assertEquals(BoogieType.WVAL, expr.getType());
         BoogieExpr w = expr.asWVal();
         assertEquals("v__1", w.toString());
@@ -25,8 +25,8 @@ public class BoogieExprTest {
     @Test
     public void testBool() {
         BoogieExpr expr = new BoogieExpr(BoogieType.BOOL);
-        expr.print("v");
-        expr.print(" == 0");
+        expr.append("v");
+        expr.append(" == 0");
         assertEquals(BoogieType.BOOL, expr.getType());
 
         BoogieExpr w = expr.asWVal();

@@ -133,11 +133,11 @@ public class BoogieExpr {
      *
      * @param str
      */
-    public void print(String str) {
+    public void append(String str) {
         builder.append(str);
     }
 
-    public void printf(String format, Object... args) {
+    public void appendf(String format, Object... args) {
         builder.append(String.format(format, args));
     }
 
@@ -155,11 +155,11 @@ public class BoogieExpr {
             return this;
         } else {
             BoogieExpr result = new BoogieExpr(BoogieType.WVAL);
-            result.print("from");
-            result.print(termType.toString());
-            result.print("(");
+            result.append("from");
+            result.append(termType.toString());
+            result.append("(");
             result.builder.append(this.builder);
-            result.print(")");
+            result.append(")");
             return result;
         }
     }
@@ -176,11 +176,11 @@ public class BoogieExpr {
             return this;
         } else if (termType == BoogieType.WVAL){
             BoogieExpr result = new BoogieExpr(type);
-            result.print("to");
-            result.print(type.toString());
-            result.print("(");
+            result.append("to");
+            result.append(type.toString());
+            result.append("(");
             result.builder.append(this.builder.toString());
-            result.print(")");
+            result.append(")");
             return result;
         } else {
             throw new IllegalArgumentException("Cannot coerce " + builder.toString() + " to " + type);
@@ -313,7 +313,7 @@ public class BoogieExpr {
      *
      * @return a BoogieExpr whose outermost operator is null.
      */
-    public BoogieExpr atom() {
+    public BoogieExpr asAtom() {
         if (outermostOp == null) {
             return this;
         } else {

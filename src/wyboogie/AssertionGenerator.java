@@ -68,7 +68,7 @@ public class AssertionGenerator {
 
     /** Translate a Whiley expression into a Boogie expression. */
     protected BoogieExpr expr(Location<?> expr) {
-        return wy2b.expr(expr);
+        return wy2b.boogieExpr(expr);
     }
 
     /**
@@ -140,16 +140,16 @@ public class AssertionGenerator {
             Bytecode.Invoke funCall = (Bytecode.Invoke) expr.getBytecode();
             String name = funCall.name().name();
             Type.FunctionOrMethod type = funCall.type();
-            String funName = wy2b.mangleFunctionMethodName(name, type);
+            String funName = wy2b.mangledFunctionMethodName(name, type);
             Location<?>[] operands = expr.getOperands();
             BoogieExpr funPre = new BoogieExpr(BOOL, funName + Wyil2Boogie.METHOD_PRE + "(");
             for(int i=0;i!=operands.length;++i) {
                 if(i!=0) {
-                    funPre.print(", ");
+                    funPre.append(", ");
                 }
                 funPre.addExpr(expr(operands[i]).asWVal());
             }
-            funPre.print(")");
+            funPre.append(")");
             generateCheck(funPre);
             break;  // continue checking all subexpressions too.
 
