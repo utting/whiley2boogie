@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 if [[ "$#" > 0 ]]
 then
-    WY2BHOME=/Users/utting/git/WhileyCompiler/modules/wy2b
+    SCRIPT_PATH=$(dirname `which $0`)
+    echo "SCRIPT=$SCRIPT_PATH"
     for w in "$@"
     do
-	echo "===== $w ====="
-	java -jar $HOME/bin/whiley2boogie.jar "$w" &&
-	boogie /timeLimit:10 $WY2BHOME/wval.bpl ${w%.whiley}.bpl
+        echo "===== $w ====="
+        java -jar $SCRIPT_PATH/whiley2boogie.jar "$w" &&
+        boogie /timeLimit:10 $SCRIPT_PATH/../wval.bpl ${w%.whiley}.bpl
     done
 else
     echo "Usage: $0 *.whiley"
