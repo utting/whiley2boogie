@@ -2069,7 +2069,7 @@ public final class Wyil2Boogie {
         List<Type> object1 = Collections.singletonList(Type.Record(true, Collections.emptyMap()));
         // the following types are approximate - the params or returns are more specific than needed.
         Type.FunctionOrMethod typePredicate = Type.Function(bool1, any1);
-        Type.FunctionOrMethod castFunction = Type.Function(any1, any1);
+        Type.FunctionOrMethod anyFunction = Type.Function(any1, any1);
         Type.FunctionOrMethod anyMethod = Type.Method(any1, Collections.emptySet(), Collections.emptyList(), any1);
 
         functionOverloads = new HashMap<>();
@@ -2086,8 +2086,16 @@ public final class Wyil2Boogie {
         for (String predef : new String[] {
                 "toNull", "toInt", "toBool", "toArray", "toRecord",
                 "toObject", "toRef", "toFunction", "toMethod", "toByte",
+                // byte bitwise operators
+                "byte_and", "byte_or", "byte_xor", "byte_shift_left",
+                "byte_shift_right", "byte_invert",
+                // int bitwise operators (unbounded)
+                "bitwise_and", "bitwise_or", "bitwise_xor",
+                "bitwise_shift_left", "bitwise_shift_right", "bitwise_invert",
+                // higher-order apply operators
+                "applyTo1", "applyTo2", "applyTo3"
                 }) {
-            addPredefinedFunction(predef, castFunction);
+            addPredefinedFunction(predef, anyFunction);
         }
         addPredefinedFunction("fromInt", Type.Function(any1, int1));
         addPredefinedFunction("fromBool", Type.Function(any1, bool1));
@@ -2095,18 +2103,21 @@ public final class Wyil2Boogie {
         addPredefinedFunction("fromRecord", Type.Function(any1, record1));
         addPredefinedFunction("fromObject", Type.Function(any1, object1));
         addPredefinedFunction("fromRef", Type.Function(any1, ref1));
-        addPredefinedFunction("fromFunction", Type.Function(any1, Collections.singletonList(castFunction)));
+        addPredefinedFunction("fromFunction", Type.Function(any1, Collections.singletonList(anyFunction)));
         addPredefinedFunction("fromMethod", Type.Function(any1, Collections.singletonList(anyMethod)));
-        addPredefinedFunction("applyTo1", Type.Function(any1, any1)); // should take TWO inputs
 
         for (WyilFile.FunctionOrMethod m : functionOrMethods) {
             String name = m.name();
+            boolean isExported = m.hasModifier(Modifier.EXPORT);
+            boolean isNative = m.hasModifier(Modifier.NATIVE);
             Map<Type.FunctionOrMethod, String> map = functionOverloads.get(name);
             if (map == null) {
                 // first one with this name needs no mangling!
                 map = new HashMap<>();
                 map.put(m.type(), name);
                 functionOverloads.put(name, map);
+            } else if (isExported || isNative) {
+                throw new IllegalArgumentException("Cannot overload exported function: " + name);
             } else if (!map.containsKey(m.type())) {
                 String mangled = name + "$" + (map.size() + 1);
                 map.put(m.type(), mangled);

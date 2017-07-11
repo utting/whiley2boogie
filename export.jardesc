@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <jardesc>
-    <jar path="/Users/utting/bin/whiley2boogie.jar"/>
+    <jar path="/Whiley2Boogie/scripts/whiley2boogie.jar"/>
     <options buildIfNeeded="true" compress="true" descriptionLocation="/Whiley2Boogie/export.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="false" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
     <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
     <selectedProjects/>
