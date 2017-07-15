@@ -85,7 +85,12 @@ function fromArray([int]WVal,int) returns (WVal);
 function arrayupdate(a:WVal, i:WVal, v:WVal) returns (WVal) {
     fromArray(toArray(a)[toInt(i) := v], arraylen(a)) }
 axiom (forall s:[int]WVal, len:int :: 0 <= len ==> isArray(fromArray(s,len)));
-axiom (forall s:[int]WVal, len:int :: 0 <= len ==> toArray(fromArray(s,len)) == s); // TOO STRONG
+// NOTE: 148 tests/valid programs fail without any array equality axiom:
+// axiom (forall s:[int]WVal, len:int :: 0 <= len ==> toArray(fromArray(s,len)) == s); // TOO STRONG
+// alternative weaker pointwise equality axiom
+// (this is sufficient to restore the 148 tests/valid. Only 2 programs have one more proof fail.)
+axiom (forall s:[int]WVal, len:int, i:int :: 0 <= i && i < len
+        ==> toArray(fromArray(s,len))[i] == s[i]);
 axiom (forall s:[int]WVal, len:int :: 0 <= len ==> arraylen(fromArray(s,len)) == len);
 axiom (forall v:WVal :: isArray(v) ==> fromArray(toArray(v), arraylen(v)) == v);
 axiom (forall v:WVal :: isArray(v) ==> 0 <= arraylen(v));

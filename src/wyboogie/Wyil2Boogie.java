@@ -111,6 +111,7 @@ import static wyboogie.BoogieType.*;
  *
  * TODO: implement missing language features, such as:
  * <ul>
+ *   <li>System.Console sys and sys.out.println(string)</li>
  *   <li>DONE: indirect invoke (12 tests)</li>
  *   <li>DONE: references, new (17 tests), and dereferencing (17 tests)</li>
  *   <li>DONE: switch (14 tests)</li>
