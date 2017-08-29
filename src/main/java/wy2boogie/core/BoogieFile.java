@@ -1,6 +1,5 @@
 package wy2boogie.core;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -50,8 +49,7 @@ public class BoogieFile extends AbstractCompilationUnit {
 	};
 
 	/**
-	 * Raw contents of the JavaScript file. Eventually, this will use a
-	 * structured form here to help support different ECMAScript standards, etc.
+	 * Raw contents of the Boogie file.
 	 */
 	private final byte[] bytes;
 

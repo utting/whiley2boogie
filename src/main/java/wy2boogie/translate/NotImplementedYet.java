@@ -1,4 +1,4 @@
-package wyboogie;
+package wy2boogie.translate;
 
 import wybs.lang.Attribute.Source;
 import wyil.lang.SyntaxTree.Location;

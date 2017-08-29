@@ -1,4 +1,4 @@
-package wyboogie;
+package wy2boogie.translate;
 
 public enum BoogieType {
     WVAL("WVal"),

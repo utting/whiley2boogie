@@ -1,4 +1,4 @@
-package wyboogie;
+package wy2boogie.translate;
 
 import static org.junit.Assert.*;
 
@@ -6,6 +6,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 
 import org.junit.Test;
+
+import wy2boogie.translate.Wyil2Boogie;
 
 public class Wyil2BoogieTest {
 

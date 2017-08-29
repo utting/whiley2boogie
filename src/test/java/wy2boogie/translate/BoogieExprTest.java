@@ -1,8 +1,11 @@
-package wyboogie;
+package wy2boogie.translate;
 
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+
+import wy2boogie.translate.BoogieExpr;
+import wy2boogie.translate.BoogieType;
 
 public class BoogieExprTest {
 

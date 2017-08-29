@@ -1,6 +1,6 @@
-package wyboogie;
+package wy2boogie.translate;
 
-import static wyboogie.BoogieType.*;
+import static wy2boogie.translate.BoogieType.*;
 
 import java.util.ArrayList;
 import java.util.Collections;

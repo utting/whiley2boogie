@@ -2,12 +2,13 @@ package wy2boogie.tasks;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
 import wy2boogie.core.BoogieFile;
+import wy2boogie.translate.Wyil2Boogie;
 import wybs.lang.Build;
 import wybs.lang.Build.Graph;
 import wycc.util.Logger;
@@ -89,11 +90,12 @@ public class BoogieCompileTask implements Build.Task {
 	}
 
 	private BoogieFile build(Path.Entry<WyilFile> source, Path.Entry<BoogieFile> target) throws IOException {
-		new ByteArrayOutputStream();
-		//final JavaScriptFileWriter jsfw = new JavaScriptFileWriter(this.project,this.typeSystem,bos);
-		//jsfw.apply(read);
-		final WyilFile read = source.read();
-		final String out = read.toString();
-		return new BoogieFile(target,out.getBytes());
+		final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        final PrintWriter writer = new PrintWriter(out);
+        final Wyil2Boogie translator = new Wyil2Boogie(writer);
+		translator.setVerbose(false);
+		translator.apply(source.read());
+		writer.close();
+		return new BoogieFile(target,out.toByteArray());
 	}
 }

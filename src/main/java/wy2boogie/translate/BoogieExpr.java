@@ -1,7 +1,7 @@
 /**
  *
  */
-package wyboogie;
+package wy2boogie.translate;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -29,7 +29,7 @@ import java.util.Set;
 public class BoogieExpr {
 
     private final StringBuilder builder = new StringBuilder();
-    private BoogieType termType;
+    private final BoogieType termType;
 
     // the outermost Boogie operator of this expression.  null means the expression is atomic.
     private String outermostOp = null;
@@ -47,29 +47,29 @@ public class BoogieExpr {
      * Create an atomic Boogie term whose type is BoogieType.WVAL.
      */
     public BoogieExpr() {
-        termType = BoogieType.WVAL;
+        this.termType = BoogieType.WVAL;
     }
 
     /**
      * Create an atomic Boogie term of the given type.
      */
     public BoogieExpr(BoogieType type) {
-        termType = type;
+        this.termType = type;
     }
 
     /**
      * Create an atomic Boogie term of the given type, containing the given string.
      */
     public BoogieExpr(BoogieType type, String str) {
-        termType = type;
-        builder.append(str);
+        this.termType = type;
+        this.builder.append(str);
     }
 
     /**
      * Create a Boogie term for an infix operator plus its arguments.
      */
     public BoogieExpr(BoogieType type, BoogieExpr lhs, String op, BoogieExpr rhs) {
-        termType = type;
+        this.termType = type;
         addOp(lhs, op, rhs);
     }
 
@@ -78,35 +78,36 @@ public class BoogieExpr {
      * @return the type of this whole expression.
      */
     public BoogieType getType() {
-        return termType;
+        return this.termType;
     }
 
     /**
-     * True if this expression is atomic (has no outermost operator).
+     * See if this expression is atomic.
      * For example, constants and fully bracketed expressions are atomic.
      *
-     * @return
+     * @return true if this expression is atomic (has no outermost operator)
      */
     public boolean isAtomic() {
-        return outermostOp == null;
+        return this.outermostOp == null;
     }
 
     /**
      * @return the outermost operator of this expression, or null if it is atomic.
      */
     public String getOp() {
-        return outermostOp;
+        return this.outermostOp;
     }
 
     /**
      * Set the outermost operator of this expression.
-     * @param a known Boogie operator, or null if this expression is atomic.
+     *
+     * @param op a known Boogie operator, or null if this expression is atomic.
      */
     public void setOp(String op) {
         if (op != null) {
             boogiePrecedence(op);  // will throw exception if operator is unknown.
         }
-        outermostOp = op;
+        this.outermostOp = op;
     }
 
     /**
@@ -119,11 +120,11 @@ public class BoogieExpr {
      * precedence level.  In this case, we retain the FIRST of the weakest operators seen.
      * This is why clients who construct complex expressions should call setOp manually.
      *
-     * @param expr a known Boogie operator, or null.
+     * @param op a known Boogie operator, or null.
      */
     public void setOpIfWeaker(String op) {
-        if (outermostOp == null
-            || op != null && boogiePrecedence(op) < boogiePrecedence(outermostOp)) {
+        if (this.outermostOp == null
+            || op != null && boogiePrecedence(op) < boogiePrecedence(this.outermostOp)) {
             setOp(op);
         }
     }
@@ -134,29 +135,30 @@ public class BoogieExpr {
      * @param str
      */
     public void append(String str) {
-        builder.append(str);
+        this.builder.append(str);
     }
 
     public void appendf(String format, Object... args) {
-        builder.append(String.format(format, args));
+        this.builder.append(String.format(format, args));
     }
 
     @Override
     public String toString() {
-        return builder.toString();
+        return this.builder.toString();
     }
 
     /**
      * Coerce the term to a WVal string.
-     * @return
+     *
+     * @return a BoogieExpr of type WVal.
      */
     public BoogieExpr asWVal() {
-        if (termType == BoogieType.WVAL) {
+        if (this.termType == BoogieType.WVAL) {
             return this;
         } else {
-            BoogieExpr result = new BoogieExpr(BoogieType.WVAL);
+            final BoogieExpr result = new BoogieExpr(BoogieType.WVAL);
             result.append("from");
-            result.append(termType.toString());
+            result.append(this.termType.toString());
             result.append("(");
             result.builder.append(this.builder);
             result.append(")");
@@ -168,14 +170,14 @@ public class BoogieExpr {
      * Coerce the term down to the requested subtype.
      *
      * @param type Must be a strict subtype of WVal.
-     * @return
+     * @return a BoogieExpr whose type is the requested type.
      */
     public BoogieExpr as(BoogieType type) {
         assert type != BoogieType.WVAL;
-        if (termType == type) {
+        if (this.termType == type) {
             return this;
-        } else if (termType == BoogieType.WVAL){
-            BoogieExpr result = new BoogieExpr(type);
+        } else if (this.termType == BoogieType.WVAL){
+            final BoogieExpr result = new BoogieExpr(type);
             result.append("to");
             result.append(type.toString());
             result.append("(");
@@ -183,7 +185,7 @@ public class BoogieExpr {
             result.append(")");
             return result;
         } else {
-            throw new IllegalArgumentException("Cannot coerce " + builder.toString() + " to " + type);
+            throw new IllegalArgumentException("Cannot coerce " + this.builder.toString() + " to " + type);
         }
     }
 
@@ -196,11 +198,11 @@ public class BoogieExpr {
      */
     public void addAndBracketExpr(BoogieExpr expr, String op) {
         if (expr.needsBrackets(op)) {
-            builder.append("(");
-            builder.append(expr.builder);
-            builder.append(")");
+            this.builder.append("(");
+            this.builder.append(expr.builder);
+            this.builder.append(")");
         } else {
-            builder.append(expr.builder);
+            this.builder.append(expr.builder);
         }
     }
 
@@ -211,7 +213,7 @@ public class BoogieExpr {
      * @param expr
      */
     public void addExpr(BoogieExpr expr) {
-        builder.append(expr.builder);
+        this.builder.append(expr.builder);
         setOpIfWeaker(expr.outermostOp);
     }
 
@@ -222,16 +224,16 @@ public class BoogieExpr {
      * @return true if this expression needs parentheses before applying op to it.
      */
     public boolean needsBrackets(String op) {
-        if (outermostOp == null) {
+        if (this.outermostOp == null) {
             return false;
         }
-        int opPrec = boogiePrecedence(op);
-        int thisPrec = boogiePrecedence(outermostOp);
+        final int opPrec = boogiePrecedence(op);
+        final int thisPrec = boogiePrecedence(this.outermostOp);
         if (thisPrec > opPrec) {
             // this expr has a tighter-binding operator than op, so no brackets needed.
             return false;
         }
-        if (op.equals(outermostOp)) {
+        if (op.equals(this.outermostOp)) {
             // needs brackets, unless it is a safe associative operator.
             return !isAssociative(op);
         }
@@ -288,7 +290,7 @@ public class BoogieExpr {
      * @param rhs the right hand side expression, printed after the operator.
      */
     public void addOp(String op, BoogieExpr rhs) {
-        builder.append(op);
+        this.builder.append(op);
         addAndBracketExpr(rhs, op);
         setOpIfWeaker(op);
     }
@@ -303,7 +305,7 @@ public class BoogieExpr {
      */
     public void addOp(BoogieExpr lhs, String op, BoogieExpr rhs) {
         addAndBracketExpr(lhs, op);
-        builder.append(op);
+        this.builder.append(op);
         addAndBracketExpr(rhs, op);
         setOpIfWeaker(op);
     }
@@ -314,10 +316,10 @@ public class BoogieExpr {
      * @return a BoogieExpr whose outermost operator is null.
      */
     public BoogieExpr asAtom() {
-        if (outermostOp == null) {
+        if (this.outermostOp == null) {
             return this;
         } else {
-            return new BoogieExpr(termType, "(" + this.toString() + ")");
+            return new BoogieExpr(this.termType, "(" + this.toString() + ")");
         }
     }
 
@@ -328,7 +330,7 @@ public class BoogieExpr {
      */
     public BoogieExpr withBrackets(String op) {
         if (needsBrackets(op)) {
-            BoogieExpr result = new BoogieExpr(this.termType);
+            final BoogieExpr result = new BoogieExpr(this.termType);
             result.addAndBracketExpr(this, op);
             return result;
         } else {

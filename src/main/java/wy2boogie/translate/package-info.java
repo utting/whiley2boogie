@@ -8,4 +8,4 @@
  *
  * @author Mark Utting
  */
-package wyboogie;
+package wy2boogie.translate;

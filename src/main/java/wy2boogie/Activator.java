@@ -52,7 +52,6 @@ public class Activator implements Module.Activator {
 	@Override
 	public Module start(Module.Context context) {
 		// FIXME: logger is a hack!
-		System.out.println("start wy2boogie module");
 		final Logger logger = new Logger.Default(System.err);
 		// List of commands to use
 		final Command[] commands = {
