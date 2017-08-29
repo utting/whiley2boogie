@@ -2189,6 +2189,12 @@ public final class Wyil2Boogie {
             for (final Type b : t.bounds()) {
                 declareFields(b, done);
             }
+        } else if (type instanceof Type.Intersection) {
+            final Type.Intersection t = (Type.Intersection) type;
+            done.add(t);
+            for (final Type b : t.bounds()) {
+                declareFields(b, done);
+            }
         } else if (type instanceof Type.FunctionOrMethod) {
             final Type.FunctionOrMethod t = (Type.FunctionOrMethod) type;
             done.add(t);
