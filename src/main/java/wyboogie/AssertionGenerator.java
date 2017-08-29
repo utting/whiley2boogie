@@ -228,7 +228,8 @@ public class AssertionGenerator {
             assumeAndCheck(Collections.singletonList(negLhs), expr.getOperand(1));
             return;
 
-        case Bytecode.OPCODE_varaccess:
+        case Bytecode.OPCODE_varcopy:  // WAS .OPCODE_varaccess:
+        case Bytecode.OPCODE_varmove:  // WAS .OPCODE_varaccess:
             return; // we must NOT go back to the declaration, since we've already checked that earlier.
 
         }

@@ -49,9 +49,9 @@ import java.util.stream.Stream;
 
 import wybs.lang.Build;
 import wybs.util.StdProject;
-import wycc.lang.NameID;
-import wycc.lang.SyntaxError;
-import wycc.lang.SyntaxError.InternalFailure;
+import wybs.lang.NameID;
+import wybs.lang.SyntaxError;
+import wybs.lang.SyntaxError.InternalFailure;
 import wycc.util.Pair;
 import wyfs.lang.Content;
 import wyfs.lang.Path;
@@ -248,14 +248,14 @@ public final class Wyil2Boogie {
             out.printf("const unique %s:WFuncName;\n", func_const);
             // At the moment, we assume indirect-invoke is used rarely, so for ONE type of function in each program.
             // TODO: extend this to handle more than one type of indirect-invoke result (different applyTo operators?)
-            if (type.returns().size() != 1) {
+            if (type.returns().length != 1) {
                 throw new NotImplementedYet("multi-valued constant functions", null);
             }
-            Type ret = type.returns().get(0);
-            ArrayList<Type> args = type.params();
+            Type ret = type.returns()[0];
+            Type[] args = type.params();
             StringBuilder vDecl = new StringBuilder();
             StringBuilder vCall = new StringBuilder();
-            for (int i = 1; i <= args.size(); i++) {
+            for (int i = 1; i <= args.length; i++) {
                 if (i > 1) {
                     vDecl.append(", ");
                     vCall.append(", ");
@@ -263,14 +263,14 @@ public final class Wyil2Boogie {
                 vDecl.append("v" + i + ":WVal");
                 vCall.append("v" + i);
             }
-            String call = String.format("applyTo%d(toFunction(f), %s)", args.size(), vCall.toString());
-            System.err.println("WARNING: assuming that all indirect function calls of arity " + args.size() +
+            String call = String.format("applyTo%d(toFunction(f), %s)", args.length, vCall.toString());
+            System.err.println("WARNING: assuming that all indirect function calls of arity " + args.length +
                     " return type " + ret);
             out.printf("axiom (forall f:WVal, %s :: isFunction(f) ==> ", vDecl.toString());
             out.print(typePredicate(call, ret));
             out.printf(");\n");
             out.printf("axiom (forall %s :: applyTo%d(%s, %s) == %s(%s));\n\n",
-                    vDecl.toString(), args.size(),
+                    vDecl.toString(), args.length,
                     func_const, vCall.toString(),
                     name.name(), vCall.toString());
             referencedFunctions.add(name);
@@ -376,8 +376,8 @@ public final class Wyil2Boogie {
         declareFields(method.getTree());
         declareFuncConstants(method.getTree());
         String name = mangledFunctionMethodName(method.name(), method.type());
-        int inSize = ft.params().size();
-        int outSize = ft.returns().size();
+        int inSize = ft.params().length;
+        int outSize = ft.returns().length;
         inDecls = method.getTree().getLocations().subList(0, inSize);
         outDecls = method.getTree().getLocations().subList(inSize, inSize + outSize);
         assert inDecls.size() == inSize;
@@ -401,11 +401,11 @@ public final class Wyil2Boogie {
         }
         out.printf("    requires %s(%s);\n", name + METHOD_PRE, getNames(inDecls));
         // Part of the postcondition is the type and type constraints of each output variable.
-        List<Type> outputs = method.type().returns();
-        for (int i = 0; i != outputs.size(); ++i) {
+        Type[] outputs = method.type().returns();
+        for (int i = 0; i != outputs.length; ++i) {
             VariableDeclaration locn = (VariableDeclaration) outDecls.get(i).getBytecode();
             String inName = locn.getName();
-            out.printf("    ensures %s;\n", typePredicate(inName, outputs.get(i)));
+            out.printf("    ensures %s;\n", typePredicate(inName, outputs[i]));
         }
         for (Location<Expr> postcondition : method.getPostcondition()) {
             out.printf("    ensures %s;\n", boogieBoolExpr(postcondition).toString());
@@ -477,16 +477,16 @@ public final class Wyil2Boogie {
         out.print("(");
         writeParameters(method.type().params(), inDecls, null);
         out.print(") returns (bool)\n{\n      ");
-        List<Type> parameters = method.type().params();
-        for (int i = 0; i != parameters.size(); ++i) {
+        Type[] parameters = method.type().params();
+        for (int i = 0; i != parameters.length; ++i) {
             if (i != 0) {
                 out.print(AND_OUTER);
             }
             VariableDeclaration locn = (VariableDeclaration) inDecls.get(i).getBytecode();
             String inName = locn.getName();
-            out.print(typePredicate(inName, parameters.get(i)));
+            out.print(typePredicate(inName, parameters[i]));
         }
-        if (parameters.size() > 0) {
+        if (parameters.length > 0) {
             out.print(AND_OUTER);
         }
         writeConjunction(pre);
@@ -505,7 +505,7 @@ public final class Wyil2Boogie {
         out.print(name);
         out.print("(");
         writeParameters(method.type().params(), inDecls, null);
-        if (method.type().returns().isEmpty()) {
+        if (method.type().returns().length == 0) {
             out.println(");");
             throw new IllegalArgumentException("function with no return values: " + method);
         } else {
@@ -529,16 +529,16 @@ public final class Wyil2Boogie {
             out.println(call);
             out.print("    ==>\n      ");
             // Now write the type and type constraints of each output variable.
-            List<Type> outputs = method.type().returns();
-            for (int i = 0; i != outputs.size(); ++i) {
+            Type[] outputs = method.type().returns();
+            for (int i = 0; i != outputs.length; ++i) {
                 if (i != 0) {
                     out.print(AND_OUTER);
                 }
                 VariableDeclaration locn = (VariableDeclaration) outDecls.get(i).getBytecode();
                 String inName = locn.getName();
-                out.print(typePredicate(inName, outputs.get(i)));
+                out.print(typePredicate(inName, outputs[i]));
             }
-            if (outputs.size() > 0) {
+            if (outputs.length > 0) {
                 out.print(AND_OUTER);
             }
             writeConjunction(method.getPostcondition());
@@ -588,7 +588,7 @@ public final class Wyil2Boogie {
         out.print(name);
         out.print("(");
         writeParameters(method.type().params(), inDecls, mutatedInputs);
-        if (!method.type().returns().isEmpty()) {
+        if (method.type().returns().length > 0) {
             out.print(") returns (");
             writeParameters(method.type().returns(), outDecls, null);
         }
@@ -677,8 +677,8 @@ public final class Wyil2Boogie {
         }
     }
 
-    private void writeParameters(List<Type> parameters, List<Location<?>> decls, Map<String, Type> rename) {
-        for (int i = 0; i != parameters.size(); ++i) {
+    private void writeParameters(Type[] parameters, List<Location<?>> decls, Map<String, Type> rename) {
+        for (int i = 0; i != parameters.length; ++i) {
             if (i != 0) {
                 out.print(", ");
             }
@@ -1492,7 +1492,8 @@ public final class Wyil2Boogie {
         case Bytecode.OPCODE_is:
             return boogieIs((Location<Bytecode.Operator>) expr);
 
-        case Bytecode.OPCODE_varaccess:
+        case Bytecode.OPCODE_varcopy: // WAS: Bytecode.OPCODE_varaccess:
+        case Bytecode.OPCODE_varmove: // WAS: Bytecode.OPCODE_varaccess:
             return boogieVariableAccess((Location<VariableAccess>) expr);
 
         default:

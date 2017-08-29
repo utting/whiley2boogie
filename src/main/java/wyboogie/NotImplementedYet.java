@@ -1,6 +1,6 @@
 package wyboogie;
 
-import wycc.lang.Attribute.Source;
+import wybs.lang.Attribute.Source;
 import wyil.lang.SyntaxTree.Location;
 
 /**
