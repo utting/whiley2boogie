@@ -6,7 +6,7 @@ then
     for w in "$@"
     do
         echo "===== $w ====="
-        java -jar $SCRIPT_PATH/whiley2boogie.jar "$w" &&
+        wy wy2boogie "$w" &&
         boogie /timeLimit:10 $SCRIPT_PATH/../wval.bpl ${w%.whiley}.bpl
     done
 else
