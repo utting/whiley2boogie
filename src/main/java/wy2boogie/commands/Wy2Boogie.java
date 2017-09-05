@@ -38,12 +38,12 @@ public class Wy2Boogie extends Compile {
 
 	@Override
 	public String getName() {
-		return "wy2boogie";
+		return "boogie";
 	}
 
 	@Override
 	public String getDescription() {
-		return "Translates (WyIL) files into Boogie (a verification IL)";
+		return "Translates WyIL files into the Boogie verification language";
 	}
 
 	@Override

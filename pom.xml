@@ -22,15 +22,14 @@
   <!-- ============================================== -->
 
   <name>Whiley2Boogie Compiler (Wy2Boogie)</name>
-  <description>
-    The Whiley2Boogie Compiler is responsible for translating Whiley
-    Intermediate Language (WyIL) files into Boogie (an intermediate verification language).
-  </description>
+  <description>The Whiley2Boogie Compiler is responsible for translating Whiley Intermediate Language (WyIL) files into Boogie (an intermediate verification language).</description>
 
   <url>http://whiley.org</url>
 
   <scm>
-    <url>https://github.com/Whiley/Whiley2Boogie</url>
+    <url>https://github.com/utting/whiley2boogie</url>
+    <connection>scm:git:https://github.com/utting/whiley2boogie</connection>
+    <tag>master</tag>
   </scm>
 
   <developers>
