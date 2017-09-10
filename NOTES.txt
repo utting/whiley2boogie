@@ -1,8 +1,10 @@
 Workflow
 ========
-(See my bin directory for the shell scripts)
+(See 'scripts' directory for the shell scripts.  Add them to your PATH.)
+
 1. Run all valid tests through Wyil2Boogie and Boogie:
 
+   cd ../WhileyCompiler/tests/valid
    wyboogie *.whiley >OUTXX.txt 2>&1
 
 2. See how many tests passed/failed etc.
@@ -19,8 +21,8 @@ Workflow
    wydiff OUTXX.results
 
 
-TODO:
-Investigate running output Boogie programs using Boogaloo:
+DONE:
+Investigated running output Boogie programs using Boogaloo:
     https://bitbucket.org/nadiapolikarpova/boogaloo/wiki/Home 
     (It doesn't really 'run' the programs - it just searches for counter-examples)
 

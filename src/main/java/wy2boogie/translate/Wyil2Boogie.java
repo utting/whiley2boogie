@@ -1981,7 +1981,12 @@ public final class Wyil2Boogie {
             final List<String> fields = new ArrayList<String>(rec.values().keySet());
             Collections.sort(fields); // sort fields alphabetically
             final BoogieExpr[] vals = fields.stream().map(f -> createConstant(rec.values().get(f))).toArray(BoogieExpr[]::new);
-            return createRecordConstructor((Type.EffectiveRecord) cd.type(), vals);
+            System.out.println("rec.type=" + rec.type()
+            		+ ":" + rec.type().getClass().getTypeName()
+            		+ " extends " + rec.type().getClass().getSuperclass()
+            		+ " implements " + Arrays.toString(rec.type().getClass().getInterfaces())
+            		+ " in record " + cd);
+            return createRecordConstructor((Type.Record) rec.type(), vals);
         } else if (cd instanceof Constant.FunctionOrMethod) {
             final Constant.FunctionOrMethod fm = (Constant.FunctionOrMethod) cd;
             return new BoogieExpr(WVAL, "fromFunction(" + CONST_FUNC + fm.name().name() + ")");
@@ -2101,25 +2106,40 @@ public final class Wyil2Boogie {
         addPredefinedFunction("fromFunction", (Type.Function) Type.Function(any1, new Type[] { anyFunction }));
         addPredefinedFunction("fromMethod", (Type.Function) Type.Function(any1, new Type[] { anyMethod }));
 
+        // first we look for exported/native functions, so the *other* overloads will be overloaded.
         for (final WyilFile.FunctionOrMethod m : functionOrMethods) {
-            final String name = m.name();
             final boolean isExported = m.hasModifier(Modifier.EXPORT);
             final boolean isNative = m.hasModifier(Modifier.NATIVE);
-            Map<Type.FunctionOrMethod, String> map = this.functionOverloads.get(name);
-            if (map == null) {
-                // first one with this name needs no mangling!
-                map = new HashMap<>();
-                map.put(m.type(), name);
-                this.functionOverloads.put(name, map);
-            } else if (isExported || isNative) {
-                throw new IllegalArgumentException("Cannot overload exported function: " + name);
-            } else if (!map.containsKey(m.type())) {
-                final String mangled = name + "$" + (map.size() + 1);
-                map.put(m.type(), mangled);
-                System.err.printf("mangle %s : %s to %s\n", name, m.type().toString(), mangled);
+            if (isExported || isNative) {
+            		addFunctionOverload(m.name(), m.type(), isExported, isNative);
+            }
+        }
+        // secondly, do the remaining function definitions
+        for (final WyilFile.FunctionOrMethod m : functionOrMethods) {
+            final boolean isExported = m.hasModifier(Modifier.EXPORT);
+            final boolean isNative = m.hasModifier(Modifier.NATIVE);
+            if (! (isExported || isNative)) {
+            		addFunctionOverload(m.name(), m.type(), isExported, isNative);
             }
         }
     }
+
+	private void addFunctionOverload(final String name, final Type.FunctionOrMethod type, final boolean isExported,
+			final boolean isNative) {
+		Map<Type.FunctionOrMethod, String> map = this.functionOverloads.get(name);
+		if (map == null) {
+		    // first one with this name needs no mangling!
+		    map = new HashMap<>();
+		    map.put(type, name);
+		    this.functionOverloads.put(name, map);
+		} else if (isExported || isNative) {
+		    throw new IllegalArgumentException("Cannot overload exported function: " + name);
+		} else if (!map.containsKey(type)) {
+		    final String mangled = name + "$" + (map.size() + 1);
+		    map.put(type, mangled);
+		    System.err.printf("mangle %s : %s to %s\n", name, type.toString(), mangled);
+		}
+	}
 
     private void addPredefinedFunction(String predef, wyil.lang.Type.Function type) {
         final Map<Type.FunctionOrMethod, String> map = new HashMap<>();
