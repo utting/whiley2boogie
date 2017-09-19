@@ -16,8 +16,8 @@ import wycc.util.Pair;
 import wyfs.lang.Path;
 import wyfs.lang.Path.Entry;
 import wyfs.lang.Path.Root;
-import wyil.lang.WyilFile;
-import wyil.util.TypeSystem;
+import wyc.lang.WhileyFile;
+import wyc.type.TypeSystem;
 
 public class BoogieCompileTask implements Build.Task {
 	/**
@@ -65,7 +65,7 @@ public class BoogieCompileTask implements Build.Task {
 
 		for (final Pair<Path.Entry<?>, Path.Root> p : delta) {
 			final Path.Root dst = p.second();
-			final Path.Entry<WyilFile> source = (Path.Entry<WyilFile>) p.first();
+			final Path.Entry<WhileyFile> source = (Path.Entry<WhileyFile>) p.first();
 			final Path.Entry<BoogieFile> target = dst.create(source.id(), BoogieFile.ContentType);
 			graph.registerDerivation(source, target);
 			generatedFiles.add(target);
@@ -89,7 +89,7 @@ public class BoogieCompileTask implements Build.Task {
 		return generatedFiles;
 	}
 
-	private BoogieFile build(Path.Entry<WyilFile> source, Path.Entry<BoogieFile> target) throws IOException {
+	private BoogieFile build(Path.Entry<WhileyFile> source, Path.Entry<BoogieFile> target) throws IOException {
 		final ByteArrayOutputStream out = new ByteArrayOutputStream();
         final PrintWriter writer = new PrintWriter(out);
         final Wyil2Boogie translator = new Wyil2Boogie(writer);

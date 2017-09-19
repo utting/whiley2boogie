@@ -1,7 +1,7 @@
 package wy2boogie.translate;
 
 import wybs.lang.Attribute.Source;
-import wyil.lang.SyntaxTree.Location;
+import wybs.lang.SyntacticItem;;
 
 /**
  * Not Implemented errors, with some context information.
@@ -12,7 +12,7 @@ import wyil.lang.SyntaxTree.Location;
  */
 @SuppressWarnings("serial")
 public class NotImplementedYet extends RuntimeException {
-	protected Location<?> location;
+	protected SyntacticItem location;
 
 	/**
 	 * Record a Not Implemented Yet message, with a source file location.
@@ -20,22 +20,22 @@ public class NotImplementedYet extends RuntimeException {
 	 * @param message
 	 * @param loc can be null if not known.
 	 */
-	public NotImplementedYet(String message, Location<?> loc) {
+	public NotImplementedYet(String message, SyntacticItem loc) {
 		super(message);
 		location = loc;
 	}
 
-	public NotImplementedYet(Throwable cause, Location<?> loc) {
+	public NotImplementedYet(Throwable cause, SyntacticItem loc) {
 		super(cause);
 		location = loc;
 	}
 
-	public NotImplementedYet(String message, Throwable cause, Location<?> loc) {
+	public NotImplementedYet(String message, Throwable cause, SyntacticItem loc) {
 		super(message, cause);
 		location = loc;
 	}
 
-	public NotImplementedYet(String message, Throwable cause, Location<?> loc, boolean enableSuppression, boolean writableStackTrace) {
+	public NotImplementedYet(String message, Throwable cause, SyntacticItem loc, boolean enableSuppression, boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
 		location = loc;
 	}

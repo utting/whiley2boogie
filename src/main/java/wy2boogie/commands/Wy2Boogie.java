@@ -8,8 +8,8 @@ import wy2boogie.core.BoogieFile;
 import wy2boogie.tasks.BoogieCompileTask;
 import wybs.util.StdBuildRule;
 import wybs.util.StdProject;
-import wyc.commands.Compile;
-import wyc.commands.Compile.Result;
+import wyc.command.Compile;
+import wyc.command.Compile.Result;
 import wycc.lang.Command;
 import wycc.lang.Feature.ConfigurationError;
 import wycc.util.ArrayUtils;
@@ -18,7 +18,7 @@ import wyfs.lang.Content;
 import wyfs.lang.Path;
 import wyfs.lang.Content.Registry;
 import wyfs.util.DirectoryRoot;
-import wyil.lang.WyilFile;
+import wyc.lang.WhileyFile;
 
 public class Wy2Boogie extends Compile {
 	/**
@@ -112,8 +112,8 @@ public class Wy2Boogie extends Compile {
 
 	protected void addWyil2JavaScriptBuildRule(StdProject project) {
 		// Configure build rules for normal compilation
-		final Content.Filter<WyilFile> wyilIncludes = Content.filter("**", WyilFile.ContentType);
-		final Content.Filter<WyilFile> wyilExcludes = null;
+		final Content.Filter<WhileyFile> wyilIncludes = Content.filter("**", WhileyFile.BinaryContentType);
+		final Content.Filter<WhileyFile> wyilExcludes = null;
 		// Rule for compiling Whiley to WyIL
 		final BoogieCompileTask boogieBuilder = new BoogieCompileTask(project);
 		if(this.verbose) {

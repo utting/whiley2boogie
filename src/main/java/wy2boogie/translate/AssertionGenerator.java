@@ -5,13 +5,7 @@ import static wy2boogie.translate.BoogieType.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import wyil.lang.Bytecode;
-import wyil.lang.SyntaxTree;
-import wyil.lang.Type;
-import wyil.lang.Bytecode.VariableAccess;
-import wyil.lang.Bytecode.VariableDeclaration;
-import wyil.lang.SyntaxTree.Location;
+import static wyc.lang.WhileyFile.*;
 
 /**
  * Generate assertions to ensure that a given expression is well-defined.
@@ -88,7 +82,7 @@ public class AssertionGenerator {
      *              similar or greater indentation will be added for subsequent lines).
      * @param expr a predicate/expression to check for well-definedness.
      */
-    public void checkPredicate(int indent, Location<?> expr) {
+    public void checkPredicate(int indent, Expr expr) {
         context.clear();
         currentIndent = indent;
         check(expr);
@@ -101,7 +95,7 @@ public class AssertionGenerator {
      * @param indent
      * @param exprs an array of predicates/expressions to check for well-definedness.
      */
-    public void checkPredicates(int indent, Location<?>[] exprs) {
+    public void checkPredicates(int indent, Tuple<? extends Expr> exprs) {
         for (Location<?> loc : exprs) {
             checkPredicate(indent, loc);
         }
