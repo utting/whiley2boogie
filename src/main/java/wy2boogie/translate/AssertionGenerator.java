@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import wyc.util.WhileyFileVisitor;
+import wyc.util.AbstractVisitor;
 
 import static wyc.lang.WhileyFile.*;
 
@@ -110,7 +110,7 @@ public class AssertionGenerator {
      * This descends into sub-expressions, and records useful context information.
      */
     private void check(Expr expr) {
-		WhileyFileVisitor visitor = new WhileyFileVisitor() {
+		AbstractVisitor visitor = new AbstractVisitor() {
 
 			@Override
 			public void visitArrayAccess(Expr.ArrayAccess expr) {
@@ -204,8 +204,7 @@ public class AssertionGenerator {
 			@Override
 			public void visitIntegerDivision(Expr.IntegerDivision expr) {
 				// check constraint: rhs != 0
-				Tuple<Expr> operands = expr.getOperands();
-				BoogieExpr rhs = expr(operands.get(1)).as(INT).withBrackets(" != ");
+				BoogieExpr rhs = expr(expr.getSecondOperand()).as(INT).withBrackets(" != ");
 				BoogieExpr rhsNonZero = new BoogieExpr(BOOL, rhs.toString() + " != 0");
 				generateCheck(rhsNonZero);
 				//
@@ -215,8 +214,7 @@ public class AssertionGenerator {
 			@Override
 			public void visitIntegerRemainder(Expr.IntegerRemainder expr) {
 				// check constraint: rhs != 0
-				Tuple<Expr> operands = expr.getOperands();
-				BoogieExpr rhs = expr(operands.get(1)).as(INT).withBrackets(" != ");
+				BoogieExpr rhs = expr(expr.getSecondOperand()).as(INT).withBrackets(" != ");
 				BoogieExpr rhsNonZero = new BoogieExpr(BOOL, rhs.toString() + " != 0");
 				generateCheck(rhsNonZero);
 				//

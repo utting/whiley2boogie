@@ -17,7 +17,7 @@ import wyfs.lang.Path;
 import wyfs.lang.Path.Entry;
 import wyfs.lang.Path.Root;
 import wyc.lang.WhileyFile;
-import wyc.type.TypeSystem;
+import wyil.type.TypeSystem;
 
 public class BoogieCompileTask implements Build.Task {
 	/**

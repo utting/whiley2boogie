@@ -23,5 +23,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/WhileyCompiler"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/WhileyCompilerCollection"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/WhileyTheoremProver"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

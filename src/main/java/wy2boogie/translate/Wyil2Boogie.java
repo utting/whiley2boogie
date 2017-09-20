@@ -50,7 +50,7 @@ import wybs.lang.NameID;
 import static wyc.lang.WhileyFile.*;
 import wyc.lang.WhileyFile;
 import wyc.lang.WhileyFile.Decl.Variable;
-import wyc.util.WhileyFileVisitor;
+import wyc.util.AbstractVisitor;
 
 /**
  * Translates WYIL bytecodes into Boogie and outputs into a given file.
@@ -407,7 +407,7 @@ public final class Wyil2Boogie {
 
 	private Map<String, Type> findMutatedInputs(Decl.FunctionOrMethod method) {
 		final Map<String, Type> result = new LinkedHashMap<>();
-		final WhileyFileVisitor visitor = new WhileyFileVisitor() {
+		final AbstractVisitor visitor = new AbstractVisitor() {
 			@Override
 			public void visitAssign(Stmt.Assign stmt) {
 				for (Expr e : stmt.getLeftHandSide()) {
@@ -588,7 +588,7 @@ public final class Wyil2Boogie {
 		this.switchCount = 0;
 		final Map<String, Type> locals = new LinkedHashMap<>(); // preserve order, but remove duplicates
 		// Create visitor to traverse method or function body
-		WhileyFileVisitor visitor = new WhileyFileVisitor() {
+		AbstractVisitor visitor = new AbstractVisitor() {
 			@Override
 			public void visitVariable(Decl.Variable decl) {
 				final String name = decl.getName().get();
@@ -1505,6 +1505,14 @@ public final class Wyil2Boogie {
 		return out;
 	}
 
+	private BoogieExpr boogieInfixOp(BoogieType argType, Expr.BinaryOperator c, String op, BoogieType resultType) {
+		final BoogieExpr out = new BoogieExpr(resultType);
+		final BoogieExpr lhs = boogieExpr(c.getFirstOperand()).as(argType);
+		final BoogieExpr rhs = boogieExpr(c.getSecondOperand()).as(argType);
+		out.addOp(lhs, op, rhs);
+		return out;
+	}
+
 	private BoogieExpr boogieBitwiseOp(Expr.NaryOperator c, String op) {
 		Tuple<Expr> operands = c.getOperands();
 		final String opType = getBitwiseType(operands.get(0));
@@ -1686,10 +1694,9 @@ public final class Wyil2Boogie {
 	 * @param argType
 	 * @param c
 	 */
-	private BoogieExpr boogieEquality(Expr.NaryOperator c) {
-		Tuple<Expr> operands = c.getOperands();
-		final Expr left = operands.get(0);
-		final Expr right = operands.get(1);
+	private BoogieExpr boogieEquality(Expr.BinaryOperator c) {
+		final Expr left = c.getFirstOperand();
+		final Expr right = c.getSecondOperand();
 		final Type leftType = left.getType();
 		final Type rightType = right.getType();
 		Type eqType = new Type.Intersection(leftType, rightType);
@@ -2231,7 +2238,7 @@ public final class Wyil2Boogie {
 	 * @param tree
 	 */
 	private void declareFields(Stmt root) {
-		WhileyFileVisitor visitor = new WhileyFileVisitor() {
+		AbstractVisitor visitor = new AbstractVisitor() {
 			@Override
 			public void visitType(Type type) {
 				declareFields(type, new HashSet<Type>());
@@ -2242,7 +2249,7 @@ public final class Wyil2Boogie {
 	}
 
 	private void declareFields(Tuple<Expr> roots) {
-		WhileyFileVisitor visitor = new WhileyFileVisitor() {
+		AbstractVisitor visitor = new AbstractVisitor() {
 			@Override
 			public void visitType(Type type) {
 				declareFields(type, new HashSet<Type>());
@@ -2254,7 +2261,7 @@ public final class Wyil2Boogie {
 		}
 	}
 	/** Walks recursively through a constant and declares any function constants. */
-	private final WhileyFileVisitor funcConstantVisitor = new WhileyFileVisitor() {
+	private final AbstractVisitor funcConstantVisitor = new AbstractVisitor() {
 		@Override
 		public void visitLambdaAccess(Expr.LambdaAccess l) {
 			declareNewFunction(l.getName().toNameID(), l.getSignature());
