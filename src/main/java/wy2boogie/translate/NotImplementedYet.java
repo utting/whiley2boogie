@@ -1,7 +1,8 @@
 package wy2boogie.translate;
 
-import wybs.lang.Attribute.Source;
-import wyil.lang.SyntaxTree.Location;
+import wybs.lang.SyntacticItem;
+import wyc.lang.WhileyFile;
+import static wyc.lang.WhileyFile.Attribute;
 
 /**
  * Not Implemented errors, with some context information.
@@ -12,7 +13,7 @@ import wyil.lang.SyntaxTree.Location;
  */
 @SuppressWarnings("serial")
 public class NotImplementedYet extends RuntimeException {
-	protected Location<?> location;
+	protected SyntacticItem location;
 
 	/**
 	 * Record a Not Implemented Yet message, with a source file location.
@@ -20,22 +21,22 @@ public class NotImplementedYet extends RuntimeException {
 	 * @param message
 	 * @param loc can be null if not known.
 	 */
-	public NotImplementedYet(String message, Location<?> loc) {
+	public NotImplementedYet(String message, SyntacticItem loc) {
 		super(message);
 		location = loc;
 	}
 
-	public NotImplementedYet(Throwable cause, Location<?> loc) {
+	public NotImplementedYet(Throwable cause, SyntacticItem loc) {
 		super(cause);
 		location = loc;
 	}
 
-	public NotImplementedYet(String message, Throwable cause, Location<?> loc) {
+	public NotImplementedYet(String message, Throwable cause, SyntacticItem loc) {
 		super(message, cause);
 		location = loc;
 	}
 
-	public NotImplementedYet(String message, Throwable cause, Location<?> loc, boolean enableSuppression, boolean writableStackTrace) {
+	public NotImplementedYet(String message, Throwable cause, SyntacticItem loc, boolean enableSuppression, boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
 		location = loc;
 	}
@@ -44,16 +45,13 @@ public class NotImplementedYet extends RuntimeException {
 	public String getMessage() {
 		String msg = super.getMessage();
 		String context = "";
-		Source src = null;
+		Attribute.Span src = null;
 		if (location != null) {
 		    context = " in " + location.toString();
-			src = location.attribute(Source.class);
-			if (src == null) {
-			    // try again
-				src = location.getEnclosingTree().getEnclosingDeclaration().attribute(Source.class);
-			}
+			src = location.getParent(Attribute.Span.class);
 			if (src != null) {
-			    context = " at (" + src.line + "," + src.start + ")";
+				// FIXME: need to determine the line number here somehow --djp
+			    context = " at (" + src.getStart() + ".." + src.getEnd() + ")";
 			}
 		}
 		return msg + context;
