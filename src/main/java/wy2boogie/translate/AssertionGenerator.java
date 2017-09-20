@@ -5,6 +5,9 @@ import static wy2boogie.translate.BoogieType.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import wyc.util.WhileyFileVisitor;
+
 import static wyc.lang.WhileyFile.*;
 
 /**
@@ -36,7 +39,7 @@ public class AssertionGenerator {
      * @param var
      * @param expr
      */
-    private void declareAndCheck(List<String> vars, List<BoogieExpr> conjuncts, Location<?> expr) {
+    private void declareAndCheck(List<String> vars, List<BoogieExpr> conjuncts, Expr expr) {
         int size = bndVars.size();
         bndVars.addAll(vars);
         assumeAndCheck(conjuncts, expr);
@@ -51,7 +54,7 @@ public class AssertionGenerator {
      * @param conjunct
      * @param expr
      */
-    private void assumeAndCheck(List<BoogieExpr> conjuncts, Location<?> expr) {
+    private void assumeAndCheck(List<BoogieExpr> conjuncts, Expr expr) {
         int size = context.size();
         context.addAll(conjuncts);
         check(expr);
@@ -61,7 +64,7 @@ public class AssertionGenerator {
     }
 
     /** Translate a Whiley expression into a Boogie expression. */
-    protected BoogieExpr expr(Location<?> expr) {
+    protected BoogieExpr expr(Expr expr) {
         return wy2b.boogieExpr(expr);
     }
 
@@ -96,7 +99,7 @@ public class AssertionGenerator {
      * @param exprs an array of predicates/expressions to check for well-definedness.
      */
     public void checkPredicates(int indent, Tuple<? extends Expr> exprs) {
-        for (Location<?> loc : exprs) {
+        for (Expr loc : exprs) {
             checkPredicate(indent, loc);
         }
     }
@@ -106,134 +109,150 @@ public class AssertionGenerator {
      *
      * This descends into sub-expressions, and records useful context information.
      */
-    private void check(Location<?> expr) {
-        // The default is that after this switch, we still check all subexpressions.
-        // If a case has already checked all subexpressions, it should return, not break.
-        switch (expr.getOpcode()) {
+    private void check(Expr expr) {
+		WhileyFileVisitor visitor = new WhileyFileVisitor() {
 
-        case Bytecode.OPCODE_arrayindex:
-            // check that 0 <= index < arraylen(array).
-            BoogieExpr indexInBounds = new BoogieExpr(BOOL);
-            BoogieExpr array = expr(expr.getOperand(0)).asWVal();
-            BoogieExpr arraylen = new BoogieExpr(INT, "arraylen(" + array.toString() + ")");
-            BoogieExpr index = expr(expr.getOperand(1)).as(INT);
-            indexInBounds.addOp(ZERO, " <= ", index);
-            indexInBounds.addOp(" && ", new BoogieExpr(BOOL, index, " < ", arraylen));
-            assert indexInBounds.getOp().equals(" && ");
-            generateCheck(indexInBounds);
-            break;
+			@Override
+			public void visitArrayAccess(Expr.ArrayAccess expr) {
+				// check that 0 <= index < arraylen(array).
+				BoogieExpr indexInBounds = new BoogieExpr(BOOL);
+				BoogieExpr array = expr(expr.getFirstOperand()).asWVal();
+				BoogieExpr arraylen = new BoogieExpr(INT, "arraylen(" + array.toString() + ")");
+				BoogieExpr index = expr(expr.getSecondOperand()).as(INT);
+				indexInBounds.addOp(ZERO, " <= ", index);
+				indexInBounds.addOp(" && ", new BoogieExpr(BOOL, index, " < ", arraylen));
+				assert indexInBounds.getOp().equals(" && ");
+				generateCheck(indexInBounds);
+				// Continue checking all subexpression
+				super.visitArrayAccess(expr);
+			}
 
-//        case Bytecode.OPCODE_arraygen:
-//            // check that: 0 <= length.
-//            return writeArrayGenerator((Location<Bytecode.Operator>) expr);
-//
-//        case Bytecode.OPCODE_indirectinvoke:
-//            return writeIndirectInvoke((Location<Bytecode.IndirectInvoke>) expr);
+			// case Bytecode.OPCODE_arraygen:
+			// // check that: 0 <= length.
+			// return writeArrayGenerator((Location<Bytecode.Operator>) expr);
+			//
+			// case Bytecode.OPCODE_indirectinvoke:
+			// return writeIndirectInvoke((Location<Bytecode.IndirectInvoke>) expr);
 
-        case Bytecode.OPCODE_invoke:
-            Bytecode.Invoke funCall = (Bytecode.Invoke) expr.getBytecode();
-            String name = funCall.name().name();
-            Type.FunctionOrMethod type = funCall.type();
-            String funName = wy2b.mangledFunctionMethodName(name, type);
-            Location<?>[] operands = expr.getOperands();
-            BoogieExpr funPre = new BoogieExpr(BOOL, funName + Wyil2Boogie.METHOD_PRE + "(");
-            for(int i=0;i!=operands.length;++i) {
-                if(i!=0) {
-                    funPre.append(", ");
-                }
-                funPre.addExpr(expr(operands[i]).asWVal());
-            }
-            funPre.append(")");
-            generateCheck(funPre);
-            break;  // continue checking all subexpressions too.
+			@Override
+			public void visitInvoke(Expr.Invoke funCall) {
+				String name = funCall.getName().toString();
+				Type.Callable type = funCall.getSignature();
+				String funName = wy2b.mangledFunctionMethodName(name, type);
+				Tuple<Expr> operands = funCall.getOperands();
+				BoogieExpr funPre = new BoogieExpr(BOOL, funName + Wyil2Boogie.METHOD_PRE + "(");
+				for (int i = 0; i != operands.size(); ++i) {
+					if (i != 0) {
+						funPre.append(", ");
+					}
+					funPre.addExpr(expr(operands.get(i)).asWVal());
+				}
+				funPre.append(")");
+				generateCheck(funPre);
+				// Continue checking all subexpression
+				super.visitInvoke(funCall);
+			}
 
-//        case Bytecode.OPCODE_lambda:
-//            return writeLambda((Location<Bytecode.Lambda>) expr);
-//
-//        case Bytecode.OPCODE_record:
-//            BoogieExpr[] rvals = Arrays.stream(expr.getOperands()).map(this::expr).toArray(BoogieExpr[]::new);
-//            return createRecordConstructor((Type.EffectiveRecord) expr.getType(), rvals);
-//
-//        case Bytecode.OPCODE_newobject:
-//            return writeNewObject((Location<Bytecode.Operator>) expr);
-//
-//        case Bytecode.OPCODE_dereference:
-//            // TODO: dereference
-//            throw new NotImplementedYet("dereference", expr);
-//
-//        case Bytecode.OPCODE_neg:
-//            return prefixOp(INT, expr, "- ", INT);
+			// case Bytecode.OPCODE_lambda:
+			// return writeLambda((Location<Bytecode.Lambda>) expr);
+			//
+			// case Bytecode.OPCODE_record:
+			// BoogieExpr[] rvals =
+			// Arrays.stream(expr.getOperands()).map(this::expr).toArray(BoogieExpr[]::new);
+			// return createRecordConstructor((Type.EffectiveRecord) expr.getType(), rvals);
+			//
+			// case Bytecode.OPCODE_newobject:
+			// return writeNewObject((Location<Bytecode.Operator>) expr);
+			//
+			// case Bytecode.OPCODE_dereference:
+			// // TODO: dereference
+			// throw new NotImplementedYet("dereference", expr);
+			//
+			// case Bytecode.OPCODE_neg:
+			// return prefixOp(INT, expr, "- ", INT);
 
-        case Bytecode.OPCODE_all:
-            List<String> vars = new ArrayList<>();
-            List<BoogieExpr> constraints = new ArrayList<>();
-            for (int i = 0; i != expr.numberOfOperandGroups(); i++) {
-                Location<?>[] range = expr.getOperandGroup(i);
-                // declare the bound variable: v:WVal
-                @SuppressWarnings("unchecked")
-                Location<VariableDeclaration>  v = (Location<VariableDeclaration>) range[SyntaxTree.VARIABLE];
-                String bndName = v.getBytecode().getName();
-                vars.add(bndName);
+			@Override
+			public void visitUniversalQuantifier(Expr.UniversalQuantifier expr) {
+				List<String> vars = new ArrayList<>();
+				List<BoogieExpr> constraints = new ArrayList<>();
+				for (Decl.Variable parameter : expr.getParameters()) {
+					Expr.ArrayRange range = (Expr.ArrayRange) parameter.getInitialiser();
+					// declare the bound variable: v:WVal
+					String bndName = parameter.getName().get();
+					vars.add(bndName);
 
-                // and add the constraint: isInt(v) && start <= v && v <= end
-                BoogieExpr vExpr = new BoogieExpr(WVAL, bndName).as(INT);
-                Location<?> low = range[SyntaxTree.START];
-                Location<?> high = range[SyntaxTree.END];
-                check(low);
-                check(high);
-                BoogieExpr lowExpr = expr(low).as(INT);
-                BoogieExpr highExpr = expr(high).as(INT);
-                constraints.add(new BoogieExpr(BOOL, "isInt(" + bndName + ")"));
-                constraints.add(new BoogieExpr(BOOL, lowExpr, " <= ", vExpr));
-                constraints.add(new BoogieExpr(BOOL, vExpr, " < ", highExpr));
-            }
-            declareAndCheck(vars, constraints, expr.getOperand(SyntaxTree.CONDITION));
-            return; // we have checked all sub-expressions
+					// and add the constraint: isInt(v) && start <= v && v <= end
+					BoogieExpr vExpr = new BoogieExpr(WVAL, bndName).as(INT);
+					Expr low = range.getFirstOperand();
+					Expr high = range.getSecondOperand();
+					check(low);
+					check(high);
+					BoogieExpr lowExpr = expr(low).as(INT);
+					BoogieExpr highExpr = expr(high).as(INT);
+					constraints.add(new BoogieExpr(BOOL, "isInt(" + bndName + ")"));
+					constraints.add(new BoogieExpr(BOOL, lowExpr, " <= ", vExpr));
+					constraints.add(new BoogieExpr(BOOL, vExpr, " < ", highExpr));
+				}
+				declareAndCheck(vars, constraints, expr.getOperand());
+				//
+				super.visitUniversalQuantifier(expr);
+			}
+			// case Bytecode.OPCODE_some:
+			// return writeQuantifier("exists", " && ", (Location<Bytecode.Quantifier>)
+			// expr);
 
-//        case Bytecode.OPCODE_some:
-//            return writeQuantifier("exists", " && ", (Location<Bytecode.Quantifier>) expr);
+			@Override
+			public void visitIntegerDivision(Expr.IntegerDivision expr) {
+				// check constraint: rhs != 0
+				Tuple<Expr> operands = expr.getOperands();
+				BoogieExpr rhs = expr(operands.get(1)).as(INT).withBrackets(" != ");
+				BoogieExpr rhsNonZero = new BoogieExpr(BOOL, rhs.toString() + " != 0");
+				generateCheck(rhsNonZero);
+				//
+				super.visitIntegerDivision(expr);
+			}
 
-        case Bytecode.OPCODE_div:
-        case Bytecode.OPCODE_rem:
-            // check constraint: rhs != 0
-            BoogieExpr rhs = expr(expr.getOperand(1)).as(INT).withBrackets(" != ");
-            BoogieExpr rhsNonZero = new BoogieExpr(BOOL, rhs.toString() + " != 0");
-            generateCheck(rhsNonZero);
-            break;  // carry on checking subexpressions.
+			@Override
+			public void visitIntegerRemainder(Expr.IntegerRemainder expr) {
+				// check constraint: rhs != 0
+				Tuple<Expr> operands = expr.getOperands();
+				BoogieExpr rhs = expr(operands.get(1)).as(INT).withBrackets(" != ");
+				BoogieExpr rhsNonZero = new BoogieExpr(BOOL, rhs.toString() + " != 0");
+				generateCheck(rhsNonZero);
+				//
+				super.visitIntegerRemainder(expr);
+			}
+			// case Bytecode.OPCODE_logicalnot:
+			// TODO: does this upset our context calculations?
+			// return prefixOp(BOOL, expr, "! ", BOOL);
 
-//        case Bytecode.OPCODE_logicalnot:
-              // TODO: does this upset our context calculations?
-//            return prefixOp(BOOL, expr, "! ", BOOL);
+			@Override
+			public void visitLogicalAnd(Expr.LogicalAnd expr) {
+				Tuple<Expr> operands = expr.getOperands();
+				check(operands.get(0));
+				// assume the LHS while checking the RHS.
+				BoogieExpr lhsAnd = expr(operands.get(0)).as(BOOL);
+				assumeAndCheck(Collections.singletonList(lhsAnd), operands.get(1));
+				//
+				super.visitLogicalAnd(expr);
+			}
 
-        case Bytecode.OPCODE_logicaland:
-            check(expr.getOperand(0));
-            // assume the LHS while checking the RHS.
-            BoogieExpr lhsAnd = expr(expr.getOperand(0)).as(BOOL);
-            assumeAndCheck(Collections.singletonList(lhsAnd), expr.getOperand(1));
-            return;
-
-        case Bytecode.OPCODE_logicalor:
-            check(expr.getOperand(0));
-            // assume the negation of the LHS while checking the RHS.
-            BoogieExpr lhsOr = expr(expr.getOperand(0)).as(BOOL);
-            BoogieExpr negLhs = new BoogieExpr(BOOL);
-            negLhs.addOp("! ", lhsOr);
-            assert negLhs.getOp().equals("! ");
-            assumeAndCheck(Collections.singletonList(negLhs), expr.getOperand(1));
-            return;
-
-        case Bytecode.OPCODE_varcopy:  // WAS .OPCODE_varaccess:
-        case Bytecode.OPCODE_varmove:  // WAS .OPCODE_varaccess:
-            return; // we must NOT go back to the declaration, since we've already checked that earlier.
-
-        }
+			@Override
+			public void visitLogicalOr(Expr.LogicalOr expr) {
+				Tuple<Expr> operands = expr.getOperands();
+				check(operands.get(0));
+				// assume the negation of the LHS while checking the RHS.
+				BoogieExpr lhsOr = expr(operands.get(0)).as(BOOL);
+				BoogieExpr negLhs = new BoogieExpr(BOOL);
+				negLhs.addOp("! ", lhsOr);
+				assert negLhs.getOp().equals("! ");
+				assumeAndCheck(Collections.singletonList(negLhs), operands.get(1));
+				//
+				super.visitLogicalOr(expr);
+			}
+		};
         // The default behaviour is to check all sub-expressions.
-        // System.out.println("  looping thru " + expr.numberOfOperands() + " args of " + expr);
-        for (Location<?> loc : expr.getOperands()) {
-            check(loc);
-        }
+        visitor.visitExpression(expr);
     }
-
-
 
 }

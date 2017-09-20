@@ -1,7 +1,8 @@
 package wy2boogie.translate;
 
-import wybs.lang.Attribute.Source;
-import wybs.lang.SyntacticItem;;
+import wybs.lang.SyntacticItem;
+import wyc.lang.WhileyFile;
+import static wyc.lang.WhileyFile.Attribute;
 
 /**
  * Not Implemented errors, with some context information.
@@ -44,16 +45,13 @@ public class NotImplementedYet extends RuntimeException {
 	public String getMessage() {
 		String msg = super.getMessage();
 		String context = "";
-		Source src = null;
+		Attribute.Span src = null;
 		if (location != null) {
 		    context = " in " + location.toString();
-			src = location.attribute(Source.class);
-			if (src == null) {
-			    // try again
-				src = location.getEnclosingTree().getEnclosingDeclaration().attribute(Source.class);
-			}
+			src = location.getParent(Attribute.Span.class);
 			if (src != null) {
-			    context = " at (" + src.line + "," + src.start + ")";
+				// FIXME: need to determine the line number here somehow --djp
+			    context = " at (" + src.getStart() + ".." + src.getEnd() + ")";
 			}
 		}
 		return msg + context;
