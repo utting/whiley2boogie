@@ -1354,6 +1354,7 @@ public final class Wyil2Boogie {
 			return boogieArrayLength((Expr.ArrayLength) expr);
 
 		case EXPR_arrayaccess:
+		case EXPR_arrayborrow:
 			return boogieArrayIndex((Expr.ArrayAccess) expr);
 
 		case EXPR_arrayinitialiser: {
@@ -1485,7 +1486,7 @@ public final class Wyil2Boogie {
 			return boogieVariableAccess((Expr.VariableAccess) expr);
 
 		default:
-			throw new IllegalArgumentException("unknown bytecode encountered: " + expr);
+			throw new IllegalArgumentException("unknown bytecode " + expr.getOpcode() + " encountered: " + expr);
 		}
 	}
 
@@ -2223,6 +2224,9 @@ public final class Wyil2Boogie {
 			for (final Type b : t.getReturns()) {
 				declareFields(b, done);
 			}
+		} else if (type instanceof Type.Nominal) {
+			// A nominal type's definition RHS could contain fields.
+			// But we have processed that RHS when we reach the type definition.
 		} else if (type instanceof Type.Primitive) {
 			// no fields to declare
 		} else {
