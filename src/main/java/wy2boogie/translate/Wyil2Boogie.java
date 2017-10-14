@@ -1373,6 +1373,7 @@ public final class Wyil2Boogie {
 			final Expr.Constant c = (Expr.Constant) expr;
 			return createConstant(c.getValue());
 
+		case EXPR_recordborrow:
 		case EXPR_recordaccess:
 			return boogieFieldLoad((Expr.RecordAccess) expr);
 
