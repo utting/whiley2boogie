@@ -1353,6 +1353,7 @@ public final class Wyil2Boogie {
 		case EXPR_arraylength:
 			return boogieArrayLength((Expr.ArrayLength) expr);
 
+		case EXPR_arrayborrow:
 		case EXPR_arrayaccess:
 			return boogieArrayIndex((Expr.ArrayAccess) expr);
 
@@ -1372,6 +1373,7 @@ public final class Wyil2Boogie {
 			final Expr.Constant c = (Expr.Constant) expr;
 			return createConstant(c.getValue());
 
+		case EXPR_recordborrow:
 		case EXPR_recordaccess:
 			return boogieFieldLoad((Expr.RecordAccess) expr);
 
