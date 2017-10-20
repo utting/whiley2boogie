@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
 if [[ "$#" == 1 ]]
 then
+    # This looks for one pattern in each Whiley file output, to classify the result.
+    # 'test' is the name of the current Whiley file.
+    # 'out' is the whole output for that file, just for debugging pattern-matching problems.
     awk 'BEGIN{test="";fmt0="%-40s %s"; fmt=fmt0"\n"} \
          {if ($1 == "=====" && test=="") {test=$2; out=""} \
           else if ($1 == "wyboogie.NotImplementedYet:") {printf fmt,test,"NotImplYet"; test=""} \
-          else if ($0 ~ "Exception: ") {printf fmt,test,"Exception"; test=""} \
+          else if ($0 ~ "Exception: " && test) {printf fmt,test,"Exception"; test=""} \
           else if ($0 ~ "Error compiling") {printf fmt,test,"CompileError"; test=""} \
+          else if ($0 ~ "^ *\\^+ *$") {printf fmt,test,"CompileError"; test=""} \
           else if ($0 ~ " verified, 0 errors$") {printf fmt,test,"FullyVerified"; test=""} \
           else if ($0 ~ " verified, 0 errors, ") {printf fmt0" %s\n",test,"Timeouts",$0; test=""} \
           else if ($0 ~ " verified, [^0] error") {printf fmt0" %s\n",test,"PartVerified",$0; test=""} \
@@ -13,7 +17,7 @@ then
           else if ($1 == "=====") {printf fmt,test,"UNKNOWN!!!"; print out; out=""; test=$2} \
           else {out = out$0"\n"}
          }' "$@"
-    
+
 #    echo -n "Error Compiling:    "
 #    grep -i '^Error compiling' "$@" | wc -l
 

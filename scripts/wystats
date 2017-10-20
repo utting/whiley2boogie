@@ -2,16 +2,16 @@
 if [[ "$#" > 0 ]]
 then
     echo -n "Error Compiling:    "
-    grep -i '^Error compiling' "$@" | wc -l
+    grep -i '^ *^' "$@" | wc -l
 
     echo -n "NotImplementedYet:  "
-    grep -i NotImplementedYet: "$@" | wc -l
+    grep -i '^Exception in.*NotImplementedYet:' "$@" | wc -l
 
     echo -n "Other Exceptions:   "
-    grep -i exception "$@" | wc -l
+    grep '^Exception in ' "$@" | grep -v NotImplementedYet | wc -l
 
     echo -n "Errors in BPL:      "
-    grep -i 'bpl.*error:' "$@" | wc -l
+    grep -i '^[A-Z][A-Za-z0-9_]*.bpl(.*Error:' "$@" | sed -e 's/(.*//' | uniq | wc -l
 
     echo -n "Fully Verified:     "
     grep -i ' verified, 0 errors$' "$@" | wc -l
