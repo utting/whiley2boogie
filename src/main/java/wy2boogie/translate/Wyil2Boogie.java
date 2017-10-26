@@ -34,8 +34,6 @@ import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
@@ -48,6 +46,8 @@ import java.util.stream.Stream;
 
 import wybs.lang.NameID;
 import static wyc.lang.WhileyFile.*;
+
+import wybs.util.AbstractCompilationUnit;
 import wyc.lang.WhileyFile;
 import wyc.lang.WhileyFile.Decl.Variable;
 import wyc.util.AbstractVisitor;
@@ -581,7 +581,7 @@ public final class Wyil2Boogie {
 	 * method, looking for local variable declarations, and ignoring expressions and
 	 * quantifiers.
 	 *
-	 * @param locs
+	 * @param body
 	 */
 	private void writeLocalVarDecls(Stmt.Block body) {
 		// We start after the input and output parameters.
@@ -641,7 +641,6 @@ public final class Wyil2Boogie {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private void writeStatement(int indent, Stmt c) {
 		tabIndent(indent + 1);
 		switch (c.getOpcode()) {
@@ -740,6 +739,9 @@ public final class Wyil2Boogie {
 			writeVariableInit(indent, var);
 			break;
 		}
+		case DECL_lambda:
+			throw new NotImplementedYet("DECL_lambda: ", c);
+
 		default:
 			throw new NotImplementedYet("unknown bytecode encountered", c);
 		}
@@ -1383,6 +1385,8 @@ public final class Wyil2Boogie {
 		case EXPR_invoke:
 			return boogieInvoke((Expr.Invoke) expr);
 
+		case DECL_lambda:
+			throw new NotImplementedYet("DECL_lambda expr ", expr);
 		case EXPR_lambdaaccess:
 			return boogieLambda((Expr.LambdaAccess) expr);
 
@@ -1479,11 +1483,24 @@ public final class Wyil2Boogie {
 		case EXPR_logicalor:
 			return boogieInfixOp(BOOL, (Expr.LogicalOr) expr, " || ", BOOL);
 
+		case EXPR_logicaliff:
+			return boogieEquality((Expr.BinaryOperator) expr);
+
+		case EXPR_logiaclimplication:
+			// we translate A ===> B into !A || B.
+			final Expr.LogicalImplication impl = (Expr.LogicalImplication) expr;
+			final BoogieExpr lhs = boogieExpr(impl.getFirstOperand()).as(BOOL);
+			final BoogieExpr rhs = boogieExpr(impl.getSecondOperand()).as(BOOL);
+			final BoogieExpr out1 = new BoogieExpr(BOOL);
+			out1.addOp("! ", lhs);
+			return new BoogieExpr(BOOL, out1, " || ", rhs);
+
 		case EXPR_is:
 			return boogieIs((Expr.Is) expr);
 
 		case EXPR_variablecopy: // WAS: EXPR_varaccess:
 		case EXPR_variablemove: // WAS: EXPR_varaccess:
+		case EXPR_staticvariable:
 			return boogieVariableAccess((Expr.VariableAccess) expr);
 
 		default:
@@ -1676,25 +1693,17 @@ public final class Wyil2Boogie {
 	}
 
 	private BoogieExpr boogieIs(Expr.Is c) {
-		final BoogieExpr out = new BoogieExpr(BOOL);
 		final Expr lhs = c.getOperand();
 		final Type rhs = c.getTestType();
-		if (lhs instanceof Expr.VariableAccess) {
-			final Decl.Variable vd = ((Expr.VariableAccess) lhs).getVariableDeclaration();
-			final String name = vd.getName().get();
-			out.append(typePredicate(name, rhs));
-		} else {
-			throw new NotImplementedYet("expr is type", c);
-		}
-		return out;
+		// convert lhs to a string, so we can pass it into typePredicate(...).
+		final String lhsStr = boogieExpr(lhs).as(WVAL).asAtom().toString();
+		return new BoogieExpr(BOOL, typePredicate(lhsStr, rhs));
 	}
 
 	/**
 	 * Equality and inequality requires type-dependent expansion.
 	 *
-	 * @param resultType
-	 * @param argType
-	 * @param c
+	 * @param c a binary equality or inequality expression.
 	 */
 	private BoogieExpr boogieEquality(Expr.BinaryOperator c) {
 		final Expr left = c.getFirstOperand();
@@ -2028,7 +2037,7 @@ public final class Wyil2Boogie {
 		final BoogieExpr[] values = Arrays.stream(expr.getOperands().toArray(Expr.class)).map(this::boogieExpr)
 				.toArray(BoogieExpr[]::new);
 		final BoogieExpr out = new BoogieExpr(RECORD);
-		Tuple<Identifier> fields = expr.getFields();
+		Tuple<AbstractCompilationUnit.Identifier> fields = expr.getFields();
 		// the values are presented in order according to the alphabetically sorted
 		// field names!
 		// FIXME: need to fix sorting of fields --- djp
@@ -2060,7 +2069,7 @@ public final class Wyil2Boogie {
 	 * This should be called once at the beginning of each file/module. It
 	 * initialises the global <code>functionOverloads</code> map.
 	 *
-	 * @param functionOrMethods
+	 * @param declarations
 	 */
 	private void resolveFunctionOverloading(Tuple<Decl> declarations) {
 		// some common types
@@ -2240,7 +2249,7 @@ public final class Wyil2Boogie {
 	 *
 	 * This should be called before that syntax tree is output.
 	 *
-	 * @param tree
+	 * @param root
 	 */
 	private void declareFields(Stmt root) {
 		AbstractVisitor visitor = new AbstractVisitor() {

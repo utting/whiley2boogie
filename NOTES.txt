@@ -48,6 +48,26 @@ MethodCall_Valid_3.whiley requires unfolding method calls inside exprs.
 Process_Valid_6.whiley requires unfolding method calls inside exprs.
 
 
+Results 2017-10-26
+==================
+After API updates, and git update which added a few tests.
+Also, implemented ==> and <==>.
+$ wystats OUT56_assert_implies.txt
+Error Compiling:          11
+NotImplementedYet:       106
+Other Exceptions:         48
+Errors in BPL:            73
+Fully Verified:          305
+Verify time outs:          0
+Verify errors:            46
+
+
+RecursiveType_Valid_28:
+I don't think Line 26 (assert ls.next is Link)
+is valid in general, without a much stronger recursive invariant
+on List and LinkedList to relate their length to their non-nullness.
+
+
 Results
 =======
 2016-10-14: OUT32_array_checks.txt
