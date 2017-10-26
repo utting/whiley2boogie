@@ -19,7 +19,7 @@ import static wyc.lang.WhileyFile.*;
 public class AssertionGenerator {
     private final Wyil2Boogie wy2b;
 
-    protected final BoogieExpr ZERO = new BoogieExpr(INT, "0");
+    private final BoogieExpr ZERO = new BoogieExpr(INT, "0");
 
     private int currentIndent;
 
@@ -36,8 +36,9 @@ public class AssertionGenerator {
     /**
      * Check expr in the context of a universally quantifier variable, var.
      *
-     * @param var
-     * @param expr
+     * @param vars bound variables
+     * @param conjuncts constraints on the bound variables
+     * @param expr the main body of the quantifier
      */
     private void declareAndCheck(List<String> vars, List<BoogieExpr> conjuncts, Expr expr) {
         int size = bndVars.size();
@@ -51,8 +52,8 @@ public class AssertionGenerator {
     /**
      * Check expr under the assumption of conjunct.
      *
-     * @param conjunct
-     * @param expr
+     * @param conjuncts predicates that can be assumed true during the checking of expr.
+     * @param expr the expression to check.
      */
     private void assumeAndCheck(List<BoogieExpr> conjuncts, Expr expr) {
         int size = context.size();
@@ -64,16 +65,16 @@ public class AssertionGenerator {
     }
 
     /** Translate a Whiley expression into a Boogie expression. */
-    protected BoogieExpr expr(Expr expr) {
+    private BoogieExpr expr(Expr expr) {
         return wy2b.boogieExpr(expr);
     }
 
     /**
      * Generate a Boogie assertion to check the given conjecture.
      *
-     * @param conjecture
+     * @param conjecture the predicate to check.
      */
-    protected void generateCheck(BoogieExpr conjecture) {
+    private void generateCheck(BoogieExpr conjecture) {
         wy2b.generateAssertion(currentIndent, bndVars, context, conjecture);
     }
 
@@ -95,7 +96,7 @@ public class AssertionGenerator {
     /**
      * Convenience entry point to check a whole array of expressions.
      *
-     * @param indent
+     * @param indent how many levels to indent this whole assertion.
      * @param exprs an array of predicates/expressions to check for well-definedness.
      */
     public void checkPredicates(int indent, Tuple<? extends Expr> exprs) {
@@ -194,8 +195,6 @@ public class AssertionGenerator {
 					constraints.add(new BoogieExpr(BOOL, vExpr, " < ", highExpr));
 				}
 				declareAndCheck(vars, constraints, expr.getOperand());
-				//
-				super.visitUniversalQuantifier(expr);
 			}
 			// case Bytecode.OPCODE_some:
 			// return writeQuantifier("exists", " && ", (Location<Bytecode.Quantifier>)
@@ -231,8 +230,6 @@ public class AssertionGenerator {
 				// assume the LHS while checking the RHS.
 				BoogieExpr lhsAnd = expr(operands.get(0)).as(BOOL);
 				assumeAndCheck(Collections.singletonList(lhsAnd), operands.get(1));
-				//
-				super.visitLogicalAnd(expr);
 			}
 
 			@Override
@@ -245,8 +242,15 @@ public class AssertionGenerator {
 				negLhs.addOp("! ", lhsOr);
 				assert negLhs.getOp().equals("! ");
 				assumeAndCheck(Collections.singletonList(negLhs), operands.get(1));
-				//
-				super.visitLogicalOr(expr);
+			}
+
+			@Override
+			public void visitLogicalImplication(Expr.LogicalImplication expr) {
+				check(expr.getFirstOperand());
+				// assume the LHS while checking the RHS.
+				BoogieExpr lhsOr = expr(expr.getFirstOperand()).as(BOOL);
+				System.out.println("assuming lhs of ==> " + lhsOr);
+				assumeAndCheck(Collections.singletonList(lhsOr), expr.getSecondOperand());
 			}
 		};
         // The default behaviour is to check all sub-expressions.
