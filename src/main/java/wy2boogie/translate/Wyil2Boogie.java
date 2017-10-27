@@ -88,6 +88,7 @@ import wyc.util.AbstractVisitor;
  *
  * TODO: implement missing language features, such as:
  * <ul>
+ *   <li>DONE: Property declarations and uses.</li>
  *   <li>System.Console sys and sys.out.println(string)</li>
  *   <li>DONE: indirect invoke (12 tests)</li>
  *   <li>DONE: references, new (17 tests), and dereferencing (17 tests)</li>
@@ -279,6 +280,12 @@ public final class Wyil2Boogie {
 				writeProcedure((Decl.FunctionOrMethod) decl);
 	            this.out.println();
 	            this.out.flush();
+			} else if (decl instanceof Decl.Property) {
+				writeProperty((Decl.Property) decl);
+				this.out.println();
+				this.out.flush();
+			} else {
+				throw new NotImplementedYet("Unknown declaration " + decl.getClass(), decl);
 			}
         }
     }
@@ -460,6 +467,29 @@ public final class Wyil2Boogie {
 	}
 
 	/**
+	 * Writes out a Whiley property declaration as a Boogie boolean function with explicit body.
+	 *
+	 * @param prop Whiley property
+	 */
+	private void writeProperty(Decl.Property prop) {
+		final String name = mangledFunctionMethodName(prop.getName().get(), prop.getType());
+		this.inDecls = prop.getParameters();
+		this.outDecls = prop.getReturns();
+		this.out.printf("function %s(", name);
+		writeParameters(this.inDecls, null);
+		this.out.println(") returns (bool);");
+
+		// write axiom: (forall in :: f(in) <==> body);
+		this.out.print("axiom (forall ");
+		writeParameters(this.inDecls, null);
+		this.out.printf(" :: %s(%s) <==> ", name, getNames(this.inDecls));
+		writeConjunction(prop.getInvariant());
+		this.out.println(");");
+		this.inDecls = null;
+		this.outDecls = null;
+	}
+
+	/**
 	 * Writes out a Boogie function declaration, plus a pre implies post axiom.
 	 *
 	 * @param name
@@ -519,8 +549,7 @@ public final class Wyil2Boogie {
 	/**
 	 * Get the names being declared.
 	 *
-	 * @param decls
-	 *            a list of declarations.
+	 * @param decls a list of declarations.
 	 * @return a comma-separated string of just the names being declared.
 	 */
 	private String getNames(Tuple<Decl.Variable> decls) {
@@ -538,7 +567,6 @@ public final class Wyil2Boogie {
 	/**
 	 * Writes a conjunction, and leaves it as a Boogie boolean value.
 	 *
-	 * @param preds
 	 */
 	private void writeConjunction(Tuple<Expr> preds) {
 		if (preds.size() == 0) {
@@ -698,7 +726,6 @@ public final class Wyil2Boogie {
 			// TODO: check arguments against the precondition!
 			this.out.print("call "); // it should be a method, not a function
 			this.outerMethodCall = (Expr.Invoke) c;
-			;
 			writeInvoke(indent, (Expr.Invoke) c);
 			this.outerMethodCall = null;
 			break;
@@ -1627,17 +1654,19 @@ public final class Wyil2Boogie {
 
 	private BoogieExpr boogieInvoke(Expr.Invoke expr) {
 		// TODO: check that it is safe to use unqualified DeclID names?
-		final BoogieExpr out = new BoogieExpr(WVAL);
+		BoogieType outType = WVAL;
 		final String name = expr.getName().toString();
 		final Type.Callable type = expr.getSignature();
 		if (type instanceof Type.Method) {
 			if (expr != this.outerMethodCall) {
 				// The Whiley language spec 0.3.38, Section 3.5.5, says that because they are
-				// impure,
-				// methods cannot be called inside specifications.
+				// impure, methods cannot be called inside specifications.
 				throw new NotImplementedYet("call to method (" + name + ") from inside an expression", expr);
 			}
+		} else if (type instanceof Type.Property) {
+			outType = BOOL; // properties are translated to Boogie boolean functions.
 		}
+		final BoogieExpr out = new BoogieExpr(outType);
 		out.append(mangledFunctionMethodName(name, type) + "(");
 		final Tuple<Expr> operands = expr.getOperands();
 		for (int i = 0; i != operands.size(); ++i) {
