@@ -27,7 +27,6 @@ package wy2boogie.translate;
 
 import static wy2boogie.translate.BoogieType.*;
 
-import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -49,7 +48,6 @@ import static wyc.lang.WhileyFile.*;
 
 import wybs.util.AbstractCompilationUnit;
 import wyc.lang.WhileyFile;
-import wyc.lang.WhileyFile.Decl.Variable;
 import wyc.util.AbstractVisitor;
 
 /**
@@ -103,17 +101,18 @@ import wyc.util.AbstractVisitor;
  * @author David J. Pearce
  * @author Mark Utting
  */
+@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public final class Wyil2Boogie {
     /** Prefix for the function/method names namespace (the WFuncName Boogie type). */
-    public static final String CONST_FUNC = "func__";
+    private static final String CONST_FUNC = "func__";
 
-    public static final String HEAP = "w__heap";
-    public static final String ALLOCATED = "w__alloc";
-    public static final String NEW = "new";
-    public static final String NEW_REF = "ref__";
+    private static final String HEAP = "w__heap";
+    private static final String ALLOCATED = "w__alloc";
+    private static final String NEW = "new";
+    private static final String NEW_REF = "ref__";
     // max number of 'new' expressions in a single statement.
     // TODO: calculate this on the fly within each procedure?
-    public static final int NEW_REF_MAX = 4;
+    private static final int NEW_REF_MAX = 4;
 
     private static final String IMMUTABLE_INPUT = "__0";
 
@@ -124,13 +123,13 @@ public final class Wyil2Boogie {
     public static final String METHOD_PRE = "__pre";
 
     /** Where the Boogie output is written. */
-    protected PrintWriter out;
+	private final PrintWriter out;
 
     /**
      * If true, then the Whiley bytecodes are printed as comments.
      * Note: this must be set via the '-v' flag in the main method.
      */
-    protected boolean verbose = false;
+	private boolean verbose = false;
 
     /** Keeps track of which (non-mangled) WField names have already been declared. */
     private final Set<String> declaredFields = new HashSet<>();
@@ -145,10 +144,10 @@ public final class Wyil2Boogie {
     private Map<String, Map<Type.Callable, String>> functionOverloads;
 
     /** Input parameters of the current function/method. */
-    Tuple<Decl.Variable> inDecls;
+	private Tuple<Decl.Variable> inDecls;
 
     /** Output parameters of the current function/method. */
-    Tuple<Decl.Variable> outDecls;
+	private Tuple<Decl.Variable> outDecls;
 
     /**
      * The method (procedure) that we are currently calling.
@@ -173,7 +172,7 @@ public final class Wyil2Boogie {
      * These labels are prefixed by "CONTINUE__" at the start of the loop body,
      * and by "BREAK__" after the end of the whole loop statement.
      */
-    Deque<String> loopLabels = new ArrayDeque<>();
+	private final Deque<String> loopLabels = new ArrayDeque<>();
 
     private final AssertionGenerator vcg;
 
@@ -205,7 +204,7 @@ public final class Wyil2Boogie {
      *
      * This should be called with all fields in a definition, before that definition is output.
      */
-	protected void declareNewFields(Tuple<Decl.Variable> fields) {
+	private void declareNewFields(Tuple<Decl.Variable> fields) {
 		for (final Decl.Variable f : fields) {
 			String name = f.getName().get();
 			if (!this.declaredFields.contains(name)) {
@@ -221,7 +220,8 @@ public final class Wyil2Boogie {
      * This is careful to only declare a function the first time its name is seen.
      * So it is safe to call it on every function and method constant.
      */
-    protected void declareNewFunction(NameID name, Type.Callable type) {
+	@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
+	private void declareNewFunction(NameID name, Type.Callable type) {
         if (!this.referencedFunctions.contains(name)) {
             final String func_const = CONST_FUNC + name.name();
             this.out.printf("const unique %s:WFuncName;\n", func_const);
@@ -260,7 +260,7 @@ public final class Wyil2Boogie {
     // Apply Method
     // ======================================================================
 
-    public void apply(WhileyFile module) throws IOException {
+    public void apply(WhileyFile module) {
         resolveFunctionOverloading(module.getDeclarations());
         this.out.printf("var %s:[WRef]WVal;\n", HEAP);
         this.out.printf("var %s:[WRef]bool;\n", ALLOCATED);
@@ -302,7 +302,7 @@ public final class Wyil2Boogie {
     private void writeTypeSynonym(Decl.Type td) {
         final Type t = td.getType();
         final Decl.Variable vd = td.getVariableDeclaration();
-        declareFields(t, new HashSet<Type>());
+        declareFields(t, new HashSet<>());
 		declareFields(td.getInvariant());
 		declareFuncConstants(td.getInvariant());
 		// writeModifiers(td.modifiers());
@@ -321,7 +321,7 @@ public final class Wyil2Boogie {
 	}
 
 	private void writeConstant(Decl.StaticVariable cd) {
-		declareFields(cd.getType(), new HashSet<Type>());
+		declareFields(cd.getType(), new HashSet<>());
 		declareFuncConstants(cd.getInitialiser());
 		this.out.printf("const %s : WVal;\n", cd.getName());
 		this.out.printf("axiom %s == %s;\n", cd.getName(), boogieExpr(cd.getInitialiser()).asWVal());
@@ -675,13 +675,13 @@ public final class Wyil2Boogie {
 		case STMT_assert: {
 			Stmt.Assert s = (Stmt.Assert) c;
 			this.vcg.checkPredicate(indent, s.getCondition());
-			writeAssert(indent, s); // should not contain 'new'
+			writeAssert(s); // should not contain 'new'
 			break;
 		}
 		case STMT_assume: {
 			Stmt.Assume s = (Stmt.Assume) c;
 			this.vcg.checkPredicate(indent, s.getCondition());
-			writeAssume(indent, s); // should not contain 'new'
+			writeAssume(s); // should not contain 'new'
 			break;
 		}
 		case STMT_assign: {
@@ -694,19 +694,19 @@ public final class Wyil2Boogie {
 			break;
 		}
 		case STMT_break:
-			writeBreak(indent, (Stmt.Break) c);
+			writeBreak((Stmt.Break) c);
 			break;
 		case STMT_continue:
-			writeContinue(indent, (Stmt.Continue) c);
+			writeContinue((Stmt.Continue) c);
 			break;
 		case STMT_debug:
-			writeDebug(indent, (Stmt.Debug) c);
+			writeDebug((Stmt.Debug) c);
 			break;
 		case STMT_dowhile:
 			writeDoWhile(indent, (Stmt.DoWhile) c);
 			break;
 		case STMT_fail:
-			writeFail(indent, (Stmt.Fail) c);
+			writeFail((Stmt.Fail) c);
 			break;
 		case STMT_if:
 		case STMT_ifelse: {
@@ -747,7 +747,7 @@ public final class Wyil2Boogie {
 			break;
 		}
 		case STMT_skip:
-			writeSkip(indent, (Stmt.Skip) c);
+			writeSkip((Stmt.Skip) c);
 			break;
 		case STMT_switch: {
 			Stmt.Switch s = (Stmt.Switch) c;
@@ -816,11 +816,11 @@ public final class Wyil2Boogie {
 		tabIndent(indent + 1); // get ready for next statement.
 	}
 
-	private void writeAssert(int indent, Stmt.Assert c) {
+	private void writeAssert(Stmt.Assert c) {
 		this.out.printf("assert %s;\n", boogieBoolExpr(c.getCondition()).toString());
 	}
 
-	private void writeAssume(int indent, Stmt.Assume c) {
+	private void writeAssume(Stmt.Assume c) {
 		this.out.printf("assume %s;\n", boogieBoolExpr(c.getCondition()).toString());
 	}
 
@@ -939,14 +939,14 @@ public final class Wyil2Boogie {
 	}
 
 	/** Some kind of index into a data structure. */
-	interface Index {
+	private interface Index {
 	}
 
 	/** An index into an array. */
-	class IntIndex implements Index {
-		String index;
+	private static class IntIndex implements Index {
+		private final String index;
 
-		public IntIndex(String i) {
+		private IntIndex(String i) {
 			this.index = i;
 		}
 
@@ -957,10 +957,10 @@ public final class Wyil2Boogie {
 	}
 
 	/** An index into a given field within a record/object. */
-	class FieldIndex implements Index {
-		String field;
+	private static class FieldIndex implements Index {
+		private final String field;
 
-		public FieldIndex(String f) {
+		private FieldIndex(String f) {
 			this.field = f;
 		}
 
@@ -971,10 +971,10 @@ public final class Wyil2Boogie {
 	}
 
 	/** An index into the heap (via a reference). */
-	class DerefIndex implements Index {
-		String ref;
+	private static class DerefIndex implements Index {
+		private final String ref;
 
-		public DerefIndex(String ref) {
+		private DerefIndex(String ref) {
 			this.ref = ref;
 		}
 
@@ -1014,8 +1014,7 @@ public final class Wyil2Boogie {
 			indexes.add(0, new DerefIndex(ref));
 			return HEAP;
 		} else if (loc instanceof Expr.VariableAccess) {
-			final String base = boogieExpr(loc).asWVal().toString();
-			return base;
+			return boogieExpr(loc).asWVal().toString();
 		}
 		throw new NotImplementedYet("complex assignment left-hand side", loc);
 	}
@@ -1070,11 +1069,12 @@ public final class Wyil2Boogie {
 		return (loc instanceof Expr.Invoke && ((Expr.Invoke) loc).getSignature() instanceof Type.Method);
 	}
 
-	private void writeBreak(int indent, Stmt.Break b) {
+	@SuppressWarnings("unused")
+	private void writeBreak(Stmt.Break b) {
 		this.out.printf("goto BREAK__%s;\n", this.loopLabels.getLast());
 	}
 
-	private void writeContinue(int indent, Stmt.Continue b) {
+	private void writeContinue(Stmt.Continue b) {
 		if (this.loopLabels.getLast().startsWith("SWITCH")) {
 			// TODO: implement 'continue' within switch.
 			throw new NotImplementedYet("continue inside switch", b);
@@ -1082,7 +1082,8 @@ public final class Wyil2Boogie {
 		this.out.printf("goto CONTINUE__%s;\n", this.loopLabels.getLast());
 	}
 
-	private void writeDebug(int indent, Stmt.Debug b) {
+	@SuppressWarnings({"EmptyMethod", "unused"})
+	private void writeDebug(Stmt.Debug b) {
 		// out.println("debug;");
 	}
 
@@ -1144,10 +1145,9 @@ public final class Wyil2Boogie {
 	 * In the refinement calculus, and Boogie, 'assert false' forces the verifier to
 	 * check this.
 	 *
-	 * @param indent
 	 * @param c
 	 */
-	private void writeFail(int indent, Stmt.Fail c) {
+	private void writeFail(@SuppressWarnings("unused") Stmt.Fail c) {
 		this.out.println("assert false;");
 	}
 
@@ -1251,7 +1251,7 @@ public final class Wyil2Boogie {
 			this.outerMethodCall = null;
 		}
 		for (int i = 0; i != operands.size(); ++i) {
-			final Decl.Variable locn = (Decl.Variable) this.outDecls.get(i);
+			final Decl.Variable locn = this.outDecls.get(i);
 			final String name = locn.getName().get();
 			this.out.printf("%s := %s;\n", name, args[i]);
 			tabIndent(indent + 1);
@@ -1259,8 +1259,9 @@ public final class Wyil2Boogie {
 		this.out.println("return;");
 	}
 
-	private void writeSkip(int indent, Stmt.Skip b) {
+	private void writeSkip(Stmt.Skip b) {
 		// no output needed. Boogie uses {...} blocks, so empty statements are okay.
+		this.out.println("// " + b);
 	}
 
 	/**
@@ -1327,18 +1328,16 @@ public final class Wyil2Boogie {
 		BoogieExpr match = new BoogieExpr(BoogieType.BOOL);
 		String op = null;
 		for (final Expr cd : c.getConditions()) {
-			// FIXME: here is a potential problem --- djp
-			// final BoogieExpr val = createConstant(cd).asWVal();
-			final BoogieExpr val = boogieExpr(cd);
+			final BoogieExpr val = boogieExpr(cd).asWVal();
 			final BoogieExpr test = new BoogieExpr(BoogieType.BOOL, var, " == ", val);
 			final BoogieExpr negTest = new BoogieExpr(BoogieType.BOOL, var, " != ", val);
 			defaultCond.addOp(" && ", negTest);
 			if (op == null) {
 				match = test;
 			} else {
-				op = " || ";
 				match.addOp(op, test);
 			}
+			op = " || ";
 		}
 		tabIndent(indent + 1);
 		this.out.printf(this.loopLabels.getLast() + "__CASE%d:\n", count);
@@ -1366,18 +1365,18 @@ public final class Wyil2Boogie {
 		// TODO: Do we need a havoc here, to mimic non-det initialisation?
 	}
 
-	/** Convenience: equivalent to expr(_).as(BOOL). */
-	protected BoogieExpr boogieBoolExpr(Expr expr) {
+	/** Convenience: equivalent to boogieExpr(_).as(BOOL). */
+	BoogieExpr boogieBoolExpr(Expr expr) {
 		return boogieExpr(expr).as(BOOL);
 	}
 
 	/** Convenience: equivalent to expr(_).as(INT). */
-	protected BoogieExpr boogieIntExpr(Expr expr) {
+	BoogieExpr boogieIntExpr(Expr expr) {
 		return boogieExpr(expr).as(INT);
 	}
 
 	@SuppressWarnings("unchecked")
-	protected BoogieExpr boogieExpr(Expr expr) {
+	BoogieExpr boogieExpr(Expr expr) {
 		switch (expr.getOpcode()) {
 		case EXPR_arraylength:
 			return boogieArrayLength((Expr.ArrayLength) expr);
@@ -1565,8 +1564,7 @@ public final class Wyil2Boogie {
 		final BoogieExpr lhs = boogieExpr(operands.get(0)).as(INT);
 		final BoogieExpr rhs = boogieExpr(operands.get(1)).as(INT);
 		final String call = String.format("%s_%s(%s, %s)", opType, op, lhs.toString(), rhs.toString());
-		final BoogieExpr out = new BoogieExpr(INT, call);
-		return out;
+		return new BoogieExpr(INT, call);
 	}
 
 	private BoogieExpr boogieBitwiseOp(Expr.BinaryOperator c, String op) {
@@ -1574,8 +1572,7 @@ public final class Wyil2Boogie {
 		final BoogieExpr lhs = boogieExpr(c.getFirstOperand()).as(INT);
 		final BoogieExpr rhs = boogieExpr(c.getSecondOperand()).as(INT);
 		final String call = String.format("%s_%s(%s, %s)", opType, op, lhs.toString(), rhs.toString());
-		final BoogieExpr out = new BoogieExpr(INT, call);
-		return out;
+		return new BoogieExpr(INT, call);
 	}
 
 	/** We distinguish bitwise operators on byte values from other int values. */
@@ -1648,8 +1645,7 @@ public final class Wyil2Boogie {
 		// FIXME: this doesn't seem right --- djp
 		final BoogieExpr arg = boogieExpr(args.get(0)).asWVal();
 		// TODO: decide what to do if func is a method?
-		final BoogieExpr out = new BoogieExpr(WVAL, "applyTo1(" + func + ", " + arg + ")");
-		return out;
+		return new BoogieExpr(WVAL, "applyTo1(" + func + ", " + arg + ")");
 	}
 
 	private BoogieExpr boogieInvoke(Expr.Invoke expr) {
@@ -1717,8 +1713,7 @@ public final class Wyil2Boogie {
 	private BoogieExpr boogieDereference(Expr.Dereference expr) {
 		final BoogieExpr be = boogieExpr(expr.getOperand()).as(WREF);
 		// TODO: assume the type information of out.
-		final BoogieExpr out = new BoogieExpr(WVAL, "w__heap[" + be.toString() + "]");
-		return out;
+		return new BoogieExpr(WVAL, "w__heap[" + be.toString() + "]");
 	}
 
 	private BoogieExpr boogieIs(Expr.Is c) {
@@ -1750,8 +1745,7 @@ public final class Wyil2Boogie {
 						c);
 			}
 		}
-		final BoogieExpr eq = boogieTypedEquality(eqType, boogieExpr(left), boogieExpr(right)).as(BOOL);
-		return eq;
+		return boogieTypedEquality(eqType, boogieExpr(left), boogieExpr(right)).as(BOOL);
 	}
 
 	/** True for the types that our equality code generator can handle. */
@@ -1839,14 +1833,7 @@ public final class Wyil2Boogie {
 		return out;
 	}
 
-	private static Comparator<Decl.Variable> fieldsComparator = new Comparator<Decl.Variable>() {
-
-		@Override
-		public int compare(Variable o1, Variable o2) {
-			return o1.getName().compareTo(o2.getName());
-		}
-
-	};
+	private static final Comparator<Decl.Variable> fieldsComparator = Comparator.comparing(Decl.Named::getName);
 
 	@SuppressWarnings("unchecked")
 	private BoogieExpr boogieQuantifier(String quant, String predOp, Expr.Quantifier c) {
@@ -1884,7 +1871,7 @@ public final class Wyil2Boogie {
 	 *
 	 * @param indent
 	 */
-	protected void tabIndent(int indent) {
+	private void tabIndent(int indent) {
 		indent = indent * 4;
 		for (int i = 0; i < indent; ++i) {
 			this.out.print(" ");
@@ -1892,7 +1879,7 @@ public final class Wyil2Boogie {
 	}
 
 	/** Returns an indent of the requested number of 'tab' stops. */
-	protected String createIndent(int indent) {
+	private String createIndent(int indent) {
 		return indent <= 0 ? "" : String.format("%" + (indent * 4) + "s", "");
 	}
 
@@ -1906,7 +1893,7 @@ public final class Wyil2Boogie {
 	 * @return a Boogie boolean typing predicate, such as "isInt(a)". The outermost
 	 *         operator will have precedence of && or tighter.
 	 */
-	public String typePredicate(String var, Type type) {
+	private String typePredicate(String var, Type type) {
 		final String typeStr = type.toString();
 		if (type instanceof Type.Nominal) {
 			final String typeName = ((Type.Nominal) type).getName().toString();
@@ -1963,13 +1950,16 @@ public final class Wyil2Boogie {
 		if (type instanceof Type.Union) {
 			// we generate the disjunction of all the bounds
 			final Type.Union u = (Type.Union) type;
-			String result = "((";
+			final StringBuilder sb = new StringBuilder();
+			sb.append("((");
 			String sep = "";
 			for (int i = 0; i != u.size(); ++i) {
-				result += sep + typePredicate(var, u.get(i));
+				sb.append(sep);
+				sb.append(typePredicate(var, u.get(i)));
 				sep = ") || (";
 			}
-			return result + "))";
+			sb.append("))");
+			return sb.toString();
 		}
 		if (type instanceof Type.Negation) {
 			// we negate the type test
@@ -2100,7 +2090,7 @@ public final class Wyil2Boogie {
 	 * @param field
 	 * @return field prefixed with a dollar.
 	 */
-	protected String mangledWField(String field) {
+	private String mangledWField(String field) {
 		return "$" + field;
 	}
 
@@ -2158,15 +2148,25 @@ public final class Wyil2Boogie {
 		addPredefinedFunction("fromFunction", new Type.Function(new Tuple<>(any1), new Tuple<>(anyFunction)));
 		addPredefinedFunction("fromMethod", new Type.Function(new Tuple<>(any1), new Tuple<>(anyMethod)));
 
-		// first we look for exported/native functions, so the *other* overloads will be
-		// overloaded.
+		// first we look for exported/native functions, and mark them as NOT overloaded.
 		for (final Decl d : declarations) {
-			if (d instanceof Decl.FunctionOrMethod) {
-				Decl.FunctionOrMethod m = (Decl.FunctionOrMethod) d;
+			if (d instanceof Decl.Callable) {
+				Decl.Callable m = (Decl.Callable) d;
 				final boolean isExported = m.match(Modifier.Export.class) != null;
 				final boolean isNative = m.match(Modifier.Native.class) != null;
 				if (isExported || isNative) {
 					addFunctionOverload(m.getName().get(), m.getType(), isExported, isNative);
+				}
+			}
+		}
+		// secondly, do the remaining function definitions
+		for (final Decl d : declarations) {
+			if (d instanceof Decl.Callable) {
+				Decl.Callable m = (Decl.Callable) d;
+				final boolean isExported = m.match(Modifier.Export.class) != null;
+				final boolean isNative = m.match(Modifier.Native.class) != null;
+				if (!isExported && !isNative) {
+					addFunctionOverload(m.getName().get(), m.getType(), false, false);
 				}
 			}
 		}
@@ -2210,7 +2210,7 @@ public final class Wyil2Boogie {
 	 *            the type of the function or method.
 	 * @return a human-readable name for the function/method.
 	 */
-	protected String mangledFunctionMethodName(String name, Type.Callable type) {
+	String mangledFunctionMethodName(String name, Type.Callable type) {
 		final Map<Type.Callable, String> map = this.functionOverloads.get(name);
 		if (map == null) {
 			System.err.printf("Warning: function/method %s : %s assumed to be external, so not mangled.\n", name, type);
@@ -2235,6 +2235,7 @@ public final class Wyil2Boogie {
 	 *            the names of the types that have already been processed. (This is
 	 *            used to handle recursive and mutually-recursive types).
 	 */
+	@SuppressWarnings("StatementWithEmptyBody")
 	private void declareFields(Type type, Set<Type> done) {
 		if (done.contains(type)) {
 			return; // this is a recursive type
@@ -2296,7 +2297,7 @@ public final class Wyil2Boogie {
 		AbstractVisitor visitor = new AbstractVisitor() {
 			@Override
 			public void visitType(Type type) {
-				declareFields(type, new HashSet<Type>());
+				declareFields(type, new HashSet<>());
 			}
 		};
 		//
@@ -2307,7 +2308,7 @@ public final class Wyil2Boogie {
 		AbstractVisitor visitor = new AbstractVisitor() {
 			@Override
 			public void visitType(Type type) {
-				declareFields(type, new HashSet<Type>());
+				declareFields(type, new HashSet<>());
 			}
 		};
 		//
