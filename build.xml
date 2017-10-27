@@ -21,6 +21,7 @@
 
   <target name="compile" depends="setup">
     <javac includeantruntime="false"
+       debug="true"
 	   target="${JAVA_VERSION}"
  	   source="${JAVA_VERSION}"
 	   srcdir="${JAVA_DIR}"
