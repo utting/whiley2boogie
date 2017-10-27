@@ -1526,8 +1526,11 @@ public final class Wyil2Boogie {
 
 		case EXPR_variablecopy: // WAS: EXPR_varaccess:
 		case EXPR_variablemove: // WAS: EXPR_varaccess:
-		case EXPR_staticvariable:
 			return boogieVariableAccess((Expr.VariableAccess) expr);
+
+		case EXPR_staticvariable:
+			Expr.StaticVariableAccess svar = (Expr.StaticVariableAccess) expr;
+			return new BoogieExpr(WVAL, svar.getName().getLast().toString());
 
 		default:
 			throw new IllegalArgumentException("unknown bytecode " + expr.getOpcode() + " encountered: " + expr);
