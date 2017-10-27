@@ -26,8 +26,54 @@ Investigated running output Boogie programs using Boogaloo:
     https://bitbucket.org/nadiapolikarpova/boogaloo/wiki/Home 
     (It doesn't really 'run' the programs - it just searches for counter-examples)
 
+
+Results 2017-10-27
+==================
+Add support for Value.UTF8 (Strings) in createConst.
+$ wystats OUT57_const_strings.txt
+Error Compiling:          11
+NotImplementedYet:        75
+Other Exceptions:         49
+Errors in BPL:            78
+Fully Verified:          325
+Verify time outs:          0
+Verify errors:            51
+
+
+Results 2017-10-26
+==================
+After API updates, and git update which added a few tests.
+Also, implemented ==> and <==>.
+$ wystats OUT56_assert_implies.txt
+Error Compiling:          11
+NotImplementedYet:       106
+Other Exceptions:         48
+Errors in BPL:            73
+Fully Verified:          305
+Verify time outs:          0
+Verify errors:            46
+
+Issue: RecursiveType_Valid_28
+I don't think Line 26 (assert ls.next is Link)
+is valid in general, without a much stronger recursive invariant
+on List and LinkedList to relate their length to their non-nullness.
+
+
+Results 2017-09-05
+==================
+Before new IL API update.  409/548 = 74.6%
+$ wystats OUT52.txt
+Error Compiling:          17
+NotImplementedYet:        52
+Other Exceptions:         22
+Errors in BPL:            24
+Fully Verified:          409
+Verify time outs:          3
+Verify errors:            21
+
+
 Results 2017-03-23
-===== 
+==================
 (OUT41_outer_method_calls.txt, in tests_david_2017_03_19/valid)
 Total tests: 531 (tests/valid has only 514)
 
@@ -48,31 +94,10 @@ MethodCall_Valid_3.whiley requires unfolding method calls inside exprs.
 Process_Valid_6.whiley requires unfolding method calls inside exprs.
 
 
-Results 2017-10-26
+Results 2016-11-08
 ==================
-After API updates, and git update which added a few tests.
-Also, implemented ==> and <==>.
-$ wystats OUT56_assert_implies.txt
-Error Compiling:          11
-NotImplementedYet:       106
-Other Exceptions:         48
-Errors in BPL:            73
-Fully Verified:          305
-Verify time outs:          0
-Verify errors:            46
-
-
-RecursiveType_Valid_28:
-I don't think Line 26 (assert ls.next is Link)
-is valid in general, without a much stronger recursive invariant
-on List and LinkedList to relate their length to their non-nullness.
-
-
-Results
-=======
-2016-10-14: OUT32_array_checks.txt
-
-$ wystats OUT32_array_checks.txt 
+Added array index checks.
+$ wystats OUT32_array_checks.txt
 Error Compiling:          21
 NotImplementedYet:       132
 Other Exceptions:          2
@@ -94,7 +119,6 @@ While_Valid_23.bpl(25,34): Error: undeclared identifier: j
 While_Valid_42.bpl(28,19): Error: more than one declaration of variable name: j
 While_Valid_42.bpl(32,19): Error: more than one declaration of variable name: j
 While_Valid_42.bpl(38,26): Error: more than one declaration of variable name: j
-
 
 ===================================
 In tests/valid

@@ -1996,7 +1996,19 @@ public final class Wyil2Boogie {
 			final int val = Byte.toUnsignedInt(b.get());
 			return new BoogieExpr(INT, Integer.toString(val));
 		} else if (cd instanceof Value.Null) {
-			return new BoogieExpr(WVAL, "null"); // already a WVal
+			return new BoogieExpr(WVAL, "null"); // already a WVal;
+		} else if (cd instanceof Value.UTF8) {
+			// we turn the string into an array of ints.
+			final String str = cd.toString();
+			int len = 0;
+			final StringBuilder sb = new StringBuilder();
+			sb.append("arrayconst(fromInt(0))");
+			for (int i = 0; i < str.length(); len++) {
+				int cp = str.codePointAt(i);
+				sb.append("[" + len + " := fromInt(" + cp + ")]");
+				i += Character.charCount(cp);
+			}
+			return new BoogieExpr(WVAL, "fromArray(" + sb.toString() + ", " + len + ")");
 		} else {
 			throw new NotImplementedYet("createConstant(" + cd + ")", null);
 		}
