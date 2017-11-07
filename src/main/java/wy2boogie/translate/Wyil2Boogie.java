@@ -245,9 +245,9 @@ public final class Wyil2Boogie {
             final String call = String.format("applyTo%d(toFunction(f), %s)", args.size(), vCall.toString());
             System.err.println("WARNING: assuming that all indirect function calls of arity " + args.size() +
                     " return type " + ret);
-            this.out.printf("axiom (forall f:WVal, %s :: isFunction(f) ==> ", vDecl.toString());
-            this.out.print(typePredicate(call, ret));
-            this.out.printf(");\n");
+            this.out.printf("axiom (forall f:WVal, %s :: isFunction(f) ==> %s);\n",
+					vDecl.toString(),
+					typePredicate(call, ret));
             this.out.printf("axiom (forall %s :: applyTo%d(%s, %s) == %s(%s));\n\n",
                     vDecl.toString(), args.size(),
                     func_const, vCall.toString(),
@@ -1724,7 +1724,9 @@ public final class Wyil2Boogie {
 		final Type rhs = c.getTestType();
 		// convert lhs to a string, so we can pass it into typePredicate(...).
 		final String lhsStr = boogieExpr(lhs).as(WVAL).asAtom().toString();
-		return new BoogieExpr(BOOL, typePredicate(lhsStr, rhs));
+		BoogieExpr typePred = new BoogieExpr(BOOL, typePredicate(lhsStr, rhs));
+		typePred.setOp(" && ");
+		return typePred;
 	}
 
 	/**
@@ -1882,7 +1884,7 @@ public final class Wyil2Boogie {
 	}
 
 	/** Returns an indent of the requested number of 'tab' stops. */
-	private String createIndent(int indent) {
+	String createIndent(int indent) {
 		return indent <= 0 ? "" : String.format("%" + (indent * 4) + "s", "");
 	}
 
@@ -2107,11 +2109,13 @@ public final class Wyil2Boogie {
 	 */
 	private void resolveFunctionOverloading(Tuple<Decl> declarations) {
 		// some common types
-		final Type[] any1 = { Type.Any };
+		// NOTE: the Any type was removed on 27/10/2017, so we simulate it by:  int|!int.
+		final Type type_Any = new Type.Union(Type.Int, new Type.Negation(Type.Int));
+		final Type[] any1 = { type_Any };
 		final Type[] bool1 = { Type.Bool };
 		final Type[] int1 = { Type.Int };
-		final Type[] array1 = { new Type.Array(Type.Any) };
-		final Type[] ref1 = { new Type.Reference(Type.Any) };
+		final Type[] array1 = { new Type.Array(type_Any) };
+		final Type[] ref1 = { new Type.Reference(type_Any) };
 		final Type[] record1 = { new Type.Record(false, new Tuple<>()) };
 		final Type[] object1 = { new Type.Record(true, new Tuple<>()) };
 		// the following types are approximate - the params or returns are more specific
