@@ -30,17 +30,7 @@ import static wy2boogie.translate.BoogieType.*;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 import wybs.lang.Build;
@@ -201,7 +191,11 @@ public final class Wyil2Boogie {
 	 */
 	private final TypeSystem typeSystem;
 
-    public Wyil2Boogie(TypeSystem typeSys, PrintWriter writer) {
+	/** Records type synonyms, so we can unfold them during when generating equality tests. */
+	private Map<String, Type> typeDefs = new HashMap<>();
+
+
+	public Wyil2Boogie(TypeSystem typeSys, PrintWriter writer) {
     	this.typeSystem = typeSys;
         this.out = writer;
         this.vcg = new AssertionGenerator(this);
@@ -347,6 +341,10 @@ public final class Wyil2Boogie {
 			writeConjunction(td.getInvariant());
 		}
 		this.out.println(" }");
+
+		// remember this type synonym for later
+		System.out.println("DEBUG: recording type " + td.getName().get() + " := " + t + " where " + td.getInvariant());
+		this.typeDefs.put(td.getName().get(), t); // we do not need the invariants
 	}
 
 	private void writeConstant(Decl.StaticVariable cd) {
@@ -1780,6 +1778,7 @@ public final class Wyil2Boogie {
 		// try to find a simple intersection of leftType and rightType
 		Type intersectType = new Type.Intersection(leftType, rightType);
 		Type usableType = findUsableEqualityType(intersectType);
+		// System.out.println("DEBUG: " + leftType + " =?= " + rightType + " gives intersection " + usableType);
 		if (usableType == null) {
 			// Let's try harder to simplify this intersection type.
 			// 'simplify' does not do enough simplification - we need to unfold NominalTypes.
@@ -1826,9 +1825,16 @@ public final class Wyil2Boogie {
 			return elemType == null ? null : new Type.Array(elemType);
 		} else if (type instanceof Type.Record) {
 			Type.Record aType = (Type.Record) type;
-
-			// TODO: check all the field types too!
-			return new Type.Record(aType.isOpen(), aType.getFields());
+			// Now we map all the field types too!
+			List<Decl.Variable> fields = new ArrayList<>();
+			for (Decl.Variable v : aType.getFields()) {
+				Type fType = findUsableEqualityType(v.getType());
+				if (fType == null) {
+					return null; // give up!
+				}
+				fields.add(new Decl.Variable(v.getModifiers(), v.getName(), fType));
+			}
+			return new Type.Record(aType.isOpen(), new Tuple(fields));
 		} else if (type instanceof Type.Intersection) {
 			Type.Intersection aType = (Type.Intersection) type;
 			for (int i = 0; i < aType.size(); i++) {
@@ -1837,11 +1843,16 @@ public final class Wyil2Boogie {
 					return result;
 				}
 			}
-			System.out.println("DEBUG: equality intersection null: " + type);
+			// System.out.println("DEBUG: equality intersection null: " + type);
 			return null;
 		} else if (type instanceof Type.Difference) {
 			Type.Difference aType = (Type.Difference) type;
 			return findUsableEqualityType(aType.getLeftHandSide());
+		} else if (type instanceof Type.Nominal) {
+			Type.Nominal aType = (Type.Nominal) type;
+			Type result = this.typeDefs.getOrDefault(aType.getName().get(0).get(), null);
+			// System.out.println("DEBUG: unfold eq type: " + type + " -> " + result);
+			return findUsableEqualityType(result);
 		} else {
 			System.out.println("DEBUG: difficult equality type: " + type);
 			return null;
