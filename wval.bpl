@@ -119,7 +119,7 @@ axiom (forall a1:WVal, a2:WVal ::
     isArray(a1)
     && isArray(a2)
     && arraylen(a1) == arraylen(a2)
-    && (forall i:int :: toArray(a1)[i] == toArray(a2)[i])
+    && (forall i:int :: 0 <= i && i < arraylen(a1) ==> toArray(a1)[i] == toArray(a2)[i])
     ==> a1 == a2
     );
 
