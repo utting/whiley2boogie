@@ -229,15 +229,18 @@ public final class Wyil2Boogie {
      */
 	private void declareNewFields(Tuple<Decl.Variable> fields) {
 		for (final Decl.Variable f : fields) {
-			String name = f.getName().get();
-			if (!this.declaredFields.contains(name)) {
-				this.out.println("const unique " + mangledWField(name) + ":WField;");
-				this.declaredFields.add(name);
-			}
+			declareNewField(f.getName().get());
 		}
 	}
 
-    /**
+	private void declareNewField(String name) {
+		if (!this.declaredFields.contains(name)) {
+            this.out.println("const unique " + mangledWField(name) + ":WField;");
+            this.declaredFields.add(name);
+        }
+	}
+
+	/**
      * Declare any function or method names whose address is taken.
      *
      * This is careful to only declare a function the first time its name is seen.
@@ -670,6 +673,16 @@ public final class Wyil2Boogie {
 				// we don't bother recording these in the 'done' map, since each switch has a
 				// unique variable.
 				out.printf("var %s : WVal;\n", createSwitchVar(switchCount));
+			}
+
+			@Override
+			public void visitExistentialQuantifier(Expr.ExistentialQuantifier expr) {
+				// do not recurse in, because vars inside quantifiers are bound vars in Boogie.
+			}
+
+			@Override
+			public void visitUniversalQuantifier(Expr.UniversalQuantifier expr) {
+				// do not recurse in, because vars inside quantifiers are bound vars in Boogie.
 			}
 		};
 		// Run the visitor
@@ -2408,6 +2421,30 @@ public final class Wyil2Boogie {
 		}
 	}
 
+	private final AbstractVisitor recordVisitor = new AbstractVisitor() {
+		@Override
+		public void visitType(Type type) {
+			declareFields(type, new HashSet<>());
+		}
+
+		@Override
+		public void visitRecordInitialiser(Expr.RecordInitialiser expr) {
+			for (AbstractCompilationUnit.Identifier f: expr.getFields()) {
+				declareNewField(f.get());
+			}
+		}
+
+		@Override
+		public void visitRecordAccess(Expr.RecordAccess expr) {
+			declareNewField(expr.getField().get());
+		}
+
+		@Override
+		public void visitRecordUpdate(Expr.RecordUpdate expr) {
+			declareNewField(expr.getField().get());
+		}
+	};
+
 	/**
 	 * A helper function that declares all new fields in a complete syntax tree.
 	 *
@@ -2416,28 +2453,15 @@ public final class Wyil2Boogie {
 	 * @param root
 	 */
 	private void declareFields(Stmt root) {
-		AbstractVisitor visitor = new AbstractVisitor() {
-			@Override
-			public void visitType(Type type) {
-				declareFields(type, new HashSet<>());
-			}
-		};
-		//
-		visitor.visitStatement(root);
+		recordVisitor.visitStatement(root);
 	}
 
 	private void declareFields(Tuple<Expr> roots) {
-		AbstractVisitor visitor = new AbstractVisitor() {
-			@Override
-			public void visitType(Type type) {
-				declareFields(type, new HashSet<>());
-			}
-		};
-		//
 		for(Expr root : roots) {
-			visitor.visitExpression(root);
+			recordVisitor.visitExpression(root);
 		}
 	}
+
 	/** Walks recursively through a constant and declares any function constants. */
 	private final AbstractVisitor funcConstantVisitor = new AbstractVisitor() {
 		@Override
