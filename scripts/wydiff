@@ -16,7 +16,13 @@ then
                for (k in stats) {print k"\t"stats[k]; sum+=stats[k]}\
                print "Total\t"sum\
               }'
+elif [[ "$#" == 2 ]]
+then
+    sdiff "$1" "$2" |grep '[<>|]'
 else
-    echo "Usage: $0 OUT*.results"
+    echo "Usage 1: $0 OUT.results"
+    echo "         This compares OUT.results against the Whiley prover (WHILEY/ALL.results)"
+    echo "Usage 2: $0 OUT1.results OUT2.results"
+    echo "         This compares OUT1.results against OUT2.results"
     exit 1
 fi
