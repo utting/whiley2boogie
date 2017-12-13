@@ -25,13 +25,13 @@ public class BoogieCompileTask implements Build.Task {
 	 * builder. This includes all modules declared in the project being verified
 	 * and/or defined in external resources (e.g. jar files).
 	 */
-	protected final Build.Project project;
+	private final Build.Project project;
 
 	/**
 	 * The type system is useful for managing nominal types and converting them
 	 * into their underlying types.
 	 */
-	protected final TypeSystem typeSystem;
+	private final TypeSystem typeSystem;
 
 	/**
 	 * For logging information.
@@ -52,6 +52,7 @@ public class BoogieCompileTask implements Build.Task {
 		return this.project;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Set<Entry<?>> build(Collection<Pair<Entry<?>, Root>> delta, Graph graph) throws IOException {
 		final Runtime runtime = Runtime.getRuntime();
@@ -65,7 +66,7 @@ public class BoogieCompileTask implements Build.Task {
 
 		for (final Pair<Path.Entry<?>, Path.Root> p : delta) {
 			final Path.Root dst = p.second();
-			final Path.Entry<WhileyFile> source = (Path.Entry<WhileyFile>) p.first();
+			final Path.Entry<WhileyFile> source = (Entry<WhileyFile>) p.first();
 			final Path.Entry<BoogieFile> target = dst.create(source.id(), BoogieFile.ContentType);
 			graph.registerDerivation(source, target);
 			generatedFiles.add(target);
@@ -92,7 +93,7 @@ public class BoogieCompileTask implements Build.Task {
 	private BoogieFile build(Path.Entry<WhileyFile> source, Path.Entry<BoogieFile> target) throws IOException {
 		final ByteArrayOutputStream out = new ByteArrayOutputStream();
         final PrintWriter writer = new PrintWriter(out);
-        final Wyil2Boogie translator = new Wyil2Boogie(writer);
+        final Wyil2Boogie translator = new Wyil2Boogie(typeSystem, writer);
 		translator.setVerbose(false);
 		translator.apply(source.read());
 		writer.close();

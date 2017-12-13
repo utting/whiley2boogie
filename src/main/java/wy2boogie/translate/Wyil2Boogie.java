@@ -43,12 +43,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import wybs.lang.Build;
 import wybs.lang.NameID;
 import static wyc.lang.WhileyFile.*;
 
+import wybs.lang.NameResolver;
 import wybs.util.AbstractCompilationUnit;
+import wyc.check.FlowTypeCheck;
 import wyc.lang.WhileyFile;
 import wyc.util.AbstractVisitor;
+import wyc.util.WhileyFileResolver;
+import wyil.type.TypeSystem;
+import wyil.type.extractors.ReadableTypeExtractor;
 
 /**
  * Translates WYIL bytecodes into Boogie and outputs into a given file.
@@ -72,6 +78,8 @@ import wyc.util.AbstractVisitor;
  *
  * DONE: refactor the BoogieExpr writeXXX() methods to boogieXXX().
  *
+ * TODO: cleanup: generate ref__i variables only when necessary, or avoid them completely.
+ *
  * TODO: move ALL method calls out of expressions?  (5 tests do this!)
  *
  * TODO: mangle Whiley var names to avoid Boogie reserved words and keywords?
@@ -83,6 +91,8 @@ import wyc.util.AbstractVisitor;
  *       (Because current translation only generates e into the __impl code of the function,
  *       so the semantics of the function are not visible elsewhere in the program.
  *       But this is a bit ad-hoc - the semantics should really be given in the postcondition!)
+ *
+ * TODO: generate equality axioms for each record type defined in Whiley (like for arrays)?
  *
  * TODO: implement missing language features, such as:
  * <ul>
@@ -103,6 +113,8 @@ import wyc.util.AbstractVisitor;
  */
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public final class Wyil2Boogie {
+	private static final boolean USE_BOOGIE_EQUALITY = false;
+
     /** Prefix for the function/method names namespace (the WFuncName Boogie type). */
     private static final String CONST_FUNC = "func__";
 
@@ -182,14 +194,31 @@ public final class Wyil2Boogie {
     /** Records the values within all the 'new' expressions in the current statement. */
     private final List<String> newAllocations = new ArrayList<>();
 
-    public Wyil2Boogie(PrintWriter writer) {
+	/**
+	 * Provides mechanism for operating on types. For example, expanding them
+	 * and performing subtype tests, etc. This object may cache results to
+	 * improve performance of some operations.
+	 */
+	private final TypeSystem typeSystem;
+
+    public Wyil2Boogie(TypeSystem typeSys, PrintWriter writer) {
+    	this.typeSystem = typeSys;
         this.out = writer;
         this.vcg = new AssertionGenerator(this);
     }
 
-    public Wyil2Boogie(OutputStream stream) {
-        this(new PrintWriter(new OutputStreamWriter(stream)));
+    public Wyil2Boogie(TypeSystem typeSys, OutputStream stream) {
+        this(typeSys, new PrintWriter(new OutputStreamWriter(stream)));
     }
+
+	/**
+	 * Access the type system object this compile task is using.
+	 *
+	 * @return the type system.
+	 */
+	public TypeSystem getTypeSystem() {
+		return typeSystem;
+	}
 
     // ======================================================================
     // Configuration Methods
@@ -418,23 +447,30 @@ public final class Wyil2Boogie {
 			@Override
 			public void visitAssign(Stmt.Assign stmt) {
 				for (Expr e : stmt.getLeftHandSide()) {
+					boolean mayMutate = true; // guilty until proven innocent.
 					while (!(e instanceof Expr.VariableAccess)) {
-						// ArrayAccess, Dereference, RecordAccess
-						if (e instanceof Expr.UnaryOperator) {
-							// Dereference, RecordAccess
-							e = ((Expr.UnaryOperator) e).getOperand();
-						} else {
-							// Array Access
+						if (e instanceof Expr.Dereference) {
+							mayMutate = false;
+							break;
+						}
+						// ArrayAccess, RecordAccess
+						if (e instanceof Expr.RecordAccess) {
+							e = ((Expr.RecordAccess) e).getOperand();
+						} else if (e instanceof Expr.ArrayAccess) {
 							e = ((Expr.ArrayAccess) e).getFirstOperand();
+						} else {
+							System.err.printf("WARNING: unknown assignment LHS: %s\n", e.toString());
 						}
 					}
-					Decl.Variable decl = ((Expr.VariableAccess) e).getVariableDeclaration();
-					for (Decl.Variable param : method.getParameters()) {
-						if (param == decl) {
-							// this is a mutated input!
-							final String name = decl.getName().get();
-							System.err.printf("MUTATED INPUT %s : %s\n", name, decl.getType());
-							result.put(name, decl.getType());
+					if (mayMutate) {
+						Decl.Variable decl = ((Expr.VariableAccess) e).getVariableDeclaration();
+						for (Decl.Variable param : method.getParameters()) {
+							if (param == decl) {
+								// this is a mutated input!
+								final String name = decl.getName().get();
+								System.err.printf("MUTATED INPUT %s : %s\n", name, decl.getType());
+								result.put(name, decl.getType());
+							}
 						}
 					}
 				}
@@ -1530,6 +1566,7 @@ public final class Wyil2Boogie {
 
 		case EXPR_staticvariable:
 			Expr.StaticVariableAccess svar = (Expr.StaticVariableAccess) expr;
+			// TODO? Decl.StaticVariable decl = typeSystem.resolveExactly(svar.getName(), Decl.StaticVariable.class);
 			return new BoogieExpr(WVAL, svar.getName().getLast().toString());
 
 		default:
@@ -1739,29 +1776,76 @@ public final class Wyil2Boogie {
 		final Expr right = c.getSecondOperand();
 		final Type leftType = left.getType();
 		final Type rightType = right.getType();
-		Type eqType = new Type.Intersection(leftType, rightType);
-		if (!isUsableEqualityType(eqType)) {
-			if (isUsableEqualityType(leftType)) {
-				eqType = leftType;
-			} else if (isUsableEqualityType(rightType)) {
-				eqType = rightType;
-			} else {
-				throw new NotImplementedYet("comparison of void intersection type: " + leftType + " and " + rightType,
-						c);
+
+		// try to find a simple intersection of leftType and rightType
+		Type intersectType = new Type.Intersection(leftType, rightType);
+		Type usableType = findUsableEqualityType(intersectType);
+		if (usableType == null) {
+			// Let's try harder to simplify this intersection type.
+			// 'simplify' does not do enough simplification - we need to unfold NominalTypes.
+			// Type eqType = this.typeSystem.simplify(intersectType);
+			Type eqType = null;
+			try {
+				// FIXME: extractReadableType is not quite correct, as it can throw away some fields.
+				eqType = this.typeSystem.extractReadableType(intersectType, new FlowTypeCheck.Environment());
+				// FIXME: temporary hack to handle intersection of two equal types.
+				if (eqType == null && leftType.equals(rightType)) {
+					eqType = leftType;
+				}
+			} catch (NameResolver.ResolutionError resolutionError) {
+				resolutionError.printStackTrace();
+			}
+			if (!USE_BOOGIE_EQUALITY) {
+				System.out.println("DEBUG: simplified: " + intersectType
+						+ "\n               to: " + eqType);
+			}
+			if (usableType != null) {
+				usableType = findUsableEqualityType(usableType);
+			}
+			if (usableType == null) {
+				throw new NotImplementedYet("comparison of complex type: " + intersectType, c);
 			}
 		}
-		return boogieTypedEquality(eqType, boogieExpr(left), boogieExpr(right)).as(BOOL);
+
+		// finally, generate an appropriate equality check for this intersection type
+		return boogieTypedEquality(usableType, boogieExpr(left), boogieExpr(right)).as(BOOL);
 	}
 
 	/** True for the types that our equality code generator can handle. */
-	private boolean isUsableEqualityType(Type type) {
+	private Type findUsableEqualityType(Type type) {
 		final String str = type.toString();
-		return str.equals("bool") // WAS type instanceof Type.Bool
+		if (str.equals("bool") // WAS type instanceof Type.Bool
 				|| str.equals("int") // WAS type instanceof Type.Int
 				|| str.equals("byte") // WAS type instanceof Type.Byte
 				|| str.equals("null") // WAS type instanceof Type.Null
-				|| (type instanceof Type.Array && isUsableEqualityType(((Type.Array) type).getElement()))
-				|| type instanceof Type.Record; // should check all the field types too?
+				) {
+			return type;
+		} else if (type instanceof Type.Array) {
+			Type.Array aType = (Type.Array) type;
+			Type elemType = findUsableEqualityType(aType.getElement());
+			return elemType == null ? null : new Type.Array(elemType);
+		} else if (type instanceof Type.Record) {
+			Type.Record aType = (Type.Record) type;
+
+			// TODO: check all the field types too!
+			return new Type.Record(aType.isOpen(), aType.getFields());
+		} else if (type instanceof Type.Intersection) {
+			Type.Intersection aType = (Type.Intersection) type;
+			for (int i = 0; i < aType.size(); i++) {
+				Type result = findUsableEqualityType(aType.get(i));
+				if (result != null) {
+					return result;
+				}
+			}
+			System.out.println("DEBUG: equality intersection null: " + type);
+			return null;
+		} else if (type instanceof Type.Difference) {
+			Type.Difference aType = (Type.Difference) type;
+			return findUsableEqualityType(aType.getLeftHandSide());
+		} else {
+			System.out.println("DEBUG: difficult equality type: " + type);
+			return null;
+		}
 	}
 
 	/**
@@ -1776,64 +1860,69 @@ public final class Wyil2Boogie {
 	 *            the RHS expression
 	 */
 	private BoogieExpr boogieTypedEquality(Type eqType, BoogieExpr left, BoogieExpr right) {
-		final String eqTypeStr = eqType.toString();
 		final BoogieExpr out = new BoogieExpr(BOOL);
-		if (eqTypeStr.equals("null")) {
-			// This requires special handling, since we do not have toNull and fromNull
-			// functions.
-			// Instead, we just compare both sides to the WVal 'null' constant.
-			// TODO: an alternative would be to just compare the WVals using '=='?
-			final BoogieExpr nulle = new BoogieExpr(NULL, "null");
-			final BoogieExpr lhs = new BoogieExpr(BOOL, left.asWVal(), " == ", nulle);
-			final BoogieExpr rhs = new BoogieExpr(BOOL, right.asWVal(), " == ", nulle);
-			out.addOp(lhs, " && ", rhs);
-		} else if (eqTypeStr.equals("int") // WAS eqType instanceof Type.Int
-				|| eqTypeStr.equals("byte")) { // WAS eqType instanceof Type.Byte) {
-			out.addOp(left.as(INT), " == ", right.as(INT));
-		} else if (eqTypeStr.equals("bool")) { // WAS eqType instanceof Type.Bool) {
-			out.addOp(left.as(BOOL), " == ", right.as(BOOL));
-		} else if (eqType instanceof Type.Record) {
-			final BoogieExpr leftRec = left.as(RECORD).asAtom();
-			final BoogieExpr rightRec = right.as(RECORD).asAtom();
-			final Type.Record recType = (Type.Record) eqType;
-			final Decl.Variable[] fields = recType.getFields().toArray(Decl.Variable.class);
-			Arrays.sort(fields, fieldsComparator);
-			if (fields.length == 0) {
-				out.append("true");
-			}
-			for (int i = 0; i < fields.length; i++) {
-				final Decl.Variable field = fields[i];
-				final String deref = "[" + mangledWField(field.getName().get()) + "]";
-				final BoogieExpr leftVal = new BoogieExpr(WVAL, leftRec + deref);
-				final BoogieExpr rightVal = new BoogieExpr(WVAL, rightRec + deref);
-				final BoogieExpr feq = boogieTypedEquality(field.getType(), leftVal, rightVal).as(BOOL);
-				if (i == 0) {
-					out.addExpr(feq);
-				} else {
-					out.addOp(" && ", feq);
-				}
-			}
-		} else if (eqType instanceof Type.Array) {
-			final BoogieExpr leftArray = left.as(ARRAY).asAtom();
-			final BoogieExpr rightArray = right.as(ARRAY).asAtom();
-			final Type.Array arrayType = (Type.Array) eqType;
-			final Type elemType = arrayType.getElement();
-			// we check the length and all the values:
-			// arraylen(left) == arraylen(right)
-			// && (forall i:int :: 0 <= i && i < arraylen(a) ==> left[i] == right[i])
-			final String index = generateFreshBoundVar("idx");
-			final String deref = "[" + index + "]";
-			final BoogieExpr leftVal = new BoogieExpr(WVAL, leftArray + deref);
-			final BoogieExpr rightVal = new BoogieExpr(WVAL, rightArray + deref);
-			out.appendf("arraylen(%s) == arraylen(%s) && (forall %s:int :: 0 <= %s && %s < arraylen(%s)",
-					left.asWVal().toString(), right.asWVal().toString(), index, index, index, left.asWVal().toString());
-			out.addOp(" ==> ", boogieTypedEquality(elemType, leftVal, rightVal).as(BOOL));
-			out.append(")");
-			out.setOp(" && "); // && is outermost, since the ==> is bracketed.
+		if (USE_BOOGIE_EQUALITY) {
+			// temporary experiment to use just Boogie equality.
+			out.addOp(left.asWVal(), " == ", right.asWVal());
 		} else {
-			throw new NotImplementedYet(
-					"comparison of values of type: " + eqType + ".  " + left.toString() + " == " + right.toString(),
-					null);
+			final String eqTypeStr = eqType.toString();
+			if (eqTypeStr.equals("null")) {
+				// This requires special handling, since we do not have toNull and fromNull
+				// functions.
+				// Instead, we just compare both sides to the WVal 'null' constant.
+				// TODO: an alternative would be to just compare the WVals using '=='?
+				final BoogieExpr nulle = new BoogieExpr(NULL, "null");
+				final BoogieExpr lhs = new BoogieExpr(BOOL, left.asWVal(), " == ", nulle);
+				final BoogieExpr rhs = new BoogieExpr(BOOL, right.asWVal(), " == ", nulle);
+				out.addOp(lhs, " && ", rhs);
+			} else if (eqTypeStr.equals("int") // WAS eqType instanceof Type.Int
+					|| eqTypeStr.equals("byte")) { // WAS eqType instanceof Type.Byte) {
+				out.addOp(left.as(INT), " == ", right.as(INT));
+			} else if (eqTypeStr.equals("bool")) { // WAS eqType instanceof Type.Bool) {
+				out.addOp(left.as(BOOL), " == ", right.as(BOOL));
+			} else if (eqType instanceof Type.Record) {
+				final BoogieExpr leftRec = left.as(RECORD).asAtom();
+				final BoogieExpr rightRec = right.as(RECORD).asAtom();
+				final Type.Record recType = (Type.Record) eqType;
+				final Decl.Variable[] fields = recType.getFields().toArray(Decl.Variable.class);
+				Arrays.sort(fields, fieldsComparator);
+				if (fields.length == 0) {
+					out.append("true");
+				}
+				for (int i = 0; i < fields.length; i++) {
+					final Decl.Variable field = fields[i];
+					final String deref = "[" + mangledWField(field.getName().get()) + "]";
+					final BoogieExpr leftVal = new BoogieExpr(WVAL, leftRec + deref);
+					final BoogieExpr rightVal = new BoogieExpr(WVAL, rightRec + deref);
+					final BoogieExpr feq = boogieTypedEquality(field.getType(), leftVal, rightVal).as(BOOL);
+					if (i == 0) {
+						out.addExpr(feq);
+					} else {
+						out.addOp(" && ", feq);
+					}
+				}
+			} else if (eqType instanceof Type.Array) {
+				final BoogieExpr leftArray = left.as(ARRAY).asAtom();
+				final BoogieExpr rightArray = right.as(ARRAY).asAtom();
+				final Type.Array arrayType = (Type.Array) eqType;
+				final Type elemType = arrayType.getElement();
+				// we check the length and all the values:
+				// arraylen(left) == arraylen(right)
+				// && (forall i:int :: 0 <= i && i < arraylen(a) ==> left[i] == right[i])
+				final String index = generateFreshBoundVar("idx");
+				final String deref = "[" + index + "]";
+				final BoogieExpr leftVal = new BoogieExpr(WVAL, leftArray + deref);
+				final BoogieExpr rightVal = new BoogieExpr(WVAL, rightArray + deref);
+				out.appendf("arraylen(%s) == arraylen(%s) && (forall %s:int :: 0 <= %s && %s < arraylen(%s)",
+						left.asWVal().toString(), right.asWVal().toString(), index, index, index, left.asWVal().toString());
+				out.addOp(" ==> ", boogieTypedEquality(elemType, leftVal, rightVal).as(BOOL));
+				out.append(")");
+				out.setOp(" && "); // && is outermost, since the ==> is bracketed.
+			} else {
+				throw new NotImplementedYet(
+						"comparison of values of type: " + eqType + ".  " + left.toString() + " == " + right.toString(),
+						null);
+			}
 		}
 		return out;
 	}
@@ -1966,10 +2055,19 @@ public final class Wyil2Boogie {
 			sb.append("))");
 			return sb.toString();
 		}
+		/* NOTE: Negation types were replaced by Difference types, 7 Nov 2017.
 		if (type instanceof Type.Negation) {
 			// we negate the type test
 			final Type.Negation t = (Type.Negation) type;
 			return "!" + typePredicate(var, t.getElement());
+		}
+		*/
+		if (type instanceof Type.Difference) {
+			// check that it is a member of the LHS but not the RHS.
+			final Type.Difference t = (Type.Difference) type;
+			String pos = typePredicate(var, t.getLeftHandSide());
+			String neg = typePredicate(var, t.getRightHandSide());
+			return pos + " && !(" + neg + ")";
 		}
 		if (type instanceof Type.Reference) {
 			// TODO: add constraints about the type pointed to.
@@ -2109,8 +2207,13 @@ public final class Wyil2Boogie {
 	 */
 	private void resolveFunctionOverloading(Tuple<Decl> declarations) {
 		// some common types
-		// NOTE: the Any type was removed on 27/10/2017, so we simulate it by:  int|!int.
-		final Type type_Any = new Type.Union(Type.Int, new Type.Negation(Type.Int));
+		// NOTE: the Any type was removed on 27 Oct 2017, so we simulate it by:  int|!int.
+		// NOTE: negation types also removed on 9 Nov 2017, so we now hack 'any' as int|bool.
+		//      (this is not at all equivalent, but here we use this 'any' type only as an approximate
+		//       type for some predefined Boogie functions, to avoid name overloading issues.
+		//       We do not rely on the semantics of those functions within this translator,
+		//       so their types within the translator are not critical.)
+		final Type type_Any = new Type.Union(Type.Int, Type.Bool, Type.Null);
 		final Type[] any1 = { type_Any };
 		final Type[] bool1 = { Type.Bool };
 		final Type[] int1 = { Type.Int };
@@ -2247,36 +2350,37 @@ public final class Wyil2Boogie {
 		if (done.contains(type)) {
 			return; // this is a recursive type
 		}
+		done.add(type);
 		if (type instanceof Type.Record) {
 			final Type.Record t = (Type.Record) type;
-			declareNewFields(t.getFields());
+			Tuple<Decl.Variable> fields = t.getFields();
+			declareNewFields(fields);
+			// now recurse into the types of those fields
+			for (int i = 0; i != fields.size(); ++i) {
+				declareFields(fields.get(i).getType(), done);
+			}
 		} else if (type instanceof Type.Array) {
 			final Type.Array t = (Type.Array) type;
-			done.add(t);
 			declareFields(t.getElement(), done);
 		} else if (type instanceof Type.Reference) {
 			final Type.Reference t = (Type.Reference) type;
-			done.add(t);
 			declareFields(t.getElement(), done);
-		} else if (type instanceof Type.Negation) {
-			final Type.Negation t = (Type.Negation) type;
-			done.add(t);
-			declareFields(t.getElement(), done);
+		} else if (type instanceof Type.Difference) {
+			final Type.Difference t = (Type.Difference) type;
+			declareFields(t.getLeftHandSide(), done);
+			declareFields(t.getRightHandSide(), done);
 		} else if (type instanceof Type.Union) {
 			final Type.Union t = (Type.Union) type;
-			done.add(t);
 			for (int i = 0; i != t.size(); ++i) {
 				declareFields(t.get(i), done);
 			}
 		} else if (type instanceof Type.Intersection) {
 			final Type.Intersection t = (Type.Intersection) type;
-			done.add(t);
 			for (int i = 0; i != t.size(); ++i) {
 				declareFields(t.get(i), done);
 			}
 		} else if (type instanceof Type.Callable) {
 			final Type.Callable t = (Type.Callable) type;
-			done.add(t);
 			for (final Type b : t.getParameters()) {
 				declareFields(b, done);
 			}
@@ -2285,7 +2389,7 @@ public final class Wyil2Boogie {
 			}
 		} else if (type instanceof Type.Nominal) {
 			// A nominal type's definition RHS could contain fields.
-			// But we have processed that RHS when we reach the type definition.
+			// But we have already processed that RHS when we reached the type definition.
 		} else if (type instanceof Type.Primitive) {
 			// no fields to declare
 		} else {
