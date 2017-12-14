@@ -17,8 +17,8 @@ function isArray(WVal) returns (bool);
 function isRecord(WVal) returns (bool);
 function isObject(WVal) returns (bool);   // Not used yet.
 function isRef(WVal) returns (bool);      // TODO how to represent these?
-function isFunction(WVal) returns (bool); // supports function closures too
-function isMethod(WVal) returns (bool);   // supports method closures too
+function isFunction(WVal) returns (bool); // means this is a function closure
+function isMethod(WVal) returns (bool);   // means this is a method closure
 
 // byte is a subset of int.
 function isByte(b:WVal) returns (bool) { isInt(b) && 0 <= toInt(b) && toInt(b) < 256 }
@@ -149,20 +149,6 @@ const unique undef__field:WVal; // undefined fields map to this value
 axiom (forall f:WField :: empty__record[f] == undef__field);
 
 
-// Higher-order functions (whose names are stored as expressions)
-function toFunction(WVal) returns (WFuncName);
-function fromFunction(WFuncName) returns (WVal);
-axiom (forall f:WFuncName :: isFunction(fromFunction(f)));
-axiom (forall f:WFuncName :: toFunction(fromFunction(f)) == f);
-axiom (forall v:WVal :: isFunction(v) ==> fromFunction(toFunction(v)) == v);
-
-// NOTE: we use a different applyTo<arity> function for each arity.
-//  this only supports very simple overloading.
-//  To support more, we could overload by type too?
-function applyTo1(WFuncName, WVal) returns (WVal);
-function applyTo2(WFuncName, WVal, WVal) returns (WVal);
-function applyTo3(WFuncName, WVal, WVal, WVal) returns (WVal);
-
 // bitwise operators (uninterpreted functions)
 function byte_and(int, int) returns (int);
 function byte_or(int, int) returns (int);
@@ -195,3 +181,32 @@ axiom (forall v:WVal :: isRef(v) ==> fromRef(toRef(v)) == v);
 // this chooses a fresh (unallocated) reference.
 function new([WRef]bool) returns (WRef);
 axiom (forall m : [WRef]bool :: ! m[new(m)]);  
+
+
+// Higher-order functions are stored as Closure values
+// Lambda functions take only one capture value for now.
+type FunctionClosure;
+function toFunction(WVal) returns (FunctionClosure);
+function fromFunction(FunctionClosure) returns (WVal);
+axiom (forall f:FunctionClosure :: isFunction(fromFunction(f)));
+axiom (forall f:FunctionClosure :: toFunction(fromFunction(f)) == f);
+axiom (forall v:WVal :: isFunction(v) ==> fromFunction(toFunction(v)) == v);
+
+
+function closure__0(f:WFuncName) returns (FunctionClosure);
+function closure__1(f:WFuncName, v1:WVal) returns (FunctionClosure);
+function closure__2(f:WFuncName, v1:WVal, v2:WVal) returns (FunctionClosure);
+function closure__3(f:WFuncName, v1:WVal, v2:WVal, v3:WVal) returns (FunctionClosure);
+function apply__0(FunctionClosure) returns (WVal);
+function apply__1(FunctionClosure, WVal) returns (WVal);
+function apply__2(FunctionClosure, WVal, WVal) returns (WVal);
+function apply__3(FunctionClosure, WVal, WVal, WVal) returns (WVal);
+//
+// Then for each lambda func &(x->E(x,y)):
+// 1. we give it a unique name, say func__f:
+//    const unique func__f:WFuncName;
+// 2. we generate a global function, say f, that takes the local and global inputs:
+//    function f(y:WVal, x:WVal) returns (result:WVal) { E(x,y) }
+// 3. we generate an apply axiom for that function:
+//    axiom (forall v1:WVal, v2:WVal ::
+//      apply__1(closure__1(func__f, v1), v2) == f(v1, v2));

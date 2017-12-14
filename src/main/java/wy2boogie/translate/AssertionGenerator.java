@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import wyc.lang.WhileyFile;
 import wyc.util.AbstractVisitor;
 
 import static wyc.lang.WhileyFile.*;
@@ -134,6 +135,12 @@ public class AssertionGenerator {
 			//
 			// case Bytecode.OPCODE_indirectinvoke:
 			// return writeIndirectInvoke((Location<Bytecode.IndirectInvoke>) expr);
+
+
+			@Override
+			public void visitLambda(Decl.Lambda decl) {
+				// do not recurse inside lambda functions, since their input is unknown at this point.
+			}
 
 			@Override
 			public void visitInvoke(Expr.Invoke funCall) {

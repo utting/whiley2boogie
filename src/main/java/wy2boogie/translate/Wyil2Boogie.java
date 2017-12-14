@@ -137,7 +137,7 @@ public final class Wyil2Boogie {
     private final Set<String> declaredFields = new HashSet<>();
 
     /** Keeps track of which (non-mangled) function/method names have had their address taken. */
-    private final Set<NameID> referencedFunctions = new HashSet<>();
+    private final Set<String> referencedFunctions = new HashSet<>();
 
     /** Used to generate unique IDs for bound variables. */
     private int uniqueId = 0;
@@ -247,9 +247,9 @@ public final class Wyil2Boogie {
      * So it is safe to call it on every function and method constant.
      */
 	@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
-	private void declareNewFunction(NameID name, Type.Callable type) {
+	private void declareNewFunction(String name, Type.Callable type) {
         if (!this.referencedFunctions.contains(name)) {
-            final String func_const = CONST_FUNC + name.name();
+            final String func_const = CONST_FUNC + name;
             this.out.printf("const unique %s:WFuncName;\n", func_const);
             // At the moment, we assume indirect-invoke is used rarely, so for ONE type of function in each program.
             // TODO: extend this to handle more than one type of indirect-invoke result (different applyTo operators?)
@@ -268,16 +268,19 @@ public final class Wyil2Boogie {
                 vDecl.append("v" + i + ":WVal");
                 vCall.append("v" + i);
             }
-            final String call = String.format("applyTo%d(toFunction(f), %s)", args.size(), vCall.toString());
-            System.err.println("WARNING: assuming that all indirect function calls of arity " + args.size() +
-                    " return type " + ret);
+            final String call = String.format("apply__%d(toFunction(f), %s)", args.size(), vCall.toString());
+            // TODO: this is not needed now that all functions return WVal?
             this.out.printf("axiom (forall f:WVal, %s :: isFunction(f) ==> %s);\n",
 					vDecl.toString(),
 					typePredicate(call, ret));
-            this.out.printf("axiom (forall %s :: applyTo%d(%s, %s) == %s(%s));\n\n",
-                    vDecl.toString(), args.size(),
-                    func_const, vCall.toString(),
-                    name.name(), vCall.toString());
+            // TODO: we could handle different arities of captured variables here?
+            this.out.printf("axiom (forall %s, captured__:WVal :: apply__%d(%s, %s) == %s(%s));\n\n",
+                    vDecl.toString(),
+					args.size(),
+                    "closure__1(" + func_const + ", captured__)",
+					vCall.toString(),
+                    name,
+					vCall.toString());
             this.referencedFunctions.add(name);
         }
     }
@@ -294,6 +297,7 @@ public final class Wyil2Boogie {
         for (int i = 0; i < NEW_REF_MAX; i++) {
             this.out.printf("var %s%d : WRef;\n", NEW_REF, i);
         }
+		this.out.printf("var lambda__f:WFuncName;\n");  // TODO: search for all lambda functions
         this.out.println();
         for(final Decl decl : module.getDeclarations()) {
 			if (decl instanceof Decl.StaticVariable) {
@@ -814,7 +818,9 @@ public final class Wyil2Boogie {
 			break;
 		}
 		case DECL_lambda:
-			throw new NotImplementedYet("DECL_lambda: ", c);
+			Decl.Lambda lambda = (Decl.Lambda) c;
+			this.out.print("DECL lambda??" + boogieDeclLambda(lambda));
+			break;
 
 		default:
 			throw new NotImplementedYet("unknown bytecode encountered", c);
@@ -1459,7 +1465,8 @@ public final class Wyil2Boogie {
 			return boogieInvoke((Expr.Invoke) expr);
 
 		case DECL_lambda:
-			throw new NotImplementedYet("DECL_lambda expr ", expr);
+			return boogieDeclLambda((Decl.Lambda) expr);
+
 		case EXPR_lambdaaccess:
 			return boogieLambda((Expr.LambdaAccess) expr);
 
@@ -1687,18 +1694,6 @@ public final class Wyil2Boogie {
 		return out;
 	}
 
-	private BoogieExpr boogieIndirectInvokeExpr(Expr.IndirectInvoke expr) {
-		final Tuple<Expr> args = expr.getArguments();
-		if (args.size() != 1) {
-			throw new NotImplementedYet("indirect invoke with " + args.size() + " args", expr);
-		}
-		final BoogieExpr func = boogieExpr(expr.getSource()).as(FUNCTION);
-		// FIXME: this doesn't seem right --- djp
-		final BoogieExpr arg = boogieExpr(args.get(0)).asWVal();
-		// TODO: decide what to do if func is a method?
-		return new BoogieExpr(WVAL, "applyTo1(" + func + ", " + arg + ")");
-	}
-
 	private BoogieExpr boogieInvoke(Expr.Invoke expr) {
 		// TODO: check that it is safe to use unqualified DeclID names?
 		BoogieType outType = WVAL;
@@ -1726,24 +1721,70 @@ public final class Wyil2Boogie {
 		return out;
 	}
 
-	// TODO: lambda
-	// Question: some lambda expressions capture surrounding variables - how can we
-	// represent this in Boogie?
-	private BoogieExpr boogieLambda(Expr.LambdaAccess expr) {
-		throw new NotImplementedYet("lambda", expr);
-		/*
-		 * This Whiley lambda: function g() -> func: return &(int x -> x + 1) generates
-		 * the following bytecodes: Q1: Can we pre-generate a global function for most
-		 * lambdas? Q2: How do we determine start of lambda body? Input decls?
-		 *
-		 * procedure g__impl() returns ($:WVal); requires g__pre(); ensures is_func($);
-		 * // #0 [tests/valid/Lambda_Valid_1:func] decl $ // #1 [int] decl x // #2 [int]
-		 * read (%1) // #3 [int] const 1 // #4 [int] add (%2, %3) // #5
-		 * [function(int)->(int)] lambda (%4) function(int)->(int) // #6 [] return (%5)
-		 * // #7 [] block (%6) implementation g__impl() returns ($:WVal) { $ := lambda
-		 * TODO; return; }
-		 */
-		// return new BoogieExpr(WVAL, "lambda TODO");
+	private BoogieExpr boogieIndirectInvokeExpr(Expr.IndirectInvoke expr) {
+		final Tuple<Expr> args = expr.getArguments();
+		if (args.size() != 1) {
+			throw new NotImplementedYet("indirect invoke with " + args.size() + " args", expr);
+		}
+		final BoogieExpr func = boogieExpr(expr.getSource()).as(FUNCTION);
+		// FIXME: this doesn't seem right --- djp
+		final BoogieExpr arg = boogieExpr(args.get(0)).asWVal();
+		// TODO: decide what to do if func is a method?
+		return new BoogieExpr(WVAL, "apply__1(" + func + ", " + arg + ")");
+	}
+
+	/**
+	 * Ourput a lambda function as a closure.
+	 *
+	 * @param lambda the lambda function plus the identifiers it captures.
+	 * @return a Boogie Closure expression.
+	 */
+	private BoogieExpr boogieDeclLambda(Decl.Lambda lambda) {
+		System.out.println("DECL_lambda:"
+				+ "\n  name     : " + lambda.getName() // usually empty string
+				+ "\n  captures : " + lambda.getCaptures() // Tuple<Identifier>
+				+ "\n  type     : " + lambda.getType()
+				+ "\n  types    : " + lambda.getTypes() // always null
+				+ "\n  params   : " + lambda.getParameters()
+				+ "\n  body    : " + lambda.getBody()  // an Expr
+				+ "\n  returns : " + lambda.getReturns()
+				+ "\n  string  : " + lambda.toString()
+		);
+		// TODO: get correct name
+		String lambdaName = "lambda__f"; //  + this.referencedFunctions.size();
+		Tuple<AbstractCompilationUnit.Identifier> captures = lambda.getCaptures();
+		StringBuilder closure = new StringBuilder();
+		closure.append("closure__");
+		closure.append(captures.size());
+		closure.append("(");
+		closure.append(lambdaName);
+		for (int i = 0; i < captures.size(); i++) {
+			closure.append(", ");
+			closure.append(captures.get(i).get());
+		}
+		closure.append(")");
+		return new BoogieExpr(BoogieType.FUNCTION, closure.toString());
+	}
+
+	/**
+	 * See Lambda_Valid_9.whiley and FunctionRef_Valid_1.whiley for examples that use these.
+	 *
+	 * @param lambda
+	 * @return
+	 */
+	private BoogieExpr boogieLambda(Expr.LambdaAccess lambda) {
+		String name = lambda.getName().toNameID().name();
+		final String func_const = CONST_FUNC + name;
+		System.out.println("DEBUG: Expr.LambdaAccess:"
+				+ "\n  name     : " + lambda.getName()
+				+ "\n  paraTypes: " + lambda.getParameterTypes()
+				+ "\n  signature: " + lambda.getSignature()
+				+ "\n  type     : " + lambda.getType()
+				+ "\n  types    : " + lambda.getTypes()
+				+ "\n  data    : " + Arrays.toString(lambda.getData())
+				+ "\n  string  : " + lambda.toString()
+		);
+		return new BoogieExpr(BoogieType.FUNCTION, "closure__0(" + func_const + ")");
 	}
 
 	/**
@@ -2466,8 +2507,9 @@ public final class Wyil2Boogie {
 	private final AbstractVisitor funcConstantVisitor = new AbstractVisitor() {
 		@Override
 		public void visitLambdaAccess(Expr.LambdaAccess l) {
-			declareNewFunction(l.getName().toNameID(), l.getSignature());
+			declareNewFunction(l.getName().toNameID().name(), l.getSignature());
 		}
+
 	};
 
 	private void declareFuncConstants(Stmt root) {
