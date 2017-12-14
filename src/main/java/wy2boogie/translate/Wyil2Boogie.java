@@ -33,8 +33,6 @@ import java.io.PrintWriter;
 import java.util.*;
 import java.util.stream.Stream;
 
-import wybs.lang.Build;
-import wybs.lang.NameID;
 import static wyc.lang.WhileyFile.*;
 
 import wybs.lang.NameResolver;
@@ -42,9 +40,7 @@ import wybs.util.AbstractCompilationUnit;
 import wyc.check.FlowTypeCheck;
 import wyc.lang.WhileyFile;
 import wyc.util.AbstractVisitor;
-import wyc.util.WhileyFileResolver;
 import wyil.type.TypeSystem;
-import wyil.type.extractors.ReadableTypeExtractor;
 
 /**
  * Translates WYIL bytecodes into Boogie and outputs into a given file.
@@ -138,6 +134,9 @@ public final class Wyil2Boogie {
 
     /** Keeps track of which (non-mangled) function/method names have had their address taken. */
     private final Set<String> referencedFunctions = new HashSet<>();
+
+	/** Keeps track of a unique name for each lambda function. */
+	private final Map<Decl.Lambda, String> lambdaFunctionName = new HashMap<>();
 
     /** Used to generate unique IDs for bound variables. */
     private int uniqueId = 0;
@@ -247,7 +246,7 @@ public final class Wyil2Boogie {
      * So it is safe to call it on every function and method constant.
      */
 	@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
-	private void declareNewFunction(String name, Type.Callable type) {
+	private void declareHigherOrderFunction(String name, Type.Callable type) {
         if (!this.referencedFunctions.contains(name)) {
             final String func_const = CONST_FUNC + name;
             this.out.printf("const unique %s:WFuncName;\n", func_const);
@@ -1750,8 +1749,10 @@ public final class Wyil2Boogie {
 				+ "\n  returns : " + lambda.getReturns()
 				+ "\n  string  : " + lambda.toString()
 		);
-		// TODO: get correct name
-		String lambdaName = "lambda__f"; //  + this.referencedFunctions.size();
+		String lambdaName = this.lambdaFunctionName.get(lambda);
+		if (lambdaName == null) {
+			throw new IllegalStateException("missed lambda on pass 1: " + lambda);
+		}
 		Tuple<AbstractCompilationUnit.Identifier> captures = lambda.getCaptures();
 		StringBuilder closure = new StringBuilder();
 		closure.append("closure__");
@@ -2503,13 +2504,51 @@ public final class Wyil2Boogie {
 		}
 	}
 
+	private void declareLambdaFunction(Decl.Lambda decl) {
+		// lambda function do not have useful names, so we generate a unique name and remember it.
+		String lambdaName = CONST_FUNC + lambdaFunctionName.size();
+		lambdaFunctionName.put(decl, lambdaName);
+		this.out.printf("const unique %s:WFuncName;\n", lambdaName);
+
+		// add axiom apply_n(closure_m(lambdaName, captured...), args...) = decl.getBody();
+		StringBuilder decls = new StringBuilder();
+		StringBuilder captureNames = new StringBuilder();
+		String sep = "";
+		for (AbstractCompilationUnit.Identifier c: decl.getCaptures()) {
+			decls.append(sep + c.get() + ":WVal");
+			captureNames.append(sep + c.get());
+			sep = ", ";
+		}
+		StringBuilder paramNames = new StringBuilder();
+		String paramSep = "";
+		for (Decl.Variable p: decl.getParameters()) {
+			decls.append(sep + p.getName().get() + ":WVal");  // uses above sep
+			paramNames.append(paramSep + p.getName().get());
+			sep = ", ";
+			paramSep = ", ";
+		}
+		BoogieExpr body = boogieExpr(decl.getBody()).asWVal();
+		this.out.printf("axiom (forall %s :: apply__%d(closure__%d(%s%s), %s) == %s);\n\n",
+				decls.toString(),
+				decl.getParameters().size(),
+				decl.getCaptures().size(),
+				lambdaName,
+				captureNames.toString(),
+				paramNames.toString(),
+				body.toString());
+	}
+
 	/** Walks recursively through a constant and declares any function constants. */
 	private final AbstractVisitor funcConstantVisitor = new AbstractVisitor() {
 		@Override
 		public void visitLambdaAccess(Expr.LambdaAccess l) {
-			declareNewFunction(l.getName().toNameID().name(), l.getSignature());
+			declareHigherOrderFunction(l.getName().toNameID().name(), l.getSignature());
 		}
 
+		@Override
+		public void visitLambda(Decl.Lambda decl) {
+			declareLambdaFunction(decl);
+		}
 	};
 
 	private void declareFuncConstants(Stmt root) {
