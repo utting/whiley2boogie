@@ -1,0 +1,116 @@
+Issues to discuss with David
+============================
+
+Equality:
+  1. type-specific equals tests?
+  2. or just Boogie '=='?  Plus axioms for each open/closed record type?
+    Second approach seems better.
+    1: does not handle recursive types (easily?)
+    1: with open records, not possible to statically know the valid fields.
+
+    2: will need stronger (equivalence) axioms for array equality, etc.
+       (Boogie says it does not offer extensionality of maps!)
+       Try issue 832.
+
+
+
+My translation of Type.Difference?
+  * See typePredicate method in Wyil2Boogie.java
+
+Bugs?
+  * wy compile sum0.whiley  does nothing if sum0.whiley is a symbolic link.
+  * functions with no return values is a bug.
+
+
+Java 9: support?  GitHub issue
+  1 Need to add to build.xml, javac target: source="${JAVA_VERSION}"
+    else get these compile warnings:
+    [javac] Compiling 28 source files to /Users/utting/git/whiley/WhileyCompiler/target/classes
+    [javac]
+    [javac]           WARNING
+    [javac]
+    [javac] The -source switch defaults to 9 in JDK 9.
+    [javac] If you specify -target 1.8 you now must also specify -source 1.8.
+    [javac] Ant will implicitly add -source 1.8 for you.  Please change your build file.
+    [javac] warning: [options] bootstrap class path not set in conjunction with -source 1.8
+  2. Minimum compatible versions:
+     https://cwiki.apache.org/confluence/display/MAVEN/Java+9+-+Jigsaw
+     I tried updating to:
+     	<artifactId>maven-compiler-plugin</artifactId>
+     	<version>3.7.0</version>
+
+     	<artifactId>maven-source-plugin</artifactId>
+        <version>3.0.1</version>
+
+	    <artifactId>maven-javadoc-plugin</artifactId>
+	    <version>3.0.0</version>
+	    // but >100 javadoc errors in WhileyCompiler project, so I commented out this dependency.
+
+
+
+tests/valid/Process_Valid_7.whiley:
+   needs extra requires and ensures to be verifiable?
+  NO. But isRef needs to add types of referent.
+
+   This verifies.
+   But recently does not compile due to new {data: data}?
+   type MyProc2 is &{int|bool data}
+
+   method set(MyProc2 _this, int d)
+   ensures _this->data == d:
+       _this->data = d
+
+   method get(MyProc2 _this) -> (int|bool r)
+   ensures r == _this->data:
+       return _this->data
+
+   method create(int|bool data) -> (MyProc2 r)
+   ensures r->data == data:
+       return new {data: data}
+
+   public export method test() :
+       MyProc2 p2 = create(false)
+       set(p2,1)
+       int|bool result = get(p2)
+       assume result == 1
+
+
+
+WhileyCompiler build: sign .jar problems.
+  * installed gpg (GnuPG) 2.2.3
+  Set up private key:
+  $ gpg --gen-key
+  gpg (GnuPG) 2.2.3; Copyright (C) 2017 Free Software Foundation, Inc.
+  This is free software: you are free to change and redistribute it.
+  There is NO WARRANTY, to the extent permitted by law.
+
+  Note: Use "gpg --full-generate-key" for a full featured key generation dialog.
+
+  GnuPG needs to construct a user ID to identify your key.
+
+  Real name: Mark Utting
+  Email address: utting@usc.edu.au
+  You selected this USER-ID:
+      "Mark Utting <utting@usc.edu.au>"
+
+  Change (N)ame, (E)mail, or (O)kay/(Q)uit? O
+  We need to generate a lot of random bytes. It is a good idea to perform
+  some other action (type on the keyboard, move the mouse, utilize the
+  disks) during the prime generation; this gives the random number
+  generator a better chance to gain enough entropy.
+  We need to generate a lot of random bytes. It is a good idea to perform
+  some other action (type on the keyboard, move the mouse, utilize the
+  disks) during the prime generation; this gives the random number
+  generator a better chance to gain enough entropy.
+  gpg: /Users/utting/.gnupg/trustdb.gpg: trustdb created
+  gpg: key 93D7D16D07A7C59F marked as ultimately trusted
+  gpg: directory '/Users/utting/.gnupg/openpgp-revocs.d' created
+  gpg: revocation certificate stored as '/Users/utting/.gnupg/openpgp-revocs.d/09C3CB8207F097FEDAE25B8D93D7D16D07A7C59F.rev'
+  public and secret key created and signed.
+
+  pub   rsa2048 2017-12-12 [SC] [expires: 2019-12-12]
+        09C3CB8207F097FEDAE25B8D93D7D16D07A7C59F
+  uid                      Mark Utting <utting@usc.edu.au>
+  sub   rsa2048 2017-12-12 [E] [expires: 2019-12-12]
+  Passphrase same as pwd.
+

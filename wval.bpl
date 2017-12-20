@@ -86,6 +86,7 @@ function arrayupdate(a:WVal, i:WVal, v:WVal) returns (WVal) {
     fromArray(toArray(a)[toInt(i) := v], arraylen(a)) }
 axiom (forall s:[int]WVal, len:int :: 0 <= len ==> isArray(fromArray(s,len)));
 // NOTE: 148 tests/valid programs fail without any array equality axiom:
+// NOTE: this was wrong because should use arraylen(s), not len.
 // axiom (forall s:[int]WVal, len:int :: 0 <= len ==> toArray(fromArray(s,len)) == s); // TOO STRONG
 // alternative weaker pointwise equality axiom
 // (this is sufficient to restore the 148 tests/valid. Only 2 programs have one more proof fail.)
@@ -122,6 +123,7 @@ axiom (forall a1:WVal, a2:WVal ::
     && (forall i:int :: 0 <= i && i < arraylen(a1) ==> toArray(a1)[i] == toArray(a2)[i])
     ==> a1 == a2
     );
+// should be <==>?
 
 
 // Records (and objects)
@@ -131,8 +133,6 @@ axiom (forall a1:WVal, a2:WVal ::
 //
 // The Whiley type system distinguishes between record and objects
 // (closed versus open), so this Boogie theory does not need to.
-// However, equality of records/objects is always expanded out into
-// an explicit set of equalities over a known set of fields.
 
 // Record and object injection and extraction functions
 function toRecord(WVal) returns ([WField]WVal);
@@ -148,6 +148,13 @@ const unique empty__record : [WField]WVal;
 const unique undef__field:WVal; // undefined fields map to this value
 axiom (forall f:WField :: empty__record[f] == undef__field);
 
+axiom (forall a1:WVal, a2:WVal ::
+    isRecord(a1)
+    && isRecord(a2)
+    ==>
+       ((forall i:WField :: toRecord(a1)[i] == toRecord(a2)[i])
+        <==> a1 == a2)
+    );
 
 // bitwise operators (uninterpreted functions)
 function byte_and(int, int) returns (int);

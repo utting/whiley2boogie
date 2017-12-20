@@ -99,7 +99,7 @@ import wyil.type.TypeSystem;
  */
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public final class Wyil2Boogie {
-	private static final boolean USE_BOOGIE_EQUALITY = false;
+	private static final boolean USE_BOOGIE_EQUALITY = true;
 
     /** Prefix for the function/method names namespace (the WFuncName Boogie type). */
     private static final String CONST_FUNC = "func__";
@@ -552,42 +552,41 @@ public final class Wyil2Boogie {
 			writeParameters(returns, null);
 			this.out.println(");");
 
-			// write axiom: (forall in,out :: f(in)==out && f_pre(in) ==> types(out) &&
-			// post)
+			// OLD: write axiom: (forall in,out :: f(in)==out && f_pre(in) ==> types(out) && post)
+			// NEW: write axiom: (forall in :: {f(in)} f_pre(in) ==> (exists out :: types(out) && post))
+			//    so that this axiom is triggered properly, each time we see f(...).
 			final String inVars = getNames(this.inDecls);
 			final String outVars = getNames(this.outDecls);
 			this.out.print("axiom (forall ");
 			writeParameters(parameters, null);
-			if (this.inDecls.size() > 0 && this.outDecls.size() > 0) {
-				this.out.print(", ");
-			}
+			// trigger is f(in)
+			this.out.printf(" :: {%s(%s)}\n    ", name, getNames(this.inDecls));
+			this.out.printf("%s(%s)\n",  name + METHOD_PRE, getNames(this.inDecls));
+			this.out.print("    ==> (exists ");
 			writeParameters(returns, null);
-			this.out.print(" ::\n    ");
-			// construct f(in)==out && f__pre(in)
-			final String call = String.format("%s(%s) == (%s) && %s(%s)", name, inVars, outVars, name + METHOD_PRE,
-					getNames(this.inDecls));
-			this.out.println(call);
-			this.out.print("    ==>\n      ");
+			this.out.printf(" ::\n        %s(%s) == (%s) &&\n        ", name, inVars, outVars);
 			// Now write the type and type constraints of each output variable.
-			for (int i = 0; i != parameters.size(); ++i) {
+			for (int i = 0; i != returns.size(); ++i) {
 				if (i != 0) {
 					this.out.print(AND_OUTER);
 				}
-				final Decl.Variable parameter = parameters.get(i);
-				final String inName = parameter.getName().get();
-				this.out.print(typePredicate(inName, parameter.getType()));
+				final Decl.Variable outvar = returns.get(i);
+				final String inName = outvar.getName().get();
+				this.out.print(typePredicate(inName, outvar.getType()));
 			}
 			if (parameters.size() > 0) {
 				this.out.print(AND_OUTER);
 			}
 			writeConjunction(method.getEnsures());
-			this.out.println(");");
+			this.out.println("));");
 		}
 		this.out.println();
 	}
 
 	/**
 	 * Get the names being declared.
+	 *
+	 * TODO: check if this also needs to rename mutated input variables?
 	 *
 	 * @param decls a list of declarations.
 	 * @return a comma-separated string of just the names being declared.
