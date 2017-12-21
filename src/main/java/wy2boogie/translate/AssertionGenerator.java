@@ -146,17 +146,20 @@ public class AssertionGenerator {
 			public void visitInvoke(Expr.Invoke funCall) {
 				String name = funCall.getName().toString();
 				Type.Callable type = funCall.getSignature();
-				String funName = wy2b.mangledFunctionMethodName(name, type);
-				Tuple<Expr> operands = funCall.getOperands();
-				BoogieExpr funPre = new BoogieExpr(BOOL, funName + Wyil2Boogie.METHOD_PRE + "(");
-				for (int i = 0; i != operands.size(); ++i) {
-					if (i != 0) {
-						funPre.append(", ");
+				// properties do not have preconditions.
+				if (type instanceof Type.Function || type instanceof Type.Method) {
+					String funName = wy2b.mangledFunctionMethodName(name, type);
+					Tuple<Expr> operands = funCall.getOperands();
+					BoogieExpr funPre = new BoogieExpr(BOOL, funName + Wyil2Boogie.METHOD_PRE + "(");
+					for (int i = 0; i != operands.size(); ++i) {
+						if (i != 0) {
+							funPre.append(", ");
+						}
+						funPre.addExpr(expr(operands.get(i)).asWVal());
 					}
-					funPre.addExpr(expr(operands.get(i)).asWVal());
+					funPre.append(")");
+					generateCheck(funPre);
 				}
-				funPre.append(")");
-				generateCheck(funPre);
 				// Continue checking all subexpression
 				super.visitInvoke(funCall);
 			}
@@ -203,9 +206,11 @@ public class AssertionGenerator {
 				}
 				declareAndCheck(vars, constraints, expr.getOperand());
 			}
-			// case Bytecode.OPCODE_some:
-			// return writeQuantifier("exists", " && ", (Location<Bytecode.Quantifier>)
-			// expr);
+
+			@Override
+			public void visitExistentialQuantifier(Expr.ExistentialQuantifier expr) {
+				// do not go inside because correctness checks in there usually depend upon the existential vars.
+			}
 
 			@Override
 			public void visitIntegerDivision(Expr.IntegerDivision expr) {

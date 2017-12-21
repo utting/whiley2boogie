@@ -64,11 +64,33 @@ import wyil.type.TypeSystem;
  *
  * DONE: refactor the BoogieExpr writeXXX() methods to boogieXXX().
  *
+ * DONE: added generic equality axiom for records (to wval.bpl).
+ *       Instead of generating equality axioms for each record type defined in Whiley.
+ *
+ * TODO: refactor so that statements are returned as strings?
+ *       This would allow us to use side-effects to declare local variables, refs, etc.
+ *
+ * TODO: add implicit conditions to each conjunct.  See Assert_Valid_1.whiley.
+ *       ensures ys[0] == 0:  should be expanded to:  ensures 0<=0 && 0<|ys| && ys[0]==0:
+ *       This needs a theory of three-valued logic for expressions?
+ *
+ * TODO: declare local variables for any missing output parameters of 'call' statements (see Array_Valid_9.whiley).
+ *
+ * TODO: add type invariants to loops.  See While_Valid_62.whiley.
+ *
  * TODO: cleanup: generate ref__i variables only when necessary, or avoid them completely.
  *
  * TODO: move ALL method calls out of expressions?  (5 tests do this!)
+ *       See MethodCall_Valid_4.whiley for a complex example.
+ *       See MethodRef_Valid_2.whiley for an example of indirect call of a method.
+ *          (Could we handle this with an axiom that just asserts the ensures clause of the method?).
  *
- * TODO: mangle Whiley var names to avoid Boogie reserved words and keywords?
+ *
+ * TODO: mangle Whiley var names to avoid Boogie reserved words and keywords.
+ *       See Switch_Valid_5.whiley for an example where 'type' is used as a variable name.
+ *       See While_Valid_42.whiley and ConstrainedList_Valid_23.whiley for quantifier variable same as local variable.
+ *       See MethodRef_Valid_1.whiley for function name 'call'.
+ *       See String_Valid_4.whiley for 'old' as a parameter name.
  *
  * TODO: generate assertions after each assignment, to check 'where' constraints?
  *       (Boogie checks 'where' constraints only in havoc statements, not for assignments).
@@ -78,8 +100,6 @@ import wyil.type.TypeSystem;
  *       so the semantics of the function are not visible elsewhere in the program.
  *       But this is a bit ad-hoc - the semantics should really be given in the postcondition!)
  *
- * TODO: generate equality axioms for each record type defined in Whiley (like for arrays)?
- *
  * TODO: implement missing language features, such as:
  * <ul>
  *   <li>DONE: Property declarations and uses.</li>
@@ -87,7 +107,7 @@ import wyil.type.TypeSystem;
  *   <li>DONE: indirect invoke (12 tests)</li>
  *   <li>DONE: references, new (17 tests), and dereferencing (17 tests)</li>
  *   <li>DONE: switch (14 tests)</li>
- *   <li>(!) lambda functions (17 tests)</li>
+ *   <li>DONE: lambda functions (17 tests)</li>
  *   <li>functions/methods with multiple return values (5 tests)</li>
  *   <li>DONE: continue statements and named blocks (3 tests)</li>
  *   <li>DONE (separate byte and int ops): bitwise operators (13 tests)</li>
@@ -175,9 +195,16 @@ public final class Wyil2Boogie {
      */
 	private final Deque<String> loopLabels = new ArrayDeque<>();
 
+	/** Increments with each loop we see, to allocate unique loop labels. */
+	private int loopCounter;
+
     private final AssertionGenerator vcg;
 
-    /** Used to generate unique labels for each switch statement. */
+    /**
+	 * Used to generate unique labels for each switch statement.
+	 * (This is separate from the loop counter because we allocate a local variable for each switch,
+	 * and we need their names to be distinct.)
+	 */
     private int switchCount;
 
     /** Records the values within all the 'new' expressions in the current statement. */
@@ -252,7 +279,15 @@ public final class Wyil2Boogie {
             this.out.printf("const unique %s:WFuncName;\n", func_const);
             // At the moment, we assume indirect-invoke is used rarely, so for ONE type of function in each program.
             // TODO: extend this to handle more than one type of indirect-invoke result (different applyTo operators?)
-            if (type.getReturns().size() != 1) {
+
+
+			// TODO: change axioms from:
+			// axiom (forall f:WVal, v1:WVal :: isFunction(f) ==> isInt(apply__1(toFunction(f), v1)));
+			// axiom (forall v1:WVal, captured__:WVal :: apply__1(closure__1(func__f1, captured__), v1) == f1(v1));
+			// to: (and check f_pre?)
+			// axiom (forall v1..vn:WVal :: apply__1(closure__0(func__f1), v1..vn) == f1(v1..vn));
+
+			if (type.getReturns().size() != 1) {
                 throw new NotImplementedYet("multi-valued constant functions", null);
             }
             final Type ret = type.getReturns().get(0);
@@ -296,7 +331,6 @@ public final class Wyil2Boogie {
         for (int i = 0; i < NEW_REF_MAX; i++) {
             this.out.printf("var %s%d : WRef;\n", NEW_REF, i);
         }
-		this.out.printf("var lambda__f:WFuncName;\n");  // TODO: search for all lambda functions
         this.out.println();
         for(final Decl decl : module.getDeclarations()) {
 			if (decl instanceof Decl.StaticVariable) {
@@ -336,11 +370,10 @@ public final class Wyil2Boogie {
 		declareFuncConstants(td.getInvariant());
 		// writeModifiers(td.modifiers());
 		String param = vd.getName().get();
-		if (param.equals("$")) {
-			param = generateFreshBoundVar("r__");
-		}
-		this.out.print(
-				"function " + typePredicateName(td.getName().get()) + "(" + param + ":WVal) returns (bool) {\n    ");
+		// NOTE: an unnamed parameter will be called '$', which works fine.
+		this.out.printf("function %s(%s:WVal) returns (bool) {\n    ",
+				typePredicateName(td.getName().get()),
+				param);
 		this.out.print(typePredicate(param, t));
 		if (td.getInvariant().size() > 0) {
 			this.out.print(AND_OUTER);
@@ -381,6 +414,7 @@ public final class Wyil2Boogie {
 	 * @param method
 	 */
 	private void writeProcedure(Decl.FunctionOrMethod method) {
+		this.loopCounter = 0;
 		final Type.Callable ft = method.getType();
 		declareFields(method.getBody());
 		declareFuncConstants(method.getBody());
@@ -520,9 +554,10 @@ public final class Wyil2Boogie {
 		this.out.println(") returns (bool);");
 
 		// write axiom: (forall in :: f(in) <==> body);
+		final String call = String.format("%s(%s)", name, getNames(this.inDecls));
 		this.out.print("axiom (forall ");
 		writeParameters(this.inDecls, null);
-		this.out.printf(" :: %s(%s) <==> ", name, getNames(this.inDecls));
+		this.out.printf(" :: {%s} %s <==> ", call, call);
 		writeConjunction(prop.getInvariant());
 		this.out.println(");");
 		this.inDecls = null;
@@ -557,10 +592,14 @@ public final class Wyil2Boogie {
 			//    so that this axiom is triggered properly, each time we see f(...).
 			final String inVars = getNames(this.inDecls);
 			final String outVars = getNames(this.outDecls);
-			this.out.print("axiom (forall ");
-			writeParameters(parameters, null);
-			// trigger is f(in)
-			this.out.printf(" :: {%s(%s)}\n    ", name, getNames(this.inDecls));
+			if (parameters.size() == 0) {
+				this.out.print("axiom ");
+			} else {
+				this.out.print("axiom (forall ");
+				writeParameters(parameters, null);
+				// trigger is f(in)
+				this.out.printf(" :: {%s(%s)}\n    ", name, getNames(this.inDecls));
+			}
 			this.out.printf("%s(%s)\n",  name + METHOD_PRE, getNames(this.inDecls));
 			this.out.print("    ==> (exists ");
 			writeParameters(returns, null);
@@ -574,11 +613,13 @@ public final class Wyil2Boogie {
 				final String inName = outvar.getName().get();
 				this.out.print(typePredicate(inName, outvar.getType()));
 			}
-			if (parameters.size() > 0) {
-				this.out.print(AND_OUTER);
-			}
+			this.out.print(AND_OUTER);
 			writeConjunction(method.getEnsures());
-			this.out.println("));");
+			if (parameters.size() == 0) {
+				this.out.println(");");
+			} else {
+				this.out.println("));");
+			}
 		}
 		this.out.println();
 	}
@@ -909,8 +950,7 @@ public final class Wyil2Boogie {
 		if (isMethod(rhs.get(0))) {
 			this.outerMethodCall = rhs.get(0);
 		}
-		// first break down complex lhs terms, like a[i].f (into a base var and some
-		// indexes)
+		// first break down complex lhs terms, like a[i].f (into a base var and some indexes)
 		final String[] lhsVars = new String[lhs.size()];
 		@SuppressWarnings("unchecked")
 		final List<Index>[] lhsIndexes = new List[lhs.size()];
@@ -921,9 +961,6 @@ public final class Wyil2Boogie {
 		// then build up any complex rhs terms, like a[i := (a[i][$f := ...])]
 		final String[] rhsExprs = new String[rhs.size()];
 		for (int i = 0; i != rhs.size(); ++i) {
-			if (i != 0) {
-				this.out.print(", ");
-			}
 			final String newValue = writeAllocations(indent, rhs.get(i)).asWVal().toString();
 			rhsExprs[i] = build_rhs(lhsVars[i], lhsIndexes[i], 0, newValue);
 		}
@@ -934,7 +971,7 @@ public final class Wyil2Boogie {
 			this.out.print("call ");
 			this.outerMethodCall = null;
 		}
-		for (int i = 0; i != lhs.size(); ++i) {
+		for (int i = 0; i != lhsVars.length; ++i) {
 			if (i != 0) {
 				this.out.print(", ");
 			}
@@ -955,7 +992,7 @@ public final class Wyil2Boogie {
 				throw new NotImplementedYet("Assignment with non-matching LHS and RHS lengths.", stmt);
 			}
 		}
-		for (int i = 0; i != rhs.size(); ++i) {
+		for (int i = 0; i != rhsExprs.length; ++i) {
 			if (i != 0) {
 				this.out.print(", ");
 			}
@@ -1168,7 +1205,8 @@ public final class Wyil2Boogie {
 	private void writeDoWhile(int indent, Stmt.DoWhile b) {
 		final Tuple<Expr> loopInvariant = b.getInvariant();
 		// Location<?>[] modifiedOperands = b.getOperandGroup(1);
-		this.loopLabels.addLast("DO__WHILE__" + this.loopLabels.size());
+		this.loopCounter++;
+		this.loopLabels.addLast("DO__WHILE__" + this.loopCounter);
 		this.out.printf("if (true) {\n");
 		tabIndent(indent + 2);
 		this.out.printf("CONTINUE__%s:\n", this.loopLabels.getLast());
@@ -1259,7 +1297,8 @@ public final class Wyil2Boogie {
 		final Tuple<Expr> loopInvariant = b.getInvariant();
 		// Location<?>[] modifiedOperands = b.getOperandGroup(1);
 		final String cond = writeAllocations(indent, b.getCondition()).as(BOOL).toString();
-		this.loopLabels.addLast("WHILE__" + this.loopLabels.size());
+		this.loopCounter++;
+		this.loopLabels.addLast("WHILE__" + this.loopCounter);
 		this.out.printf("CONTINUE__%s:\n", this.loopLabels.getLast());
 		tabIndent(indent + 1);
 		this.out.printf("while (%s)", cond);
@@ -1329,8 +1368,6 @@ public final class Wyil2Boogie {
 	 */
 	private void writeSwitch(int indent, Stmt.Switch sw) {
 		this.switchCount++;
-		// we number each switch uniquely, so that nested switches and
-		// non-nested switches in the same body all have distinct labels.
 		this.loopLabels.addLast("SWITCH" + this.switchCount);
 		final String var = createSwitchVar(this.switchCount);
 		final Tuple<Stmt.Case> cases = sw.getCases();
@@ -1734,13 +1771,13 @@ public final class Wyil2Boogie {
 	/**
 	 * Ourput a lambda function as a closure.
 	 *
-	 * @param lambda the lambda function plus the identifiers it captures.
+	 * @param lambda the lambda function, which may capture surrounding variables.
 	 * @return a Boogie Closure expression.
 	 */
 	private BoogieExpr boogieDeclLambda(Decl.Lambda lambda) {
 		System.out.println("DECL_lambda:"
 				+ "\n  name     : " + lambda.getName() // usually empty string
-				+ "\n  captures : " + lambda.getCaptures() // Tuple<Identifier>
+				+ "\n  captures : " + lambda.getCapturedVariables() // Set<Variable>
 				+ "\n  type     : " + lambda.getType()
 				+ "\n  types    : " + lambda.getTypes() // always null
 				+ "\n  params   : " + lambda.getParameters()
@@ -1752,15 +1789,16 @@ public final class Wyil2Boogie {
 		if (lambdaName == null) {
 			throw new IllegalStateException("missed lambda on pass 1: " + lambda);
 		}
-		Tuple<AbstractCompilationUnit.Identifier> captures = lambda.getCaptures();
+		Set<Decl.Variable> captures = lambda.getCapturedVariables();
 		StringBuilder closure = new StringBuilder();
 		closure.append("closure__");
 		closure.append(captures.size());
 		closure.append("(");
 		closure.append(lambdaName);
-		for (int i = 0; i < captures.size(); i++) {
+		// NOTE: assumes that lambda.getCapturedVariables() always returns the same set with the same iteration order.
+		for (Decl.Variable v : captures) {
 			closure.append(", ");
-			closure.append(captures.get(i).get());
+			closure.append(v.getName().get());
 		}
 		closure.append(")");
 		return new BoogieExpr(BoogieType.FUNCTION, closure.toString());
@@ -1826,42 +1864,49 @@ public final class Wyil2Boogie {
 	private BoogieExpr boogieEquality(Expr.BinaryOperator c) {
 		final Expr left = c.getFirstOperand();
 		final Expr right = c.getSecondOperand();
-		final Type leftType = left.getType();
-		final Type rightType = right.getType();
+		if (USE_BOOGIE_EQUALITY) {
+			// with this approach we just directly use Boogie equality.
+			final BoogieExpr out = new BoogieExpr(BOOL);
+			out.addOp(boogieExpr(left).asWVal(), " == ", boogieExpr(right).asWVal());
+			return out;
+		} else {
+			final Type leftType = left.getType();
+			final Type rightType = right.getType();
 
-		// try to find a simple intersection of leftType and rightType
-		Type intersectType = new Type.Intersection(leftType, rightType);
-		Type usableType = findUsableEqualityType(intersectType);
-		// System.out.println("DEBUG: " + leftType + " =?= " + rightType + " gives intersection " + usableType);
-		if (usableType == null) {
-			// Let's try harder to simplify this intersection type.
-			// 'simplify' does not do enough simplification - we need to unfold NominalTypes.
-			// Type eqType = this.typeSystem.simplify(intersectType);
-			Type eqType = null;
-			try {
-				// FIXME: extractReadableType is not quite correct, as it can throw away some fields.
-				eqType = this.typeSystem.extractReadableType(intersectType, new FlowTypeCheck.Environment());
-				// FIXME: temporary hack to handle intersection of two equal types.
-				if (eqType == null && leftType.equals(rightType)) {
-					eqType = leftType;
-				}
-			} catch (NameResolver.ResolutionError resolutionError) {
-				resolutionError.printStackTrace();
-			}
-			if (!USE_BOOGIE_EQUALITY) {
-				System.out.println("DEBUG: simplified: " + intersectType
-						+ "\n               to: " + eqType);
-			}
-			if (usableType != null) {
-				usableType = findUsableEqualityType(usableType);
-			}
+			// try to find a simple intersection of leftType and rightType
+			Type intersectType = new Type.Intersection(leftType, rightType);
+			Type usableType = findUsableEqualityType(intersectType);
+			// System.out.println("DEBUG: " + leftType + " =?= " + rightType + " gives intersection " + usableType);
 			if (usableType == null) {
-				throw new NotImplementedYet("comparison of complex type: " + intersectType, c);
+				// Let's try harder to simplify this intersection type.
+				// 'simplify' does not do enough simplification - we need to unfold NominalTypes.
+				// Type eqType = this.typeSystem.simplify(intersectType);
+				Type eqType = null;
+				try {
+					// FIXME: extractReadableType is not quite correct, as it can throw away some fields.
+					eqType = this.typeSystem.extractReadableType(intersectType, new FlowTypeCheck.Environment());
+					// FIXME: temporary hack to handle intersection of two equal types.
+					if (eqType == null && leftType.equals(rightType)) {
+						eqType = leftType;
+					}
+				} catch (NameResolver.ResolutionError resolutionError) {
+					resolutionError.printStackTrace();
+				}
+				if (!USE_BOOGIE_EQUALITY) {
+					System.out.println("DEBUG: simplified: " + intersectType
+							+ "\n               to: " + eqType);
+				}
+				if (usableType != null) {
+					usableType = findUsableEqualityType(usableType);
+				}
+				if (usableType == null) {
+					throw new NotImplementedYet("comparison of complex type: " + intersectType, c);
+				}
 			}
-		}
 
-		// finally, generate an appropriate equality check for this intersection type
-		return boogieTypedEquality(usableType, boogieExpr(left), boogieExpr(right)).as(BOOL);
+			// finally, generate an appropriate equality check for this intersection type
+			return boogieTypedEquality(usableType, boogieExpr(left), boogieExpr(right)).as(BOOL);
+		}
 	}
 
 	/** True for the types that our equality code generator can handle. */
@@ -1926,68 +1971,63 @@ public final class Wyil2Boogie {
 	 */
 	private BoogieExpr boogieTypedEquality(Type eqType, BoogieExpr left, BoogieExpr right) {
 		final BoogieExpr out = new BoogieExpr(BOOL);
-		if (USE_BOOGIE_EQUALITY) {
-			// temporary experiment to use just Boogie equality.
-			out.addOp(left.asWVal(), " == ", right.asWVal());
-		} else {
-			final String eqTypeStr = eqType.toString();
-			if (eqTypeStr.equals("null")) {
-				// This requires special handling, since we do not have toNull and fromNull
-				// functions.
-				// Instead, we just compare both sides to the WVal 'null' constant.
-				// TODO: an alternative would be to just compare the WVals using '=='?
-				final BoogieExpr nulle = new BoogieExpr(NULL, "null");
-				final BoogieExpr lhs = new BoogieExpr(BOOL, left.asWVal(), " == ", nulle);
-				final BoogieExpr rhs = new BoogieExpr(BOOL, right.asWVal(), " == ", nulle);
-				out.addOp(lhs, " && ", rhs);
-			} else if (eqTypeStr.equals("int") // WAS eqType instanceof Type.Int
-					|| eqTypeStr.equals("byte")) { // WAS eqType instanceof Type.Byte) {
-				out.addOp(left.as(INT), " == ", right.as(INT));
-			} else if (eqTypeStr.equals("bool")) { // WAS eqType instanceof Type.Bool) {
-				out.addOp(left.as(BOOL), " == ", right.as(BOOL));
-			} else if (eqType instanceof Type.Record) {
-				final BoogieExpr leftRec = left.as(RECORD).asAtom();
-				final BoogieExpr rightRec = right.as(RECORD).asAtom();
-				final Type.Record recType = (Type.Record) eqType;
-				final Decl.Variable[] fields = recType.getFields().toArray(Decl.Variable.class);
-				Arrays.sort(fields, fieldsComparator);
-				if (fields.length == 0) {
-					out.append("true");
-				}
-				for (int i = 0; i < fields.length; i++) {
-					final Decl.Variable field = fields[i];
-					final String deref = "[" + mangledWField(field.getName().get()) + "]";
-					final BoogieExpr leftVal = new BoogieExpr(WVAL, leftRec + deref);
-					final BoogieExpr rightVal = new BoogieExpr(WVAL, rightRec + deref);
-					final BoogieExpr feq = boogieTypedEquality(field.getType(), leftVal, rightVal).as(BOOL);
-					if (i == 0) {
-						out.addExpr(feq);
-					} else {
-						out.addOp(" && ", feq);
-					}
-				}
-			} else if (eqType instanceof Type.Array) {
-				final BoogieExpr leftArray = left.as(ARRAY).asAtom();
-				final BoogieExpr rightArray = right.as(ARRAY).asAtom();
-				final Type.Array arrayType = (Type.Array) eqType;
-				final Type elemType = arrayType.getElement();
-				// we check the length and all the values:
-				// arraylen(left) == arraylen(right)
-				// && (forall i:int :: 0 <= i && i < arraylen(a) ==> left[i] == right[i])
-				final String index = generateFreshBoundVar("idx");
-				final String deref = "[" + index + "]";
-				final BoogieExpr leftVal = new BoogieExpr(WVAL, leftArray + deref);
-				final BoogieExpr rightVal = new BoogieExpr(WVAL, rightArray + deref);
-				out.appendf("arraylen(%s) == arraylen(%s) && (forall %s:int :: 0 <= %s && %s < arraylen(%s)",
-						left.asWVal().toString(), right.asWVal().toString(), index, index, index, left.asWVal().toString());
-				out.addOp(" ==> ", boogieTypedEquality(elemType, leftVal, rightVal).as(BOOL));
-				out.append(")");
-				out.setOp(" && "); // && is outermost, since the ==> is bracketed.
-			} else {
-				throw new NotImplementedYet(
-						"comparison of values of type: " + eqType + ".  " + left.toString() + " == " + right.toString(),
-						null);
+		final String eqTypeStr = eqType.toString();
+		if (eqTypeStr.equals("null")) {
+			// This requires special handling, since we do not have toNull and fromNull
+			// functions.
+			// Instead, we just compare both sides to the WVal 'null' constant.
+			// TODO: an alternative would be to just compare the WVals using '=='?
+			final BoogieExpr nulle = new BoogieExpr(NULL, "null");
+			final BoogieExpr lhs = new BoogieExpr(BOOL, left.asWVal(), " == ", nulle);
+			final BoogieExpr rhs = new BoogieExpr(BOOL, right.asWVal(), " == ", nulle);
+			out.addOp(lhs, " && ", rhs);
+		} else if (eqTypeStr.equals("int") // WAS eqType instanceof Type.Int
+				|| eqTypeStr.equals("byte")) { // WAS eqType instanceof Type.Byte) {
+			out.addOp(left.as(INT), " == ", right.as(INT));
+		} else if (eqTypeStr.equals("bool")) { // WAS eqType instanceof Type.Bool) {
+			out.addOp(left.as(BOOL), " == ", right.as(BOOL));
+		} else if (eqType instanceof Type.Record) {
+			final BoogieExpr leftRec = left.as(RECORD).asAtom();
+			final BoogieExpr rightRec = right.as(RECORD).asAtom();
+			final Type.Record recType = (Type.Record) eqType;
+			final Decl.Variable[] fields = recType.getFields().toArray(Decl.Variable.class);
+			Arrays.sort(fields, fieldsComparator);
+			if (fields.length == 0) {
+				out.append("true");
 			}
+			for (int i = 0; i < fields.length; i++) {
+				final Decl.Variable field = fields[i];
+				final String deref = "[" + mangledWField(field.getName().get()) + "]";
+				final BoogieExpr leftVal = new BoogieExpr(WVAL, leftRec + deref);
+				final BoogieExpr rightVal = new BoogieExpr(WVAL, rightRec + deref);
+				final BoogieExpr feq = boogieTypedEquality(field.getType(), leftVal, rightVal).as(BOOL);
+				if (i == 0) {
+					out.addExpr(feq);
+				} else {
+					out.addOp(" && ", feq);
+				}
+			}
+		} else if (eqType instanceof Type.Array) {
+			final BoogieExpr leftArray = left.as(ARRAY).asAtom();
+			final BoogieExpr rightArray = right.as(ARRAY).asAtom();
+			final Type.Array arrayType = (Type.Array) eqType;
+			final Type elemType = arrayType.getElement();
+			// we check the length and all the values:
+			// arraylen(left) == arraylen(right)
+			// && (forall i:int :: 0 <= i && i < arraylen(a) ==> left[i] == right[i])
+			final String index = generateFreshBoundVar("idx");
+			final String deref = "[" + index + "]";
+			final BoogieExpr leftVal = new BoogieExpr(WVAL, leftArray + deref);
+			final BoogieExpr rightVal = new BoogieExpr(WVAL, rightArray + deref);
+			out.appendf("arraylen(%s) == arraylen(%s) && (forall %s:int :: 0 <= %s && %s < arraylen(%s)",
+					left.asWVal().toString(), right.asWVal().toString(), index, index, index, left.asWVal().toString());
+			out.addOp(" ==> ", boogieTypedEquality(elemType, leftVal, rightVal).as(BOOL));
+			out.append(")");
+			out.setOp(" && "); // && is outermost, since the ==> is bracketed.
+		} else {
+			throw new NotImplementedYet(
+					"comparison of values of type: " + eqType + ".  " + left.toString() + " == " + right.toString(),
+					null);
 		}
 		return out;
 	}
@@ -2512,29 +2552,38 @@ public final class Wyil2Boogie {
 		// add axiom apply_n(closure_m(lambdaName, captured...), args...) = decl.getBody();
 		StringBuilder decls = new StringBuilder();
 		StringBuilder captureNames = new StringBuilder();
-		String sep = "";
-		for (AbstractCompilationUnit.Identifier c: decl.getCaptures()) {
-			decls.append(sep + c.get() + ":WVal");
-			captureNames.append(sep + c.get());
-			sep = ", ";
+		String declSep = "";
+		for (Decl.Variable c: decl.getCapturedVariables()) {
+			decls.append(declSep + c.getName().get() + ":WVal");
+			captureNames.append(", " + c.getName().get());
+			declSep = ", ";
 		}
 		StringBuilder paramNames = new StringBuilder();
-		String paramSep = "";
 		for (Decl.Variable p: decl.getParameters()) {
-			decls.append(sep + p.getName().get() + ":WVal");  // uses above sep
-			paramNames.append(paramSep + p.getName().get());
-			sep = ", ";
-			paramSep = ", ";
+			decls.append(declSep + p.getName().get() + ":WVal");
+			paramNames.append(", " + p.getName().get());
+			declSep = ", ";
 		}
-		BoogieExpr body = boogieExpr(decl.getBody()).asWVal();
-		this.out.printf("axiom (forall %s :: apply__%d(closure__%d(%s%s), %s) == %s);\n\n",
-				decls.toString(),
+		// An example trigger of this axiom is: apply__2(closure__1(funcName,cap1),in1,in2).
+		final String call = String.format("apply__%d(closure__%d(%s%s)%s)",
 				decl.getParameters().size(),
-				decl.getCaptures().size(),
+				decl.getCapturedVariables().size(),
 				lambdaName,
 				captureNames.toString(),
-				paramNames.toString(),
-				body.toString());
+				paramNames.toString()
+				);
+		BoogieExpr body = boogieExpr(decl.getBody()).asWVal();
+		if (decls.length() == 0) {
+			this.out.printf("axiom %s == %s;\n\n",
+					call,
+					body.toString());
+		} else {
+			this.out.printf("axiom (forall %s :: {%s} %s == %s);\n\n",
+					decls.toString(),
+					call,
+					call,
+					body.toString());
+		}
 	}
 
 	/** Walks recursively through a constant and declares any function constants. */
