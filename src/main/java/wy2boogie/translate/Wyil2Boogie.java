@@ -67,6 +67,8 @@ import wyil.type.TypeSystem;
  * DONE: added generic equality axiom for records (to wval.bpl).
  *       Instead of generating equality axioms for each record type defined in Whiley.
  *
+ * TODO: add type invariants to loops.  See While_Valid_62.whiley.
+ *
  * TODO: refactor so that statements are returned as strings?
  *       This would allow us to use side-effects to declare local variables, refs, etc.
  *
@@ -75,10 +77,12 @@ import wyil.type.TypeSystem;
  *       This needs a theory of three-valued logic for expressions?
  *
  * TODO: declare local variables for any missing output parameters of 'call' statements (see Array_Valid_9.whiley).
- *
- * TODO: add type invariants to loops.  See While_Valid_62.whiley.
- *
- * TODO: cleanup: generate ref__i variables only when necessary, or avoid them completely.
+
+ * TODO: handle heap and references better.
+ *       1. cleanup: generate ref__i variables only when necessary, or avoid them completely.
+ *       2. pass w__heap as a parameter to functions that use the heap.
+ *       3. add typing constraints for dereferenced values.
+ *       4. strengthen the theory of heap updating and dereferencing.
  *
  * TODO: move ALL method calls out of expressions?  (5 tests do this!)
  *       See MethodCall_Valid_4.whiley for a complex example.
@@ -108,7 +112,7 @@ import wyil.type.TypeSystem;
  *   <li>DONE: references, new (17 tests), and dereferencing (17 tests)</li>
  *   <li>DONE: switch (14 tests)</li>
  *   <li>DONE: lambda functions (17 tests)</li>
- *   <li>functions/methods with multiple return values (5 tests)</li>
+ *   <li>functions/methods with multiple return values (5 tests).  Need Boogie theory of tuples/arrays.</li>
  *   <li>DONE: continue statements and named blocks (3 tests)</li>
  *   <li>DONE (separate byte and int ops): bitwise operators (13 tests)</li>
  *   <li>DONE: generate type axioms for constants (tell Boogie the result of Whiley's type inference).</li>
@@ -2160,6 +2164,18 @@ public final class Wyil2Boogie {
 			sb.append("))");
 			return sb.toString();
 		}
+		if (type instanceof Type.Intersection) {
+			// we generate the conjunction of all the bounds
+			final Type.Intersection t = (Type.Intersection) type;
+			final StringBuilder sb = new StringBuilder();
+			String sep = "";
+			for (int i = 0; i != t.size(); ++i) {
+				sb.append(sep);
+				sb.append(typePredicate(var, t.get(i)));
+				sep = " && ";
+			}
+			return sb.toString();
+		}
 		/* NOTE: Negation types were replaced by Difference types, 7 Nov 2017.
 		if (type instanceof Type.Negation) {
 			// we negate the type test
@@ -2175,10 +2191,10 @@ public final class Wyil2Boogie {
 			return pos + " && !(" + neg + ")";
 		}
 		if (type instanceof Type.Reference) {
-			// TODO: add constraints about the type pointed to.
+			// TODO: add typing of dereference element, once we pass w__heap into functions.
 			// Type.Reference ref = (Type.Reference) type;
-			// translateType(?, ref.element(), stores);
-			return "isRef(" + var + ")";
+			// String deref = "w__heap[toRef(" + var + ")]";
+			return "isRef(" + var + ")"; // && " + typePredicate(deref, ref.getElement());
 		}
 		if (type instanceof Type.Function) {
 			// TODO: add input and output types.
