@@ -1,5 +1,6 @@
 package wy2boogie;
 
+import wy2boogie.commands.TranslateBoogieExample;
 import wy2boogie.commands.Wy2Boogie;
 import wycc.lang.Command;
 import wycc.lang.Module;
@@ -55,7 +56,9 @@ public class Activator implements Module.Activator {
 		final Logger logger = new Logger.Default(System.err);
 		// List of commands to use
 		final Command[] commands = {
-				new Wy2Boogie(this.registry, logger)};
+				new Wy2Boogie(this.registry, logger),
+				new TranslateBoogieExample(this.registry, logger)
+		};
 		// Register all commands
 		for (final Command c : commands) {
 			context.register(wycc.lang.Command.class, c);
