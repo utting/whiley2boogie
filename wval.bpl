@@ -98,7 +98,8 @@ axiom (forall v:WVal :: isArray(v) ==> 0 <= arraylen(v));
 
 // Whiley array generators [val;len] are represented as:
 //    fromArray(arrayconst(val), len)
-// and array literals use arrayconst(val0)[1 := val1][2 := val2] etc.
+// and an array literal like [val0, val1, val2] is constructed as:
+//    fromArray(arrayconst(val0)[1 := val1][2 := val2], 2)
 //
 function arrayconst(val:WVal) returns ([int]WVal);
 axiom (forall val:WVal, i:int :: arrayconst(val)[i] == val);
@@ -116,14 +117,14 @@ axiom (forall val:WVal, i:int :: arrayconst(val)[i] == val);
 //  ==> wa == wb   // if we had a strong extensionality axiom, requiring only 0..100.
 //   && wa != wb   // from a != b plus above axioms.
 // )
-axiom (forall a1:WVal, a2:WVal ::
+axiom (forall a1:WVal, a2:WVal :: {isArray(a1),isArray(a2)}
     isArray(a1)
     && isArray(a2)
-    && arraylen(a1) == arraylen(a2)
-    && (forall i:int :: 0 <= i && i < arraylen(a1) ==> toArray(a1)[i] == toArray(a2)[i])
-    ==> a1 == a2
+    ==>
+       (arraylen(a1) == arraylen(a2)
+        && (forall i:int :: 0 <= i && i < arraylen(a1) ==> toArray(a1)[i] == toArray(a2)[i])
+       <==> a1 == a2)
     );
-// should be <==>?
 
 
 // Records (and objects)
@@ -133,6 +134,8 @@ axiom (forall a1:WVal, a2:WVal ::
 //
 // The Whiley type system distinguishes between record and objects
 // (closed versus open), so this Boogie theory does not need to.
+// Note that in this theory, two records being equal means they have the same set of fields
+// (because all undefined fields are mapped to the non-Whiley value: undef__field).
 
 // Record and object injection and extraction functions
 function toRecord(WVal) returns ([WField]WVal);
@@ -148,7 +151,7 @@ const unique empty__record : [WField]WVal;
 const unique undef__field:WVal; // undefined fields map to this value
 axiom (forall f:WField :: empty__record[f] == undef__field);
 
-axiom (forall a1:WVal, a2:WVal ::
+axiom (forall a1:WVal, a2:WVal :: {isRecord(a1),isRecord(a2)}
     isRecord(a1)
     && isRecord(a2)
     ==>
