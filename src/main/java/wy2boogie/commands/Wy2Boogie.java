@@ -77,13 +77,13 @@ public class Wy2Boogie extends Compile {
 	}
 
 	public void setBoogieDir(File dir) throws IOException {
-		this.boogieDir = new DirectoryRoot(dir,this.registry);
+		this.boogieDir = new DirectoryRoot(dir, this.registry);
 	}
 
 	@Override
 	protected void finaliseConfiguration() throws IOException {
 		super.finaliseConfiguration();
-		this.boogieDir = getDirectoryRoot(this.boogieDir,this.wyildir);
+		this.boogieDir = getDirectoryRoot(this.boogieDir, this.wyildir);
 	}
 
 	@Override
