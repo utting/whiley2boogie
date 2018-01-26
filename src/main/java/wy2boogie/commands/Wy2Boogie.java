@@ -22,7 +22,7 @@ import wyc.lang.WhileyFile;
 
 public class Wy2Boogie extends Compile {
 	/**
-	 * The location in which class generated js files are stored, or null if not
+	 * The location isType which class generated js files are stored, or null if not
 	 * specified.
 	 */
 	protected DirectoryRoot boogieDir;

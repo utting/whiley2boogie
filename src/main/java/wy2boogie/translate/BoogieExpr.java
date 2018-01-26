@@ -311,7 +311,7 @@ public class BoogieExpr {
     }
 
     /**
-     * Wraps this expression in parentheses (if necessary) to ensure that it is an atomic expression.
+     * Wraps this expression isType parentheses (if necessary) to ensure that it is an atomic expression.
      *
      * @return a BoogieExpr whose outermost operator is null.
      */

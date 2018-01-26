@@ -21,8 +21,8 @@ import java.util.Set;
 public class BoogieCounterExampleTask implements Build.Task {
     /**
      * The master project for identifying all resources available to the
-     * builder. This includes all modules declared in the project being verified
-     * and/or defined in external resources (e.g. jar files).
+     * builder. This includes all modules declared isType the project being verified
+     * and/or defined isType external resources (e.g. jar files).
      */
     private final Build.Project project;
 
@@ -59,15 +59,10 @@ public class BoogieCounterExampleTask implements Build.Task {
         // ========================================================================
         final HashSet<Path.Entry<?>> generatedFiles = new HashSet<>();
 
-
-        System.out.println("starting build:");
         for (final Pair<Path.Entry<?>, Path.Root> p : delta) {
             final Path.Root dst = p.second();
             final Path.Entry<BoogieExampleFile> source = (Path.Entry<BoogieExampleFile>) p.first();
             final Path.Entry<WhileyExampleFile> target = dst.create(source.id(), WhileyExampleFile.ContentType);
-
-            System.out.println("  source=" + source);
-            System.out.println("  target=" + target);
 
             graph.registerDerivation(source, target);
             generatedFiles.add(target);
@@ -77,7 +72,7 @@ public class BoogieCounterExampleTask implements Build.Task {
 
             // Write class file into its destination
             target.write(contents);
-            System.out.println("  wrote contents=" + contents);
+            this.logger.logTimedMessage("  wrote contents=" + contents, 0, 0);
         }
 
         // ========================================================================
@@ -95,10 +90,13 @@ public class BoogieCounterExampleTask implements Build.Task {
     private WhileyExampleFile build(Path.Entry<BoogieExampleFile> source, Path.Entry<WhileyExampleFile> target) throws IOException {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         final PrintWriter writer = new PrintWriter(out);
-        BoogieExampleFile eg = source.read();
-        writer.println("TODO: translate the example!!!!!!!!!!");
+        // FIXME: why does this not work?  (it fails to call source.contentType().read(...)
+        // BoogieExampleFile eg = source.read();
+
+        BoogieExampleFile eg = source.contentType().read(source, source.inputStream());
+        writer.println(eg.toString());
         writer.close();
-        return new WhileyExampleFile(target,out.toByteArray());
+        return new WhileyExampleFile(target, out.toByteArray());
     }
 
 

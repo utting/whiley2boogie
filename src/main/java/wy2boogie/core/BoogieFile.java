@@ -15,8 +15,8 @@ public class BoogieFile extends AbstractCompilationUnit {
 	// =========================================================================
 
 	/**
-	 * Responsible for identifying and reading/writing WyilFiles. The normal
-	 * extension is ".wyil" for WyilFiles.
+	 * Responsible for identifying and reading/writing Boogie files. The normal
+	 * extension is ".bpl" for WyilFiles.
 	 */
 	public static final Content.Type<BoogieFile> ContentType = new Content.Type<BoogieFile>() {
 		public Path.Entry<BoogieFile> accept(Path.Entry<?> e) {
@@ -28,7 +28,7 @@ public class BoogieFile extends AbstractCompilationUnit {
 
 		@Override
 		public BoogieFile read(Path.Entry<BoogieFile> e, InputStream input) throws IOException {
-			// At this stage, parsing java files is strictly off-limits :)
+			// At this stage, parsing Boogie is strictly off-limits :)
 			throw new UnsupportedOperationException();
 		}
 

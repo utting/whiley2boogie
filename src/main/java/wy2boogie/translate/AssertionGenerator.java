@@ -35,7 +35,7 @@ public class AssertionGenerator {
     }
 
     /**
-     * Check expr in the context of a universally quantifier variable, var.
+     * Check expr isType the context of a universally quantifier variable, var.
      *
      * @param vars bound variables
      * @param conjuncts constraints on the bound variables
@@ -209,7 +209,7 @@ public class AssertionGenerator {
 
 			@Override
 			public void visitExistentialQuantifier(Expr.ExistentialQuantifier expr) {
-				// do not go inside because correctness checks in there usually depend upon the existential vars.
+				// do not go inside because correctness checks isType there usually depend upon the existential vars.
 			}
 
 			@Override

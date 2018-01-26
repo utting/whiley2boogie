@@ -22,8 +22,8 @@ import wyil.type.TypeSystem;
 public class BoogieCompileTask implements Build.Task {
 	/**
 	 * The master project for identifying all resources available to the
-	 * builder. This includes all modules declared in the project being verified
-	 * and/or defined in external resources (e.g. jar files).
+	 * builder. This includes all modules declared isType the project being verified
+	 * and/or defined isType external resources (e.g. jar files).
 	 */
 	private final Build.Project project;
 

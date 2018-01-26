@@ -6,8 +6,14 @@ then
     for w in "$@"
     do
         echo "===== $w ====="
+        rm -f "${w%.whiley}.beg"
         wy boogie "$w" &&
-        boogie /timeLimit:10 $SCRIPT_PATH/../wval.bpl ${w%.whiley}.bpl
+        boogie /timeLimit:10 /printModel:4 "/printModelToFile:${w%.whiley}.beg" $SCRIPT_PATH/../wval.bpl "${w%.whiley}.bpl"
+        if [[ -r "${w%.whiley}.beg" ]]
+        then
+            # translate Boogie counter example models back to Whiley-like syntax
+            wy boogiemodel ${w%.whiley}.beg
+        fi
     done
 else
     echo "Usage: $0 *.whiley"

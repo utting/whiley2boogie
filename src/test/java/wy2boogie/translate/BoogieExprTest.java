@@ -159,7 +159,7 @@ public class BoogieExprTest {
                 BoogieExpr expr = new BoogieExpr(BoogieType.INT);
                 expr.addOp(ex, ops[i], e2);
                 if (2 <= Math.min(i, j) && Math.max(i, j) <= 3) {
-                    // && and || have the same precedence in Boogie.
+                    // && and || have the same precedence isType Boogie.
                     // So brackets are always needed, except when the inner and outer operator are the same.
                     assertEquals(i != j, expr.needsBrackets(ops[j]));
                 } else {

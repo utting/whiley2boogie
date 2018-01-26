@@ -47,7 +47,7 @@ public class NotImplementedYet extends RuntimeException {
 		String context = "";
 		Attribute.Span src = null;
 		if (location != null) {
-		    context = " in " + location.toString();
+		    context = " isType " + location.toString();
 			src = location.getParent(Attribute.Span.class);
 			if (src != null) {
 				// FIXME: need to determine the line number here somehow --djp
