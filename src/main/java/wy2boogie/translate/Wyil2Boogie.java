@@ -1,12 +1,12 @@
 // Copyright (c) 2011, David J. Pearce (djp@ecs.vuw.ac.nz)
 // All rights reserved.
 //
-// Redistribution and use isType source and binary forms, with or without
+// Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //    * Redistributions of source code must retain the above copyright
 //      notice, this list of conditions and the following disclaimer.
-//    * Redistributions isType binary form must reproduce the above copyright
-//      notice, this list of conditions and the following disclaimer isType the
+//    * Redistributions in binary form must reproduce the above copyright
+//      notice, this list of conditions and the following disclaimer in the
 //      documentation and/or other materials provided with the distribution.
 //    * Neither the name of the <organization> nor the
 //      names of its contributors may be used to endorse or promote products
@@ -45,18 +45,18 @@ import wyil.type.TypeSystem;
 /**
  * Translates WYIL bytecodes into Boogie and outputs into a given file.
  *
- * <b>NOTE:</b> the output file is put isType the same place as the
+ * <b>NOTE:</b> the output file is put in the same place as the
  * Whiley file, but with the file extension ".bpl".  This file should
  * be sent to Boogie AFTER the WVal theory file: wval.bpl.
  *
- * <b>NOTE:</b> all values stored isType records and arrays are Whiley values (Boogie type: WVal).
+ * <b>NOTE:</b> all values stored in records and arrays are Whiley values (Boogie type: WVal).
  * So if aa is a Whiley array of integers and ii is a Whiley integer (these are both WVal values),
  * we must write <pre>toArray(aa)</pre> to get the Boogie array value,
  * <pre>toArray(aa)[toInt(ii)]</pre> to get one entry out of the array,
  * and <pre>toInt(toArray(aa)[toInt(ii)]) == 1</pre> to compare that value with one.
  * See <pre>wval.bpl</pre> for the full model of WVal (Whiley values).
  *
- * DONE: generate isType-context assertions for function preconditions, array bounds, etc.
+ * DONE: generate in-context assertions for function preconditions, array bounds, etc.
  *
  * DONE: change do-while translation so that invariant is NOT checked before first iteration.
  *
@@ -65,7 +65,7 @@ import wyil.type.TypeSystem;
  * DONE: refactor the BoogieExpr writeXXX() methods to boogieXXX().
  *
  * DONE: added generic equality axiom for records (to wval.bpl).
- *       Instead of generating equality axioms for each record type defined isType Whiley.
+ *       Instead of generating equality axioms for each record type defined in Whiley.
  *
  * TODO: add type invariants to loops.  See While_Valid_62.whiley.
  *
@@ -97,12 +97,12 @@ import wyil.type.TypeSystem;
  *       See String_Valid_4.whiley for 'old' as a parameter name.
  *
  * TODO: generate assertions after each assignment, to check 'where' constraints?
- *       (Boogie checks 'where' constraints only isType havoc statements, not for assignments).
+ *       (Boogie checks 'where' constraints only in havoc statements, not for assignments).
  *
  * TODO: generate f(x)==e axiom for each Whiley function that is just 'return e'?
  *       (Because current translation only generates e into the __impl code of the function,
- *       so the semantics of the function are not visible elsewhere isType the program.
- *       But this is a bit ad-hoc - the semantics should really be given isType the postcondition!)
+ *       so the semantics of the function are not visible elsewhere in the program.
+ *       But this is a bit ad-hoc - the semantics should really be given in the postcondition!)
  *
  * TODO: implement missing language features, such as:
  * <ul>
@@ -132,7 +132,7 @@ public final class Wyil2Boogie {
     private static final String ALLOCATED = "w__alloc";
     private static final String NEW = "new";
     private static final String NEW_REF = "ref__";
-    // max number of 'new' expressions isType a single statement.
+    // max number of 'new' expressions in a single statement.
     // TODO: calculate this on the fly within each procedure?
     private static final int NEW_REF_MAX = 4;
 
@@ -149,7 +149,7 @@ public final class Wyil2Boogie {
 
     /**
      * If true, then the Whiley bytecodes are printed as comments.
-     * Note: this must be set via the '-v' flag isType the main method.
+     * Note: this must be set via the '-v' flag in the main method.
      */
 	private boolean verbose = false;
 
@@ -179,7 +179,7 @@ public final class Wyil2Boogie {
      *
      * Boogie syntax allows us to call a method (procedure) at the statement level only.
      * But method calls can appear ANYWHERE inside an 'executable' Whiley expression.
-     * (they are not allowed isType requires/ensures/assert/assume/inv expressions).
+     * (they are not allowed in requires/ensures/assert/assume/inv expressions).
      * The current implementation of this translator only handles method calls
      * at the outermost level of an expression.
      * So while each statement is being translated, this variable points to
@@ -211,7 +211,7 @@ public final class Wyil2Boogie {
 	 */
     private int switchCount;
 
-    /** Records the values within all the 'new' expressions isType the current statement. */
+    /** Records the values within all the 'new' expressions in the current statement. */
     private final List<String> newAllocations = new ArrayList<>();
 
 	/**
@@ -255,7 +255,7 @@ public final class Wyil2Boogie {
     /**
      * Declare any new record fields that have not already been declared.
      *
-     * This should be called with all fields isType a definition, before that definition is output.
+     * This should be called with all fields in a definition, before that definition is output.
      */
 	private void declareNewFields(Tuple<Decl.Variable> fields) {
 		for (final Decl.Variable f : fields) {
@@ -281,7 +281,7 @@ public final class Wyil2Boogie {
         if (!this.referencedFunctions.contains(name)) {
             final String func_const = CONST_FUNC + name;
             this.out.printf("const unique %s:WFuncName;\n", func_const);
-            // At the moment, we assume indirect-invoke is used rarely, so for ONE type of function isType each program.
+            // At the moment, we assume indirect-invoke is used rarely, so for ONE type of function in each program.
             // TODO: extend this to handle more than one type of indirect-invoke result (different applyTo operators?)
 
 
@@ -557,7 +557,7 @@ public final class Wyil2Boogie {
 		writeParameters(this.inDecls, null);
 		this.out.println(") returns (bool);");
 
-		// write axiom: (forall isType :: f(isType) <==> body);
+		// write axiom: (forall in :: f(in) <==> body);
 		final String call = String.format("%s(%s)", name, getNames(this.inDecls));
 		this.out.print("axiom (forall ");
 		writeParameters(this.inDecls, null);
@@ -591,8 +591,8 @@ public final class Wyil2Boogie {
 			writeParameters(returns, null);
 			this.out.println(");");
 
-			// OLD: write axiom: (forall isType,out :: f(isType)==out && f_pre(isType) ==> types(out) && post)
-			// NEW: write axiom: (forall isType :: {f(isType)} f_pre(isType) ==> (exists out :: types(out) && post))
+			// OLD: write axiom: (forall in,out :: f(in)==out && f_pre(in) ==> types(out) && post)
+			// NEW: write axiom: (forall in :: {f(in)} f_pre(in) ==> (exists out :: types(out) && post))
 			//    so that this axiom is triggered properly, each time we see f(...).
 			final String inVars = getNames(this.inDecls);
 			final String outVars = getNames(this.outDecls);
@@ -601,7 +601,7 @@ public final class Wyil2Boogie {
 			} else {
 				this.out.print("axiom (forall ");
 				writeParameters(parameters, null);
-				// trigger is f(isType)
+				// trigger is f(in)
 				this.out.printf(" :: {%s(%s)}\n    ", name, getNames(this.inDecls));
 			}
 			this.out.printf("%s(%s)\n",  name + METHOD_PRE, getNames(this.inDecls));
@@ -717,19 +717,19 @@ public final class Wyil2Boogie {
 			public void visitSwitch(Stmt.Switch decl) {
 				switchCount++;
 				tabIndent(1);
-				// we don't bother recording these isType the 'done' map, since each switch has a
+				// we don't bother recording these in the 'done' map, since each switch has a
 				// unique variable.
 				out.printf("var %s : WVal;\n", createSwitchVar(switchCount));
 			}
 
 			@Override
 			public void visitExistentialQuantifier(Expr.ExistentialQuantifier expr) {
-				// do not recurse isType, because vars inside quantifiers are bound vars isType Boogie.
+				// do not recurse in, because vars inside quantifiers are bound vars in Boogie.
 			}
 
 			@Override
 			public void visitUniversalQuantifier(Expr.UniversalQuantifier expr) {
-				// do not recurse isType, because vars inside quantifiers are bound vars isType Boogie.
+				// do not recurse in, because vars inside quantifiers are bound vars in Boogie.
 			}
 		};
 		// Run the visitor
@@ -990,7 +990,7 @@ public final class Wyil2Boogie {
 		}
 		if (lhs.size() != rhs.size()) {
 			if (Stream.of(lhsIndexes).anyMatch(x -> !x.isEmpty())) {
-				throw new NotImplementedYet("Complex LHS vars isType method call not handled yet.", stmt);
+				throw new NotImplementedYet("Complex LHS vars in method call not handled yet.", stmt);
 			}
 			if (rhs.size() != 1) {
 				throw new NotImplementedYet("Assignment with non-matching LHS and RHS lengths.", stmt);
@@ -1006,7 +1006,7 @@ public final class Wyil2Boogie {
 	}
 
 	/**
-	 * Updates the heap and allocated flags for any 'new' side-effects isType expr. All
+	 * Updates the heap and allocated flags for any 'new' side-effects in expr. All
 	 * expressions that could contain 'new' expressions should be processed via this
 	 * method. It returns the resulting Boogie expression just like expr(...), but
 	 * first updates the heap etc.
@@ -1080,7 +1080,7 @@ public final class Wyil2Boogie {
 	 * Extracts base variable that is being assigned to. Builds a list of all
 	 * indexes into the 'indexes' list.
 	 *
-	 * TODO: wrap writeAllocations(indent, rhs[i]) around each expr(...) isType case the
+	 * TODO: wrap writeAllocations(indent, rhs[i]) around each expr(...) in case the
 	 * indexes contain 'new' expressions!
 	 *
 	 * @param loc
@@ -1211,6 +1211,7 @@ public final class Wyil2Boogie {
 		// Location<?>[] modifiedOperands = b.getOperandGroup(1);
 		this.loopCounter++;
 		this.loopLabels.addLast("DO__WHILE__" + this.loopCounter);
+		// TODO: we could remove this if (true) {...} wrapper?
 		this.out.printf("if (true) {\n");
 		tabIndent(indent + 2);
 		this.out.printf("CONTINUE__%s:\n", this.loopLabels.getLast());
@@ -1233,7 +1234,7 @@ public final class Wyil2Boogie {
 	}
 
 	/**
-	 * Whiley fail means this point isType the code should be unreachable.
+	 * Whiley fail means this point in the code should be unreachable.
 	 *
 	 * In the refinement calculus, and Boogie, 'assert false' forces the verifier to
 	 * check this.
@@ -1363,8 +1364,8 @@ public final class Wyil2Boogie {
 	 *
 	 * Cases are numbered, so that 'continue' can jump to the next case.
 	 *
-	 * TODO: handle continue isType switch. (This just requires storing current case
-	 * number i isType a field, so can goto "SWITCH(n)__CASE(i+1)". But to support
+	 * TODO: handle continue in switch. (This just requires storing current case
+	 * number i in a field, so can goto "SWITCH(n)__CASE(i+1)". But to support
 	 * nested switches, we will need a stack of these case numbers!).
 	 *
 	 * @param indent
@@ -1393,7 +1394,7 @@ public final class Wyil2Boogie {
 			writeCase(indent + 1, var, i, cAse, defaultCond);
 		}
 		tabIndent(indent + 1);
-		// We add a 'skip' statement after the BREAK label, just isType case this switch is
+		// We add a 'skip' statement after the BREAK label, just in case this switch is
 		// not inside a block.
 		// For example, Switch_Valid_5.whiley.
 		this.out.printf("BREAK__%s:\n", this.loopLabels.removeLast());
@@ -1721,7 +1722,7 @@ public final class Wyil2Boogie {
 	private BoogieExpr boogieConvert(Expr.Cast expr) {
 		// TODO: implement the record (and object?) conversion that drops fields?
 		// See tests/valid/Coercion_Valid_9.whiley
-		// TODO: are there any valid conversions isType Boogie?
+		// TODO: are there any valid conversions in Boogie?
 		// out.print("(" + expr.getType() + ") ");
 		return boogieExpr(expr.getOperand());
 	}
@@ -2087,7 +2088,7 @@ public final class Wyil2Boogie {
 	}
 
 	/**
-	 * Translate the WyIL type into the type isType Boogie.
+	 * Translate the WyIL type into the type in Boogie.
 	 *
 	 * @param var
 	 *            the name of the variable being typed. Example "a".
@@ -2293,7 +2294,7 @@ public final class Wyil2Boogie {
 				.toArray(BoogieExpr[]::new);
 		final BoogieExpr out = new BoogieExpr(RECORD);
 		Tuple<AbstractCompilationUnit.Identifier> fields = expr.getFields();
-		// the values are presented isType order according to the alphabetically sorted
+		// the values are presented in order according to the alphabetically sorted
 		// field names!
 		// FIXME: need to fix sorting of fields --- djp
 		// Arrays.sort(fields);
@@ -2307,8 +2308,8 @@ public final class Wyil2Boogie {
 
 	/**
 	 * Converts a Whiley field name into a Boogie field name. This translation is
-	 * useful because isType Boogie it is possible to have fields and variables with the
-	 * same name, but our encoding isType Boogie means they are all isType the same name
+	 * useful because in Boogie it is possible to have fields and variables with the
+	 * same name, but our encoding in Boogie means they are all in the same name
 	 * space (constants plus variables).
 	 *
 	 * @param field
@@ -2351,7 +2352,7 @@ public final class Wyil2Boogie {
 
 		this.functionOverloads = new HashMap<>();
 
-		// Now predefine all the functions isType wval.bpl (as unmangled).
+		// Now predefine all the functions in wval.bpl (as unmangled).
 		// This is so that any user-defined functions with those names will be forced to
 		// use mangled names!
 		for (final String predef : new String[] { "isNull", "isInt", "isBool", "isArray", "isRecord", "isObject",
@@ -2543,7 +2544,7 @@ public final class Wyil2Boogie {
 	};
 
 	/**
-	 * A helper function that declares all new fields isType a complete syntax tree.
+	 * A helper function that declares all new fields in a complete syntax tree.
 	 *
 	 * This should be called before that syntax tree is output.
 	 *
