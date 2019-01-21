@@ -1,6 +1,9 @@
 Issues to discuss with David
 ============================
 
+How to run 'wy boogie' with assertions enabled?
+
+
 Equality:
   1. type-specific equals tests?
   2. or just Boogie '=='?  Plus axioms for each open/closed record type?
@@ -14,15 +17,15 @@ Equality:
 
 
 
-My translation of Type.Difference?
-  * See typePredicate method in Wyil2Boogie.java
-
 Bugs?
   * wy compile sum0.whiley  does nothing if sum0.whiley is a symbolic link.
   * functions with no return values is a bug.
+  * wy boogie ConstrainedReference_Valid_1.whiley (and wy compile) return status 0, but give this error:
+    ./ConstrainedReference_Valid_1.whiley:7: expected reference type
+            return (*v) + 1
 
 
-Java 9: support?  GitHub issue
+Java 9: support?  Add GitHub issue, or pull request with changes.
   1 Need to add to build.xml, javac target: source="${JAVA_VERSION}"
     else get these compile warnings:
     [javac] Compiling 28 source files to /Users/utting/git/whiley/WhileyCompiler/target/classes
