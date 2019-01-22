@@ -10,11 +10,11 @@ then
           else if ($0 ~ "Exception: " && test) {printf fmt,test,"Exception"; test=""} \
           else if ($0 ~ "Error compiling") {printf fmt,test,"CompileError"; test=""} \
           else if ($0 ~ "^ *\\^+ *$") {printf fmt,test,"CompileError"; test=""} \
-          else if ($0 ~ " verified, 0 errors$") {printf fmt,test,"FullyVerified"; test=""} \
-          else if ($0 ~ " verified, 0 errors, ") {printf fmt0" %s\n",test,"Timeouts",$0; test=""} \
-          else if ($0 ~ " verified, [^0] error") {printf fmt0" %s\n",test,"PartVerified",$0; test=""} \
-          else if ($0 ~ "errors detected in.*.bpl") {printf fmt,test,"BplErrors"; test=""} \
-          else if ($1 == "=====") {printf fmt,test,"UNKNOWN!!!"; print out; out=""; test=$2} \
+          else if ($0 ~ " verified, 0 errors$" && test) {printf fmt,test,"FullyVerified"; test=""} \
+          else if ($0 ~ " verified, 0 errors, " && test) {printf fmt0" %s\n",test,"Timeouts",$0; test=""} \
+          else if ($0 ~ " verified, [^0] error" && test) {printf fmt0" %s\n",test,"PartVerified",$0; test=""} \
+          else if ($0 ~ "errors detected in.*.bpl" && test) {printf fmt,test,"BplErrors"; test=""} \
+          else if ($1 == "=====" && test) {printf fmt,test,"UNKNOWN!!!"; print out; out=""; test=$2} \
           else {out = out$0"\n"}
          }' "$@"
 
