@@ -7,7 +7,11 @@ then
     do
         echo "===== $w ====="
         rm -f "${w%.whiley}.beg"
-        wy boogie "$w" &&
+        # NOTE: this was just: wy boogie "$w" && boogie ...
+        # But wy does not return exit status correctly.
+        # So we flip stderr and stdout and use awk to set exit status 1 on compile errors.
+        # Works, but Yuck!
+        wy boogie "$w" 3>&1 1>&2 2>&3 |awk 'BEGIN{s=0} {print $0; if ($0 ~ "\\^\\^") s=1} END{exit s}' &&
         boogie /timeLimit:10 /printModel:4 "/printModelToFile:${w%.whiley}.beg" $SCRIPT_PATH/../wval.bpl "${w%.whiley}.bpl"
         if [[ -r "${w%.whiley}.beg" ]]
         then
