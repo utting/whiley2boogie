@@ -6,10 +6,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import wyc.lang.WhileyFile;
-import wyc.util.AbstractVisitor;
+import wyil.lang.WyilFile;
+import wyil.util.AbstractVisitor;
 
-import static wyc.lang.WhileyFile.*;
+import static wyil.lang.WyilFile.*;
 
 /**
  * Generate assertions to ensure that a given expression is well-defined.
@@ -145,7 +145,7 @@ public class AssertionGenerator {
 			@Override
 			public void visitInvoke(Expr.Invoke funCall) {
 				String name = funCall.getName().toString();
-				Type.Callable type = funCall.getSignature();
+				Type.Callable type = funCall.getDeclaration().getType();
 				// properties do not have preconditions.
 				if (type instanceof Type.Function || type instanceof Type.Method) {
 					String funName = wy2b.mangledFunctionMethodName(name, type);

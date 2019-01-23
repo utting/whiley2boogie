@@ -63,15 +63,13 @@ public class BoogieCounterExampleTask implements Build.Task {
             final Path.Root dst = p.second();
             final Path.Entry<BoogieExampleFile> source = (Path.Entry<BoogieExampleFile>) p.first();
             final Path.Entry<WhileyExampleFile> target = dst.create(source.id(), WhileyExampleFile.ContentType);
-
-            graph.registerDerivation(source, target);
             generatedFiles.add(target);
-
             // Construct the file
             final WhileyExampleFile contents = build(source, target);
-
             // Write class file into its destination
             target.write(contents);
+			// Flush any changes to disk
+			target.flush();
             this.logger.logTimedMessage("  wrote contents=" + contents, 0, 0);
         }
 

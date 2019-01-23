@@ -17,7 +17,7 @@ import wyfs.lang.Path;
 import wyfs.lang.Path.Entry;
 import wyfs.lang.Path.Root;
 import wyc.lang.WhileyFile;
-import wyil.type.TypeSystem;
+import wyil.lang.WyilFile;
 
 public class BoogieCompileTask implements Build.Task {
 	/**
@@ -28,19 +28,12 @@ public class BoogieCompileTask implements Build.Task {
 	private final Build.Project project;
 
 	/**
-	 * The type system is useful for managing nominal types and converting them
-	 * into their underlying types.
-	 */
-	private final TypeSystem typeSystem;
-
-	/**
 	 * For logging information.
 	 */
 	private Logger logger = Logger.NULL;
 
 	public BoogieCompileTask(Build.Project project) {
 		this.project = project;
-		this.typeSystem = new TypeSystem(project);
 	}
 
 	public void setLogger(Logger logger) {
@@ -66,21 +59,21 @@ public class BoogieCompileTask implements Build.Task {
 
 		for (final Pair<Path.Entry<?>, Path.Root> p : delta) {
 			final Path.Root dst = p.second();
-			final Path.Entry<WhileyFile> source = (Entry<WhileyFile>) p.first();
+			final Path.Entry<WyilFile> source = (Entry<WyilFile>) p.first();
 			final Path.Entry<BoogieFile> target = dst.create(source.id(), BoogieFile.ContentType);
-			graph.registerDerivation(source, target);
 			generatedFiles.add(target);
-
 			// Construct the file
 			final BoogieFile contents = build(source, target);
-
 			// Write class file into its destination
 			target.write(contents);
+			// Flush any changes to disk
+			target.flush();
 		}
 
 		// ========================================================================
 		// Done
 		// ========================================================================
+
 
 		final long endTime = System.currentTimeMillis();
 		this.logger.logTimedMessage("WyIL => Boogie: compiled " + delta.size() + " file(s)",
@@ -90,10 +83,10 @@ public class BoogieCompileTask implements Build.Task {
 		return generatedFiles;
 	}
 
-	private BoogieFile build(Path.Entry<WhileyFile> source, Path.Entry<BoogieFile> target) throws IOException {
+	public static BoogieFile build(Path.Entry<WyilFile> source, Path.Entry<BoogieFile> target) throws IOException {
 		final ByteArrayOutputStream out = new ByteArrayOutputStream();
         final PrintWriter writer = new PrintWriter(out);
-        final Wyil2Boogie translator = new Wyil2Boogie(typeSystem, writer);
+        final Wyil2Boogie translator = new Wyil2Boogie(writer);
 		translator.setVerbose(false);
 		translator.apply(source.read());
 		writer.close();

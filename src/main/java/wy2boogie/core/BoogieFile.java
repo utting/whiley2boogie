@@ -9,7 +9,7 @@ import wybs.util.AbstractCompilationUnit;
 import wyfs.lang.Content;
 import wyfs.lang.Path;
 
-public class BoogieFile extends AbstractCompilationUnit {
+public class BoogieFile extends AbstractCompilationUnit<BoogieFile> {
 	// =========================================================================
 	// Content Type
 	// =========================================================================
@@ -53,7 +53,7 @@ public class BoogieFile extends AbstractCompilationUnit {
 	 */
 	private final byte[] bytes;
 
-	public BoogieFile(Path.Entry<? extends CompilationUnit> entry, byte[] bytes) {
+	public BoogieFile(Path.Entry<BoogieFile> entry, byte[] bytes) {
 		super(entry);
 		this.bytes = bytes;
 	}

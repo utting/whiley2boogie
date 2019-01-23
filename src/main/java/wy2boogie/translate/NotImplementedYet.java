@@ -1,8 +1,8 @@
 package wy2boogie.translate;
 
 import wybs.lang.SyntacticItem;
+import wybs.util.AbstractCompilationUnit.Attribute;
 import wyc.lang.WhileyFile;
-import static wyc.lang.WhileyFile.Attribute;
 
 /**
  * Not Implemented errors, with some context information.
