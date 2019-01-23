@@ -33,14 +33,19 @@ import java.io.PrintWriter;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static wyc.lang.WhileyFile.*;
+import static wyil.lang.WyilFile.*;
 
-import wybs.lang.NameResolver;
 import wybs.util.AbstractCompilationUnit;
-import wyc.check.FlowTypeCheck;
+import wyil.check.FlowTypeCheck;
+import wyil.lang.WyilFile;
+import wyil.type.subtyping.EmptinessTest;
+import wyil.type.subtyping.RelaxedTypeEmptinessTest;
+import wyil.type.subtyping.StrictTypeEmptinessTest;
+import wyil.type.subtyping.SubtypeOperator;
+import wyil.type.util.ConcreteTypeExtractor;
+import wyil.type.util.ReadWriteTypeExtractor;
 import wyc.lang.WhileyFile;
-import wyc.util.AbstractVisitor;
-import wyil.type.TypeSystem;
+import wyil.util.AbstractVisitor;
 
 /**
  * Translates WYIL bytecodes into Boogie and outputs into a given file.
@@ -157,7 +162,7 @@ public final class Wyil2Boogie {
     private final Set<String> declaredFields = new HashSet<>();
 
     /** Keeps track of which (non-mangled) function/method names have had their address taken. */
-    private final Set<String> referencedFunctions = new HashSet<>();
+    private final Set<QualifiedName> referencedFunctions = new HashSet<>();
 
 	/** Keeps track of a unique name for each lambda function. */
 	private final Map<Decl.Lambda, String> lambdaFunctionName = new HashMap<>();
@@ -214,35 +219,27 @@ public final class Wyil2Boogie {
     /** Records the values within all the 'new' expressions in the current statement. */
     private final List<String> newAllocations = new ArrayList<>();
 
-	/**
-	 * Provides mechanism for operating on types. For example, expanding them
-	 * and performing subtype tests, etc. This object may cache results to
-	 * improve performance of some operations.
-	 */
-	private final TypeSystem typeSystem;
-
 	/** Records type synonyms, so we can unfold them during when generating equality tests. */
 	private Map<String, Type> typeDefs = new HashMap<>();
 
+	/**
+	 * Responsible for extract concrete types (i.e. Type instances) from abstract
+	 * types (i.e. SemanticType instances).
+	 */
+	private final ConcreteTypeExtractor concreteTypeExtractor;
 
-	public Wyil2Boogie(TypeSystem typeSys, PrintWriter writer) {
-    	this.typeSystem = typeSys;
+	public Wyil2Boogie(PrintWriter writer) {
         this.out = writer;
         this.vcg = new AssertionGenerator(this);
+        // Create concrete type extractor
+        EmptinessTest<SemanticType> strictEmptiness = new StrictTypeEmptinessTest();
+		this.concreteTypeExtractor = new ConcreteTypeExtractor(strictEmptiness);
     }
 
-    public Wyil2Boogie(TypeSystem typeSys, OutputStream stream) {
-        this(typeSys, new PrintWriter(new OutputStreamWriter(stream)));
+    public Wyil2Boogie(OutputStream stream) {
+        this(new PrintWriter(new OutputStreamWriter(stream)));
     }
 
-	/**
-	 * Access the type system object this compile task is using.
-	 *
-	 * @return the type system.
-	 */
-	public TypeSystem getTypeSystem() {
-		return typeSystem;
-	}
 
     // ======================================================================
     // Configuration Methods
@@ -257,8 +254,8 @@ public final class Wyil2Boogie {
      *
      * This should be called with all fields in a definition, before that definition is output.
      */
-	private void declareNewFields(Tuple<Decl.Variable> fields) {
-		for (final Decl.Variable f : fields) {
+	private void declareNewFields(Tuple<Type.Field> fields) {
+		for (final Type.Field f : fields) {
 			declareNewField(f.getName().get());
 		}
 	}
@@ -277,8 +274,9 @@ public final class Wyil2Boogie {
      * So it is safe to call it on every function and method constant.
      */
 	@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
-	private void declareHigherOrderFunction(String name, Type.Callable type) {
+	private void declareHigherOrderFunction(QualifiedName name, Type.Callable type) {
         if (!this.referencedFunctions.contains(name)) {
+        	// FIXME: this won't work for qualified names in packages (e.g. std::integer::u8)
             final String func_const = CONST_FUNC + name;
             this.out.printf("const unique %s:WFuncName;\n", func_const);
             // At the moment, we assume indirect-invoke is used rarely, so for ONE type of function in each program.
@@ -327,36 +325,49 @@ public final class Wyil2Boogie {
     // Apply Method
     // ======================================================================
 
-    public void apply(WhileyFile module) {
-        resolveFunctionOverloading(module.getDeclarations());
-        this.out.printf("var %s:[WRef]WVal;\n", HEAP);
-        this.out.printf("var %s:[WRef]bool;\n", ALLOCATED);
-        // TODO: find a nicer way of making these local?
-        for (int i = 0; i < NEW_REF_MAX; i++) {
-            this.out.printf("var %s%d : WRef;\n", NEW_REF, i);
-        }
-        this.out.println();
-        for(final Decl decl : module.getDeclarations()) {
+    public void apply(WyilFile wf) {
+    	Decl.Module module = wf.getModule();
+    	// Iterate each locally declared compilation unit
+    	for(Decl.Unit unit : module.getUnits()) {
+    		apply(unit);
+    	}
+    	// FIXME: is this the right thing to do?
+    	for(Decl.Unit unit : module.getExterns()) {
+    		apply(unit);
+    	}
+    }
+
+    private void apply(Decl.Unit unit) {
+    	resolveFunctionOverloading(unit.getDeclarations());
+		this.out.printf("var %s:[WRef]WVal;\n", HEAP);
+		this.out.printf("var %s:[WRef]bool;\n", ALLOCATED);
+		// TODO: find a nicer way of making these local?
+		for (int i = 0; i < NEW_REF_MAX; i++) {
+			this.out.printf("var %s%d : WRef;\n", NEW_REF, i);
+		}
+		this.out.println();
+		for(final Decl decl : unit.getDeclarations()) {
 			if (decl instanceof Decl.StaticVariable) {
 				writeConstant((Decl.StaticVariable) decl);
 			} else if (decl instanceof Decl.Type) {
 				writeTypeSynonym((Decl.Type) decl);
-	            this.out.println();
-	            this.out.flush();
+				this.out.println();
+				this.out.flush();
 			} else if (decl instanceof Decl.FunctionOrMethod) {
 				writeProcedure((Decl.FunctionOrMethod) decl);
-	            this.out.println();
-	            this.out.flush();
+				this.out.println();
+				this.out.flush();
 			} else if (decl instanceof Decl.Property) {
 				writeProperty((Decl.Property) decl);
 				this.out.println();
 				this.out.flush();
+			} else if (decl instanceof Decl.Import) {
+				// skip
 			} else {
 				throw new NotImplementedYet("Unknown declaration " + decl.getClass(), decl);
 			}
-        }
+		}
     }
-
     /**
      * Whiley: <b>type</b> Name is (v:T) where P(v).
      * This is translated to Boogie as:
@@ -1158,7 +1169,7 @@ public final class Wyil2Boogie {
 	}
 
 	private boolean isMethod(Expr loc) {
-		return (loc instanceof Expr.Invoke && ((Expr.Invoke) loc).getSignature() instanceof Type.Method);
+		return (loc instanceof Expr.Invoke && ((Expr.Invoke) loc).getDeclaration() instanceof Decl.Method);
 	}
 
 	@SuppressWarnings("unused")
@@ -1272,7 +1283,7 @@ public final class Wyil2Boogie {
 	private void writeInvoke(int indent, Expr.Invoke stmt) {
 		final Tuple<Expr> arguments = stmt.getOperands();
 		final String[] args = new String[arguments.size() + 1];
-		args[0] = mangledFunctionMethodName(stmt.getName().toString(), stmt.getSignature());
+		args[0] = mangledFunctionMethodName(stmt.getName().toString(), stmt.getDeclaration().getType());
 		for (int i = 0; i != arguments.size(); ++i) {
 			args[i + 1] = writeAllocations(indent, arguments.get(i)).asWVal().toString();
 		}
@@ -1738,7 +1749,7 @@ public final class Wyil2Boogie {
 		// TODO: check that it is safe to use unqualified DeclID names?
 		BoogieType outType = WVAL;
 		final String name = expr.getName().toString();
-		final Type.Callable type = expr.getSignature();
+		final Type.Callable type = expr.getDeclaration().getType();
 		if (type instanceof Type.Method) {
 			if (expr != this.outerMethodCall) {
 				// The Whiley language spec 0.3.38, Section 3.5.5, says that because they are
@@ -1816,12 +1827,14 @@ public final class Wyil2Boogie {
 	 * @return
 	 */
 	private BoogieExpr boogieLambda(Expr.LambdaAccess lambda) {
-		String name = lambda.getName().toNameID().name();
+		// FIXME: encoding will be required for package declarations, such as
+		// "std::integer::u8"
+		String name = lambda.getDeclaration().getQualifiedName().toString();
 		final String func_const = CONST_FUNC + name;
 		System.out.println("DEBUG: Expr.LambdaAccess:"
 				+ "\n  name     : " + lambda.getName()
 				+ "\n  paraTypes: " + lambda.getParameterTypes()
-				+ "\n  signature: " + lambda.getSignature()
+				+ "\n  signature: " + lambda.getDeclaration().getType()
 				+ "\n  type     : " + lambda.getType()
 				+ "\n  types    : " + lambda.getTypes()
 				+ "\n  data    : " + Arrays.toString(lambda.getData())
@@ -1877,52 +1890,27 @@ public final class Wyil2Boogie {
 		} else {
 			final Type leftType = left.getType();
 			final Type rightType = right.getType();
-
 			// try to find a simple intersection of leftType and rightType
-			Type intersectType = new Type.Intersection(leftType, rightType);
-			Type usableType = findUsableEqualityType(intersectType);
-			// System.out.println("DEBUG: " + leftType + " =?= " + rightType + " gives intersection " + usableType);
-			if (usableType == null) {
-				// Let's try harder to simplify this intersection type.
-				// 'simplify' does not do enough simplification - we need to unfold NominalTypes.
-				// Type eqType = this.typeSystem.simplify(intersectType);
-				Type eqType = null;
-				try {
-					// FIXME: extractReadableType is not quite correct, as it can throw away some fields.
-					eqType = this.typeSystem.extractReadableType(intersectType, new FlowTypeCheck.Environment());
-					// FIXME: temporary hack to handle intersection of two equal types.
-					if (eqType == null && leftType.equals(rightType)) {
-						eqType = leftType;
-					}
-				} catch (NameResolver.ResolutionError resolutionError) {
-					resolutionError.printStackTrace();
-				}
-				if (!USE_BOOGIE_EQUALITY) {
-					System.out.println("DEBUG: simplified: " + intersectType
-							+ "\n               to: " + eqType);
-				}
-				if (usableType != null) {
-					usableType = findUsableEqualityType(usableType);
-				}
-				if (usableType == null) {
-					throw new NotImplementedYet("comparison of complex type: " + intersectType, c);
-				}
-			}
-
+			SemanticType intersectType = new SemanticType.Intersection(leftType, rightType);
+			// FIXME: using null for LifetimeRelation will not work for references types. To
+			// resolve this, you'll need to pass a LifetimeRelation down through the
+			// statements and expressions of each method. See FlowTypeChecker for how to do
+			// this.
+			Type usableType = concreteTypeExtractor.apply(intersectType, null);
 			// finally, generate an appropriate equality check for this intersection type
 			return boogieTypedEquality(usableType, boogieExpr(left), boogieExpr(right)).as(BOOL);
 		}
 	}
 
 	/** True for the types that our equality code generator can handle. */
-	private Type findUsableEqualityType(Type type) {
+	private Type findUsableEqualityType(SemanticType type) {
 		final String str = type.toString();
 		if (str.equals("bool") // WAS type instanceof Type.Bool
 				|| str.equals("int") // WAS type instanceof Type.Int
 				|| str.equals("byte") // WAS type instanceof Type.Byte
 				|| str.equals("null") // WAS type instanceof Type.Null
 				) {
-			return type;
+			return (Type) type;
 		} else if (type instanceof Type.Array) {
 			Type.Array aType = (Type.Array) type;
 			Type elemType = findUsableEqualityType(aType.getElement());
@@ -1930,13 +1918,13 @@ public final class Wyil2Boogie {
 		} else if (type instanceof Type.Record) {
 			Type.Record aType = (Type.Record) type;
 			// Now we map all the field types too!
-			List<Decl.Variable> fields = new ArrayList<>();
-			for (Decl.Variable v : aType.getFields()) {
+			List<Type.Field> fields = new ArrayList<>();
+			for (Type.Field v : aType.getFields()) {
 				Type fType = findUsableEqualityType(v.getType());
 				if (fType == null) {
 					return null; // give up!
 				}
-				fields.add(new Decl.Variable(v.getModifiers(), v.getName(), fType));
+				fields.add(new Type.Field(v.getName(), fType));
 			}
 			return new Type.Record(aType.isOpen(), new Tuple(fields));
 		} else if (type instanceof Type.Intersection) {
@@ -2132,7 +2120,7 @@ public final class Wyil2Boogie {
 		if (type instanceof Type.Record) {
 			final Type.Record t = (Type.Record) type;
 			// WAS final Map<String, Type> fields = t.fields();
-			final Tuple<Decl.Variable> fields = t.getFields();
+			final Tuple<Type.Field> fields = t.getFields();
 			// add constraints about the fields
 			final String objrec;
 			// if (t.isOpen()) {
@@ -2143,7 +2131,7 @@ public final class Wyil2Boogie {
 			final StringBuilder result = new StringBuilder();
 			result.append("is" + objrec);
 			// WAS for (final Map.Entry<String, Type> field : fields.entrySet()) {
-			for (final Decl.Variable field : fields) {
+			for (final Type.Field field : fields) {
 				result.append(" && ");
 				final String elem = "to" + objrec + "[" + mangledWField(field.getName().get()) + "]";
 				final Type elemType = field.getType();
@@ -2164,32 +2152,6 @@ public final class Wyil2Boogie {
 			}
 			sb.append("))");
 			return sb.toString();
-		}
-		if (type instanceof Type.Intersection) {
-			// we generate the conjunction of all the bounds
-			final Type.Intersection t = (Type.Intersection) type;
-			final StringBuilder sb = new StringBuilder();
-			String sep = "";
-			for (int i = 0; i != t.size(); ++i) {
-				sb.append(sep);
-				sb.append(typePredicate(var, t.get(i)));
-				sep = " && ";
-			}
-			return sb.toString();
-		}
-		/* NOTE: Negation types were replaced by Difference types, 7 Nov 2017.
-		if (type instanceof Type.Negation) {
-			// we negate the type test
-			final Type.Negation t = (Type.Negation) type;
-			return "!" + typePredicate(var, t.getElement());
-		}
-		*/
-		if (type instanceof Type.Difference) {
-			// check that it is a member of the LHS but not the RHS.
-			final Type.Difference t = (Type.Difference) type;
-			String pos = typePredicate(var, t.getLeftHandSide());
-			String neg = typePredicate(var, t.getRightHandSide());
-			return pos + " && !(" + neg + ")";
 		}
 		if (type instanceof Type.Reference) {
 			// TODO: add typing of dereference element, once we pass w__heap into functions.
@@ -2475,7 +2437,7 @@ public final class Wyil2Boogie {
 		done.add(type);
 		if (type instanceof Type.Record) {
 			final Type.Record t = (Type.Record) type;
-			Tuple<Decl.Variable> fields = t.getFields();
+			Tuple<Type.Field> fields = t.getFields();
 			declareNewFields(fields);
 			// now recurse into the types of those fields
 			for (int i = 0; i != fields.size(); ++i) {
@@ -2487,17 +2449,8 @@ public final class Wyil2Boogie {
 		} else if (type instanceof Type.Reference) {
 			final Type.Reference t = (Type.Reference) type;
 			declareFields(t.getElement(), done);
-		} else if (type instanceof Type.Difference) {
-			final Type.Difference t = (Type.Difference) type;
-			declareFields(t.getLeftHandSide(), done);
-			declareFields(t.getRightHandSide(), done);
 		} else if (type instanceof Type.Union) {
 			final Type.Union t = (Type.Union) type;
-			for (int i = 0; i != t.size(); ++i) {
-				declareFields(t.get(i), done);
-			}
-		} else if (type instanceof Type.Intersection) {
-			final Type.Intersection t = (Type.Intersection) type;
 			for (int i = 0; i != t.size(); ++i) {
 				declareFields(t.get(i), done);
 			}
@@ -2607,7 +2560,7 @@ public final class Wyil2Boogie {
 	private final AbstractVisitor funcConstantVisitor = new AbstractVisitor() {
 		@Override
 		public void visitLambdaAccess(Expr.LambdaAccess l) {
-			declareHigherOrderFunction(l.getName().toNameID().name(), l.getSignature());
+			declareHigherOrderFunction(l.getDeclaration().getQualifiedName(), l.getDeclaration().getType());
 		}
 
 		@Override
