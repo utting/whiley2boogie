@@ -1,0 +1,3213 @@
+SCRIPT=/Users/utting/git/whiley/Whiley2Boogie/scripts
+===== AddressExpression_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./AddressExpression_Invalid_1.wyil
+./AddressExpression_Invalid_1.whiley:10: unable to resolve name (is ambiguous)
+	found function AddressExpression_Invalid_1::overloaded(bool)->(bool)
+	found function AddressExpression_Invalid_1::overloaded(int)->(int)
+    fun x = &overloaded
+             ^^^^^^^^^^
+===== AddressExpression_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./AddressExpression_Invalid_2.wyil
+./AddressExpression_Invalid_2.whiley:7: unknown type encountered
+    fun x = &foo((->)
+                  ^^
+===== ArrayAccess_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ArrayAccess_Invalid_1.wyil
+./ArrayAccess_Invalid_1.whiley:2: expected type int, found bool
+    return xs[y]
+              ^
+===== ArrayAccess_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ArrayAccess_Invalid_2.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ArrayAccess_Invalid_2.bpl(35,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ArrayAccess_Invalid_2.bpl(33,5): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== ArrayAccess_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ArrayAccess_Invalid_3.wyil
+./ArrayAccess_Invalid_3.whiley:11: unable to resolve name (no match for f(tup[]))
+	found function ArrayAccess_Invalid_3::f({,}[])->({,}[])
+    return f(tups)
+           ^
+===== ArrayAccess_Invalid_4.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ArrayAccess_Invalid_4.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ArrayAccess_Invalid_4.bpl(33,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ArrayAccess_Invalid_4.bpl(33,5): anon0
+ArrayAccess_Invalid_4.bpl(35,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ArrayAccess_Invalid_4.bpl(33,5): anon0
+ArrayAccess_Invalid_4.bpl(37,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ArrayAccess_Invalid_4.bpl(33,5): anon0
+
+Boogie program verifier finished with 1 verified, 3 errors
+
+java.lang.NullPointerException
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.stringifyArray(BoogieExampleFile.java:141)
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.toString(BoogieExampleFile.java:125)
+	at wy2boogie.core.BoogieExampleFile.toString(BoogieExampleFile.java:272)
+	at wy2boogie.commands.BoogieCommand.translateCounterexample(BoogieCommand.java:251)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:126)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+===== ArrayAccess_Invalid_5.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ArrayAccess_Invalid_5.wyil
+MUTATED INPUT i : int
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ArrayAccess_Invalid_5.bpl(39,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ArrayAccess_Invalid_5.bpl(35,7): anon0
+    ArrayAccess_Invalid_5.bpl(37,11): anon3_Then
+    ArrayAccess_Invalid_5.bpl(39,5): anon2
+ArrayAccess_Invalid_5.bpl(65,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ArrayAccess_Invalid_5.bpl(61,5): anon0
+
+Boogie program verifier finished with 0 verified, 2 errors
+
+java.lang.NullPointerException
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.stringifyArray(BoogieExampleFile.java:141)
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.toString(BoogieExampleFile.java:125)
+	at wy2boogie.core.BoogieExampleFile.toString(BoogieExampleFile.java:272)
+	at wy2boogie.commands.BoogieCommand.translateCounterexample(BoogieCommand.java:251)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:126)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+===== ArrayAssign_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ArrayAssign_Invalid_1.wyil
+./ArrayAssign_Invalid_1.whiley:6: expected type int, found bool
+    xs[0] = true
+            ^^^^
+===== ArrayAssign_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ArrayAssign_Invalid_2.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ArrayAssign_Invalid_2.bpl(28,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ArrayAssign_Invalid_2.bpl(23,10): anon0
+
+Boogie program verifier finished with 0 verified, 1 error
+
+===== ArrayAssign_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ArrayAssign_Invalid_3.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ArrayAssign_Invalid_3.bpl(28,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ArrayAssign_Invalid_3.bpl(23,10): anon0
+
+Boogie program verifier finished with 0 verified, 1 error
+
+===== ArrayConversion_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ArrayConversion_Invalid_1.wyil
+./ArrayConversion_Invalid_1.whiley:5: unable to resolve name (no match for f(int[]))
+	found function ArrayConversion_Invalid_1::f(byte[])->(int)
+    f([1, 2, 3])
+    ^
+===== ArrayEmpty_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ArrayEmpty_Invalid_1.wyil
+./ArrayEmpty_Invalid_1.whiley:5: unable to resolve name (no match for f(int[]))
+	found function ArrayEmpty_Invalid_1::f(int)->(int)
+    f([0;0])
+    ^
+===== ArrayEmpty_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ArrayEmpty_Invalid_2.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ArrayEmpty_Invalid_2.bpl(48,4): Error: call to undeclared procedure: f
+ArrayEmpty_Invalid_2.bpl(49,4): Error: call to undeclared procedure: f
+2 name resolution errors detected in ArrayEmpty_Invalid_2.bpl
+===== ArrayEquals_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ArrayEquals_Invalid_1.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ArrayEquals_Invalid_1.bpl(48,4): Error: call to undeclared procedure: f
+ArrayEquals_Invalid_1.bpl(49,4): Error: call to undeclared procedure: f
+2 name resolution errors detected in ArrayEquals_Invalid_1.bpl
+===== ArrayGenerator_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ArrayGenerator_Invalid_1.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ArrayGenerator_Invalid_1.bpl(30,5): Error BP5003: A postcondition might not hold on this return path.
+ArrayGenerator_Invalid_1.bpl(26,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    ArrayGenerator_Invalid_1.bpl(29,7): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+
+java.lang.NullPointerException
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.stringifyArray(BoogieExampleFile.java:141)
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.toString(BoogieExampleFile.java:125)
+	at wy2boogie.core.BoogieExampleFile.toString(BoogieExampleFile.java:272)
+	at wy2boogie.commands.BoogieCommand.translateCounterexample(BoogieCommand.java:251)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:126)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+===== ArrayGenerator_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ArrayGenerator_Invalid_2.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ArrayGenerator_Invalid_2.bpl(32,5): Error BP5003: A postcondition might not hold on this return path.
+ArrayGenerator_Invalid_2.bpl(28,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    ArrayGenerator_Invalid_2.bpl(31,7): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== ArrayGenerator_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ArrayGenerator_Invalid_3.wyil
+./ArrayGenerator_Invalid_3.whiley:2: expected type int, found bool
+    return [0; n]
+               ^
+===== ArrayGenerator_Invalid_4.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ArrayGenerator_Invalid_4.wyil
+./ArrayGenerator_Invalid_4.whiley:2: expected type int, found byte
+    return [0; n]
+               ^
+===== ArrayLength_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ArrayLength_Invalid_1.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ArrayLength_Invalid_1.bpl(27,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ArrayLength_Invalid_1.bpl(22,9): anon0
+    ArrayLength_Invalid_1.bpl(23,13): anon4_Then
+    ArrayLength_Invalid_1.bpl(27,5): anon3
+
+Boogie program verifier finished with 0 verified, 1 error
+
+===== ArrayLength_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ArrayLength_Invalid_2.wyil
+mangle test : method()->() to test$2
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ArrayLength_Invalid_2.bpl(33,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ArrayLength_Invalid_2.bpl(23,9): anon0
+    ArrayLength_Invalid_2.bpl(26,13): anon4_Else
+    ArrayLength_Invalid_2.bpl(28,5): anon3
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== ArrayLength_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ArrayLength_Invalid_3.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ArrayLength_Invalid_3.bpl(49,4): Error: call to undeclared procedure: f
+1 name resolution errors detected in ArrayLength_Invalid_3.bpl
+===== ArrayUpdate_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ArrayUpdate_Invalid_1.wyil
+MUTATED INPUT xs : int[]
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ArrayUpdate_Invalid_1.bpl(33,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ArrayUpdate_Invalid_1.bpl(32,8): anon0
+
+Boogie program verifier finished with 0 verified, 1 error
+
+java.lang.NullPointerException
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.stringifyArray(BoogieExampleFile.java:141)
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.toString(BoogieExampleFile.java:125)
+	at wy2boogie.core.BoogieExampleFile.toString(BoogieExampleFile.java:272)
+	at wy2boogie.commands.BoogieCommand.translateCounterexample(BoogieCommand.java:251)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:126)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+===== Array_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Array_Invalid_1.wyil
+./Array_Invalid_1.whiley:4: variable may be uninitialised
+    a2[0] = x
+    ^^
+===== Array_Invalid_10.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Array_Invalid_10.wyil
+DEBUG: recording type in_arr := int|null[] where ()
+DEBUG: recording type ib_arr := int|bool[] where ()
+DEBUG: recording type arr := in_arr|ib_arr where ()
+MUTATED INPUT x : arr
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Array_Invalid_10.bpl(73,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    Array_Invalid_10.bpl(72,7): anon0
+
+Boogie program verifier finished with 2 verified, 1 error
+
+java.lang.NullPointerException
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.stringifyArray(BoogieExampleFile.java:141)
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.toString(BoogieExampleFile.java:125)
+	at wy2boogie.core.BoogieExampleFile.toString(BoogieExampleFile.java:272)
+	at wy2boogie.commands.BoogieCommand.translateCounterexample(BoogieCommand.java:251)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:126)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+===== Array_Invalid_11.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Array_Invalid_11.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Array_Invalid_11.bpl(62,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    Array_Invalid_11.bpl(60,5): anon0
+
+Boogie program verifier finished with 2 verified, 1 error
+
+===== Array_Invalid_12.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Array_Invalid_12.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Array_Invalid_12.bpl(59,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    Array_Invalid_12.bpl(59,5): anon0
+
+Boogie program verifier finished with 2 verified, 1 error
+
+java.lang.NullPointerException
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.stringifyArray(BoogieExampleFile.java:141)
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.toString(BoogieExampleFile.java:125)
+	at wy2boogie.core.BoogieExampleFile.toString(BoogieExampleFile.java:272)
+	at wy2boogie.commands.BoogieCommand.translateCounterexample(BoogieCommand.java:251)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:126)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+===== Array_Invalid_13.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Array_Invalid_13.wyil
+MUTATED INPUT xs : int[]
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Array_Invalid_13.bpl(63,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    Array_Invalid_13.bpl(60,8): anon0
+
+Boogie program verifier finished with 2 verified, 1 error
+
+java.lang.NullPointerException
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.stringifyArray(BoogieExampleFile.java:141)
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.toString(BoogieExampleFile.java:125)
+	at wy2boogie.core.BoogieExampleFile.toString(BoogieExampleFile.java:272)
+	at wy2boogie.commands.BoogieCommand.translateCounterexample(BoogieCommand.java:251)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:126)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+===== Array_Invalid_14.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Array_Invalid_14.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Array_Invalid_14.bpl(76,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    Array_Invalid_14.bpl(76,5): anon0
+
+Boogie program verifier finished with 2 verified, 1 error
+
+===== Array_Invalid_15.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Array_Invalid_15.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Array_Invalid_15.bpl(51,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    Array_Invalid_15.bpl(50,8): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+
+java.lang.NullPointerException
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.stringifyArray(BoogieExampleFile.java:141)
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.toString(BoogieExampleFile.java:125)
+	at wy2boogie.core.BoogieExampleFile.toString(BoogieExampleFile.java:272)
+	at wy2boogie.commands.BoogieCommand.translateCounterexample(BoogieCommand.java:251)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:126)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+===== Array_Invalid_16.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Array_Invalid_16.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Array_Invalid_16.bpl(51,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    Array_Invalid_16.bpl(50,8): anon0
+Array_Invalid_16.bpl(52,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    Array_Invalid_16.bpl(50,8): anon0
+
+Boogie program verifier finished with 1 verified, 2 errors
+
+===== Array_Invalid_17.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Array_Invalid_17.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Array_Invalid_17.bpl(68,4): Error: wrong number of result variables in call to g: 0
+1 name resolution errors detected in Array_Invalid_17.bpl
+===== Array_Invalid_18.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Array_Invalid_18.wyil
+DEBUG: recording type in_arr := int|null[] where ()
+DEBUG: recording type ib_arr := int|bool[] where ()
+DEBUG: recording type arr := in_arr|ib_arr where ()
+MUTATED INPUT x : arr
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Array_Invalid_18.bpl(41,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    Array_Invalid_18.bpl(41,5): anon0
+
+Boogie program verifier finished with 2 verified, 1 error
+
+java.lang.NullPointerException
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.stringifyArray(BoogieExampleFile.java:141)
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.toString(BoogieExampleFile.java:125)
+	at wy2boogie.core.BoogieExampleFile.toString(BoogieExampleFile.java:272)
+	at wy2boogie.commands.BoogieCommand.translateCounterexample(BoogieCommand.java:251)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:126)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+===== Array_Invalid_19.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Array_Invalid_19.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Array_Invalid_19.bpl(34,5): Error BP5003: A postcondition might not hold on this return path.
+Array_Invalid_19.bpl(28,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    Array_Invalid_19.bpl(32,7): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+
+java.lang.NullPointerException
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.stringifyArray(BoogieExampleFile.java:141)
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.toString(BoogieExampleFile.java:125)
+	at wy2boogie.core.BoogieExampleFile.toString(BoogieExampleFile.java:272)
+	at wy2boogie.commands.BoogieCommand.translateCounterexample(BoogieCommand.java:251)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:126)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+===== Array_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Array_Invalid_2.wyil
+./Array_Invalid_2.whiley:2: unable to resolve name (a2)
+    int x = a2[0]
+            ^^
+===== Array_Invalid_20.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Array_Invalid_20.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Array_Invalid_20.bpl(62,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    Array_Invalid_20.bpl(60,5): anon0
+
+Boogie program verifier finished with 2 verified, 1 error
+
+===== Array_Invalid_21.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Array_Invalid_21.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Array_Invalid_21.bpl(59,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    Array_Invalid_21.bpl(59,5): anon0
+
+Boogie program verifier finished with 2 verified, 1 error
+
+java.lang.NullPointerException
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.stringifyArray(BoogieExampleFile.java:141)
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.toString(BoogieExampleFile.java:125)
+	at wy2boogie.core.BoogieExampleFile.toString(BoogieExampleFile.java:272)
+	at wy2boogie.commands.BoogieCommand.translateCounterexample(BoogieCommand.java:251)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:126)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+===== Array_Invalid_22.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Array_Invalid_22.wyil
+MUTATED INPUT xs : int[]
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Array_Invalid_22.bpl(63,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    Array_Invalid_22.bpl(60,8): anon0
+Array_Invalid_22.bpl(65,5): Error BP5003: A postcondition might not hold on this return path.
+Array_Invalid_22.bpl(56,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    Array_Invalid_22.bpl(60,8): anon0
+
+Boogie program verifier finished with 2 verified, 2 errors
+
+java.lang.NullPointerException
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.stringifyArray(BoogieExampleFile.java:141)
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.toString(BoogieExampleFile.java:125)
+	at wy2boogie.core.BoogieExampleFile.toString(BoogieExampleFile.java:272)
+	at wy2boogie.commands.BoogieCommand.translateCounterexample(BoogieCommand.java:251)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:126)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+===== Array_Invalid_23.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Array_Invalid_23.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Array_Invalid_23.bpl(76,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    Array_Invalid_23.bpl(76,5): anon0
+
+Boogie program verifier finished with 2 verified, 1 error
+
+===== Array_Invalid_24.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Array_Invalid_24.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Array_Invalid_24.bpl(51,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    Array_Invalid_24.bpl(50,8): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+
+java.lang.NullPointerException
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.stringifyArray(BoogieExampleFile.java:141)
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.toString(BoogieExampleFile.java:125)
+	at wy2boogie.core.BoogieExampleFile.toString(BoogieExampleFile.java:272)
+	at wy2boogie.commands.BoogieCommand.translateCounterexample(BoogieCommand.java:251)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:126)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+===== Array_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Array_Invalid_3.wyil
+./Array_Invalid_3.whiley:3: unable to resolve name (x)
+    int y = a2[x]
+               ^
+===== Array_Invalid_4.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Array_Invalid_4.wyil
+./Array_Invalid_4.whiley:3: expected array type
+    int y = x[0]
+            ^
+===== Array_Invalid_5.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Array_Invalid_5.wyil
+./Array_Invalid_5.whiley:2: expected type int[], found int
+    return 1
+           ^
+===== Array_Invalid_6.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Array_Invalid_6.wyil
+./Array_Invalid_6.whiley:2: expected type int, found int[]
+    return a
+           ^
+===== Array_Invalid_7.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Array_Invalid_7.wyil
+./Array_Invalid_7.whiley:3: variable may be uninitialised
+    r[0] = tag
+    ^
+===== Array_Invalid_8.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Array_Invalid_8.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Array_Invalid_8.bpl(51,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    Array_Invalid_8.bpl(50,8): anon0
+Array_Invalid_8.bpl(52,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    Array_Invalid_8.bpl(50,8): anon0
+
+Boogie program verifier finished with 1 verified, 2 errors
+
+===== Array_Invalid_9.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Array_Invalid_9.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Array_Invalid_9.bpl(68,4): Error: wrong number of result variables in call to g: 0
+1 name resolution errors detected in Array_Invalid_9.bpl
+===== Assert_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Assert_Invalid_1.wyil
+./Assert_Invalid_1.whiley:2: expected type bool, found int
+    assert z
+           ^
+===== Assert_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Assert_Invalid_2.wyil
+./Assert_Invalid_2.whiley:6: method invocation not permitted
+    assert m(10, 20)
+           ^^^^^^^^^
+===== Assert_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Assert_Invalid_3.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Assert_Invalid_3.bpl(49,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    Assert_Invalid_3.bpl(49,5): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== Assign_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Assign_Invalid_1.wyil
+./Assign_Invalid_1.whiley:2: expected type int, found bool
+    return true
+           ^^^^
+===== Assign_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Assign_Invalid_2.wyil
+./Assign_Invalid_2.whiley:2: expected type bool, found int
+    return x
+           ^
+===== Assign_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Assign_Invalid_3.wyil
+./Assign_Invalid_3.whiley:2: expected type bool, found int
+    return x + y
+           ^^^^^
+===== Assign_Invalid_4.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Assign_Invalid_4.wyil
+./Assign_Invalid_4.whiley:2: expected type int, found bool
+    return true
+           ^^^^
+===== Assign_Invalid_5.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Assign_Invalid_5.wyil
+./Assign_Invalid_5.whiley:2: expected type int, found bool
+    return x
+           ^
+===== Assign_Invalid_6.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Assign_Invalid_6.wyil
+./Assign_Invalid_6.whiley:2: expected type int, found bool
+    return !x
+           ^^
+===== Assign_Invalid_7.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Assign_Invalid_7.wyil
+./Assign_Invalid_7.whiley:2: expected type int, found bool
+    return x < y
+           ^^^^^
+===== Assign_Invalid_8.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Assign_Invalid_8.wyil
+./Assign_Invalid_8.whiley:2: expected type int, found bool
+    x = false
+        ^^^^^
+===== Assign_Invalid_9.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Assign_Invalid_9.wyil
+./Assign_Invalid_9.whiley:5: expected type int, found bool
+        xs[0] = false
+                ^^^^^
+===== Byte_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Byte_Invalid_1.wyil
+./Byte_Invalid_1.whiley:3: expected type int, found byte
+    int i = b * 2
+            ^
+===== Coercion_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Coercion_Invalid_1.wyil
+./Coercion_Invalid_1.whiley:7: ambiguous coercion required (int to knackered)
+    return x
+           ^
+===== Coercion_Invalid_10.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Coercion_Invalid_10.wyil
+./Coercion_Invalid_10.whiley:11: ambiguous coercion required (void[] to intr[])
+    assume f([]) == [0;0]
+             ^^
+===== Coercion_Invalid_11.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Coercion_Invalid_11.wyil
+./Coercion_Invalid_11.whiley:17: ambiguous coercion required (int to intlist)
+    x = f(123)
+          ^^^
+===== Coercion_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Coercion_Invalid_2.wyil
+./Coercion_Invalid_2.whiley:10: expected type List4, found List1
+    return r
+           ^
+===== Coercion_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Coercion_Invalid_3.wyil
+./Coercion_Invalid_3.whiley:6: ambiguous coercion required ({} to {}|{})
+    return r
+           ^
+===== Coercion_Invalid_4.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Coercion_Invalid_4.wyil
+./Coercion_Invalid_4.whiley:6: ambiguous coercion required (nat[] to pos[]|neg[])
+    return p
+           ^
+===== Coercion_Invalid_5.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Coercion_Invalid_5.wyil
+./Coercion_Invalid_5.whiley:7: ambiguous coercion required ({} to R1)
+    return {f:0}
+           ^^^^^
+===== Coercion_Invalid_6.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Coercion_Invalid_6.wyil
+./Coercion_Invalid_6.whiley:7: ambiguous coercion required (int[] to A1)
+    return [0,1,2]
+           ^^^^^^^
+===== Coercion_Invalid_7.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Coercion_Invalid_7.wyil
+./Coercion_Invalid_7.whiley:16: ambiguous coercion required (int to expr)
+    f(-1)
+      ^^
+===== Coercion_Invalid_8.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Coercion_Invalid_8.wyil
+./Coercion_Invalid_8.whiley:12: ambiguous coercion required (int to wurf1nat)
+    return f(x)
+             ^
+===== Coercion_Invalid_9.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Coercion_Invalid_9.wyil
+./Coercion_Invalid_9.whiley:6: ambiguous coercion required (A to B|C)
+    return x
+           ^
+===== Constant_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Constant_Invalid_1.wyil
+./Constant_Invalid_1.whiley:1: cyclic static initialiser
+int X = 1 + Y
+        ^^^^^
+===== Constant_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Constant_Invalid_2.wyil
+./Constant_Invalid_2.whiley:2: unable to resolve name (Constants)
+    int a = Constants[5]
+            ^^^^^^^^^
+===== ConstrainedArray_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ConstrainedArray_Invalid_1.wyil
+DEBUG: recording type i8 := int where ( && )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ConstrainedArray_Invalid_1.bpl(36,5): Error BP5003: A postcondition might not hold on this return path.
+ConstrainedArray_Invalid_1.bpl(32,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    ConstrainedArray_Invalid_1.bpl(35,7): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== ConstrainedArray_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ConstrainedArray_Invalid_2.wyil
+DEBUG: recording type i8 := int where ( && )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ConstrainedArray_Invalid_2.bpl(41,9): Error BP5003: A postcondition might not hold on this return path.
+ConstrainedArray_Invalid_2.bpl(33,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    ConstrainedArray_Invalid_2.bpl(36,5): anon0
+    ConstrainedArray_Invalid_2.bpl(40,11): anon3_Else
+ConstrainedArray_Invalid_2.bpl(70,5): Error BP5003: A postcondition might not hold on this return path.
+ConstrainedArray_Invalid_2.bpl(65,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    ConstrainedArray_Invalid_2.bpl(68,5): anon0
+
+Boogie program verifier finished with 1 verified, 2 errors
+
+===== ConstrainedArray_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ConstrainedArray_Invalid_3.wyil
+DEBUG: recording type char := int where ( && )
+DEBUG: recording type string := char[] where ()
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ConstrainedArray_Invalid_3.bpl(39,5): Error BP5003: A postcondition might not hold on this return path.
+ConstrainedArray_Invalid_3.bpl(35,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    ConstrainedArray_Invalid_3.bpl(38,7): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== ConstrainedInt_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ConstrainedInt_Invalid_1.wyil
+DEBUG: recording type c1nat := int where ( > )
+DEBUG: recording type c1pnat := c1nat where ( > )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ConstrainedInt_Invalid_1.bpl(40,5): Error BP5003: A postcondition might not hold on this return path.
+ConstrainedInt_Invalid_1.bpl(36,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    ConstrainedInt_Invalid_1.bpl(39,7): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== ConstrainedInt_Invalid_11.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ConstrainedInt_Invalid_11.wyil
+./ConstrainedInt_Invalid_11.whiley:11: unable to resolve name (is ambiguous)
+	found function ConstrainedInt_Invalid_11::f(frf1nat)->()
+	found function ConstrainedInt_Invalid_11::f(int)->()
+    f(-1)
+    ^
+===== ConstrainedInt_Invalid_12.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ConstrainedInt_Invalid_12.wyil
+DEBUG: recording type irf2nat := int where ( > )
+java.lang.IllegalArgumentException: function with no return values: 24(154, 108, 155, 156, 157, 158, 159)
+	at wy2boogie.translate.Wyil2Boogie.writeFunction(Wyil2Boogie.java:594)
+	at wy2boogie.translate.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:445)
+	at wy2boogie.translate.Wyil2Boogie.apply(Wyil2Boogie.java:352)
+	at wy2boogie.translate.Wyil2Boogie.apply(Wyil2Boogie.java:327)
+	at wy2boogie.tasks.BoogieCompileTask.build(BoogieCompileTask.java:91)
+	at wy2boogie.commands.BoogieCommand.translateWyilFile(BoogieCommand.java:207)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:129)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Error opening file "ConstrainedInt_Invalid_12.bpl": Could not find file "/Users/utting/git/whiley/WhileyCompiler/tests/invalid/ConstrainedInt_Invalid_12.bpl".
+===== ConstrainedInt_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ConstrainedInt_Invalid_2.wyil
+DEBUG: recording type irf3nat := int where ( < )
+DEBUG: recording type pirf3nat := irf3nat where ( > )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ConstrainedInt_Invalid_2.bpl(40,5): Error BP5003: A postcondition might not hold on this return path.
+ConstrainedInt_Invalid_2.bpl(36,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    ConstrainedInt_Invalid_2.bpl(39,7): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== ConstrainedInt_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ConstrainedInt_Invalid_3.wyil
+DEBUG: recording type odd := int where ( || )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ConstrainedInt_Invalid_3.bpl(54,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ConstrainedInt_Invalid_3.bpl(53,7): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== ConstrainedInt_Invalid_4.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ConstrainedInt_Invalid_4.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ConstrainedInt_Invalid_4.bpl(33,5): Error BP5003: A postcondition might not hold on this return path.
+ConstrainedInt_Invalid_4.bpl(29,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    ConstrainedInt_Invalid_4.bpl(32,7): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== ConstrainedInt_Invalid_5.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ConstrainedInt_Invalid_5.wyil
+DEBUG: recording type c2nat := int where ( < )
+MUTATED INPUT x : c2nat
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ConstrainedInt_Invalid_5.bpl(39,5): Error BP5003: A postcondition might not hold on this return path.
+ConstrainedInt_Invalid_5.bpl(32,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    ConstrainedInt_Invalid_5.bpl(36,7): anon0
+
+Boogie program verifier finished with 0 verified, 1 error
+
+===== ConstrainedInt_Invalid_6.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ConstrainedInt_Invalid_6.wyil
+DEBUG: recording type c3num := int where ( && )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ConstrainedInt_Invalid_6.bpl(64,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ConstrainedInt_Invalid_6.bpl(64,5): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== ConstrainedInt_Invalid_7.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ConstrainedInt_Invalid_7.wyil
+DEBUG: recording type c4nat := int where ( < )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ConstrainedInt_Invalid_7.bpl(61,5): Error BP5003: A postcondition might not hold on this return path.
+ConstrainedInt_Invalid_7.bpl(56,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    ConstrainedInt_Invalid_7.bpl(59,5): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== ConstrainedInt_Invalid_8.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ConstrainedInt_Invalid_8.wyil
+DEBUG: recording type nat := int where ( && )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ConstrainedInt_Invalid_8.bpl(61,5): Error BP5003: A postcondition might not hold on this return path.
+ConstrainedInt_Invalid_8.bpl(56,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    ConstrainedInt_Invalid_8.bpl(59,5): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== ConstrainedInt_Invalid_9.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ConstrainedInt_Invalid_9.wyil
+DEBUG: recording type num := int where ( || )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ConstrainedInt_Invalid_9.bpl(65,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ConstrainedInt_Invalid_9.bpl(65,5): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== ConstrainedRecord_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ConstrainedRecord_Invalid_1.wyil
+DEBUG: recording type tup := {,} where ()
+DEBUG: recording type point := {,} where ( && )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ConstrainedRecord_Invalid_1.bpl(60,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ConstrainedRecord_Invalid_1.bpl(59,7): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== Continue_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Continue_Invalid_1.wyil
+./Continue_Invalid_1.whiley:3: continue outside loop
+        continue
+        ^^^^^^^^
+===== Continue_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Continue_Invalid_2.wyil
+./Continue_Invalid_2.whiley:4: unreachable code encountered (i.e. execution can never reach this statement)
+        x = x + 1
+        ^^^^^^^^^
+===== DefiniteAssign_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./DefiniteAssign_Invalid_1.wyil
+./DefiniteAssign_Invalid_1.whiley:6: unable to resolve name (z)
+    g(z)
+      ^
+===== DefiniteAssign_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./DefiniteAssign_Invalid_2.wyil
+./DefiniteAssign_Invalid_2.whiley:6: variable may be uninitialised
+    return z
+           ^
+===== DefiniteAssign_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./DefiniteAssign_Invalid_3.wyil
+./DefiniteAssign_Invalid_3.whiley:2: unable to resolve name (y)
+requires (x >= 0) && (y > 0):
+                      ^
+===== DefiniteAssign_Invalid_4.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./DefiniteAssign_Invalid_4.wyil
+./DefiniteAssign_Invalid_4.whiley:5: unable to resolve name (x)
+    f(x)
+      ^
+===== DoWhile_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./DoWhile_Invalid_1.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+DoWhile_Invalid_1.bpl(38,9): Error BP5001: This assertion might not hold.
+Execution trace:
+    DoWhile_Invalid_1.bpl(33,7): anon0
+    DoWhile_Invalid_1.bpl(34,5): anon2_Then
+    DoWhile_Invalid_1.bpl(35,9): CONTINUE__DO__WHILE__1
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== DoWhile_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./DoWhile_Invalid_2.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+DoWhile_Invalid_2.bpl(41,9): Error BP5001: This assertion might not hold.
+Execution trace:
+    DoWhile_Invalid_2.bpl(33,7): anon0
+    DoWhile_Invalid_2.bpl(34,5): anon4_Then
+    DoWhile_Invalid_2.bpl(35,9): CONTINUE__DO__WHILE__1
+    DoWhile_Invalid_2.bpl(36,9): anon5_Else
+DoWhile_Invalid_2.bpl(47,5): Error BP5003: A postcondition might not hold on this return path.
+DoWhile_Invalid_2.bpl(29,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    DoWhile_Invalid_2.bpl(33,7): anon0
+    DoWhile_Invalid_2.bpl(34,5): anon4_Then
+    DoWhile_Invalid_2.bpl(35,9): CONTINUE__DO__WHILE__1
+    DoWhile_Invalid_2.bpl(37,13): anon5_Then
+    DoWhile_Invalid_2.bpl(45,5): BREAK__DO__WHILE__1
+
+Boogie program verifier finished with 1 verified, 2 errors
+
+===== DoWhile_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./DoWhile_Invalid_3.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+DoWhile_Invalid_3.bpl(42,9): Error BP5001: This assertion might not hold.
+Execution trace:
+    DoWhile_Invalid_3.bpl(33,7): anon0
+    DoWhile_Invalid_3.bpl(34,5): anon4_Then
+    DoWhile_Invalid_3.bpl(35,9): CONTINUE__DO__WHILE__1
+    DoWhile_Invalid_3.bpl(36,9): anon5_Else
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== DoWhile_Invalid_4.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./DoWhile_Invalid_4.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+DoWhile_Invalid_4.bpl(38,9): Error BP5001: This assertion might not hold.
+Execution trace:
+    DoWhile_Invalid_4.bpl(33,7): anon0
+    DoWhile_Invalid_4.bpl(34,5): anon2_Then
+    DoWhile_Invalid_4.bpl(35,9): CONTINUE__DO__WHILE__1
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== DoWhile_Invalid_5.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./DoWhile_Invalid_5.wyil
+./DoWhile_Invalid_5.whiley:5: method invocation not permitted
+    while i < x where i >= g(x)
+                           ^^^^
+===== DoWhile_Invalid_6.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./DoWhile_Invalid_6.wyil
+DEBUG: recording type pos := int where ( >= )
+assuming lhs of ==> toBool(clean)
+assuming lhs of ==> toBool(clean)
+MUTATED INPUT items : int[]
+MUTATED INPUT items : int[]
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+DoWhile_Invalid_6.bpl(50,13): Error BP5005: This loop invariant might not be maintained by the loop.
+Execution trace:
+    DoWhile_Invalid_6.bpl(43,11): anon0
+    DoWhile_Invalid_6.bpl(44,13): anon5_Then
+    DoWhile_Invalid_6.bpl(45,9): CONTINUE__DO__WHILE__1
+    DoWhile_Invalid_6.bpl(49,9): anon6_LoopHead
+    DoWhile_Invalid_6.bpl(52,13): anon6_LoopBody
+    DoWhile_Invalid_6.bpl(55,23): anon7_Then
+    DoWhile_Invalid_6.bpl(64,15): anon3
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== DoWhile_Invalid_7.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./DoWhile_Invalid_7.wyil
+DEBUG: recording type nat := int where ( >= )
+assuming lhs of ==> toBool(clean)
+assuming lhs of ==> toBool(clean)
+MUTATED INPUT items : int[]
+MUTATED INPUT items : int[]
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+DoWhile_Invalid_7.bpl(52,13): Error BP5001: This assertion might not hold.
+Execution trace:
+    DoWhile_Invalid_7.bpl(43,11): anon0
+    DoWhile_Invalid_7.bpl(44,13): anon5_Then
+    DoWhile_Invalid_7.bpl(45,9): CONTINUE__DO__WHILE__1
+    DoWhile_Invalid_7.bpl(49,9): anon6_LoopHead
+    DoWhile_Invalid_7.bpl(52,13): anon6_LoopBody
+
+Boogie program verifier finished with 1 verified, 1 error
+
+java.lang.NullPointerException
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.stringifyArray(BoogieExampleFile.java:141)
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.toString(BoogieExampleFile.java:125)
+	at wy2boogie.core.BoogieExampleFile.toString(BoogieExampleFile.java:272)
+	at wy2boogie.commands.BoogieCommand.translateCounterexample(BoogieCommand.java:251)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:126)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+===== DoWhile_Invalid_8.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./DoWhile_Invalid_8.wyil
+DEBUG: recording type pos := int where ( >= )
+assuming lhs of ==> toBool(clean)
+assuming lhs of ==> toBool(clean)
+MUTATED INPUT items : int[]
+MUTATED INPUT items : int[]
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+DoWhile_Invalid_8.bpl(50,13): Error BP5005: This loop invariant might not be maintained by the loop.
+Execution trace:
+    DoWhile_Invalid_8.bpl(43,11): anon0
+    DoWhile_Invalid_8.bpl(44,13): anon5_Then
+    DoWhile_Invalid_8.bpl(45,9): CONTINUE__DO__WHILE__1
+    DoWhile_Invalid_8.bpl(49,9): anon6_LoopHead
+    DoWhile_Invalid_8.bpl(52,13): anon6_LoopBody
+    DoWhile_Invalid_8.bpl(54,13): anon7_Else
+    DoWhile_Invalid_8.bpl(64,15): anon3
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== EndOfFile_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./EndOfFile_Invalid_1.wyil
+./EndOfFile_Invalid_1.whiley:3: unexpected end-of-file
+    i
+     ^
+===== Ensures_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Ensures_Invalid_1.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== Ensures_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Ensures_Invalid_2.wyil
+./Ensures_Invalid_2.whiley:6: method invocation not permitted
+requires x > g(x):
+             ^^^^
+===== Ensures_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Ensures_Invalid_3.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Ensures_Invalid_3.bpl(33,5): Error BP5003: A postcondition might not hold on this return path.
+Ensures_Invalid_3.bpl(29,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    Ensures_Invalid_3.bpl(32,7): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== Export_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Export_Invalid_1.wyil
+mangle f : function(int[])->(int) to f$2
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Fail_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Fail_Invalid_1.wyil
+DEBUG: recording type nat1 := int where ( >= )
+DEBUG: recording type neg := int where ( < )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Fail_Invalid_1.bpl(47,13): Error BP5001: This assertion might not hold.
+Execution trace:
+    Fail_Invalid_1.bpl(39,5): anon0
+    Fail_Invalid_1.bpl(43,9): anon5_Else
+    Fail_Invalid_1.bpl(47,13): anon6_Else
+
+Boogie program verifier finished with 0 verified, 1 error
+
+===== Fail_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Fail_Invalid_2.wyil
+./Fail_Invalid_2.whiley:3: unreachable code encountered (i.e. execution can never reach this statement)
+  return x + 1
+  ^^^^^^^^^^^^
+===== Fail_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Fail_Invalid_3.wyil
+DEBUG: recording type nat1 := int where ( >= )
+DEBUG: recording type neg := int where ( < )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Fail_Invalid_3.bpl(47,13): Error BP5001: This assertion might not hold.
+Execution trace:
+    Fail_Invalid_3.bpl(39,5): anon0
+    Fail_Invalid_3.bpl(43,9): anon5_Else
+    Fail_Invalid_3.bpl(47,13): anon6_Else
+
+Boogie program verifier finished with 0 verified, 1 error
+
+===== Final_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Final_Invalid_1.wyil
+./Final_Invalid_1.whiley:3: cannot reassign final variable
+    x = x + 1
+    ^
+===== Final_Invalid_10.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Final_Invalid_10.wyil
+./Final_Invalid_10.whiley:8: cannot reassign final variable
+        y = y + 1
+        ^
+===== Final_Invalid_11.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Final_Invalid_11.wyil
+./Final_Invalid_11.whiley:8: cannot reassign final variable
+        y = y + 1
+        ^
+===== Final_Invalid_12.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Final_Invalid_12.wyil
+./Final_Invalid_12.whiley:8: cannot reassign final variable
+    y = 0
+    ^
+===== Final_Invalid_13.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Final_Invalid_13.wyil
+./Final_Invalid_13.whiley:9: cannot reassign final variable
+    y = 0
+    ^
+===== Final_Invalid_14.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Final_Invalid_14.wyil
+./Final_Invalid_14.whiley:11: cannot reassign final variable
+    y = 0
+    ^
+===== Final_Invalid_15.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Final_Invalid_15.wyil
+./Final_Invalid_15.whiley:8: cannot reassign final variable
+    y = 0
+    ^
+===== Final_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Final_Invalid_2.wyil
+./Final_Invalid_2.whiley:4: cannot reassign final variable
+    y = y + 1
+    ^
+===== Final_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Final_Invalid_3.wyil
+./Final_Invalid_3.whiley:5: cannot reassign final variable
+    CONSTANT = CONSTANT + x
+    ^^^^^^^^
+===== Final_Invalid_4.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Final_Invalid_4.wyil
+./Final_Invalid_4.whiley:4: cannot reassign final variable
+        x = x + 1
+        ^
+===== Final_Invalid_5.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Final_Invalid_5.wyil
+./Final_Invalid_5.whiley:4: cannot reassign final variable
+        x = x + 1
+        ^
+===== Final_Invalid_6.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Final_Invalid_6.wyil
+./Final_Invalid_6.whiley:7: cannot reassign final variable
+            x = x + 1
+            ^
+===== Final_Invalid_7.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Final_Invalid_7.wyil
+./Final_Invalid_7.whiley:5: cannot reassign final variable
+    y = y + 1
+    ^
+===== Final_Invalid_8.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Final_Invalid_8.wyil
+./Final_Invalid_8.whiley:6: cannot reassign final variable
+        y = y + 1
+        ^
+===== Final_Invalid_9.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Final_Invalid_9.wyil
+./Final_Invalid_9.whiley:6: cannot reassign final variable
+        y = y + 1
+        ^
+===== FunctionRef_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./FunctionRef_Invalid_1.wyil
+./FunctionRef_Invalid_1.whiley:8: expecting ":" here
+    return g(&f)
+    ^^^^^^
+===== FunctionRef_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./FunctionRef_Invalid_2.wyil
+./FunctionRef_Invalid_2.whiley:8: expecting ":" here
+    return g(&f)
+    ^^^^^^
+===== FunctionRef_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./FunctionRef_Invalid_3.wyil
+./FunctionRef_Invalid_3.whiley:8: expecting ":" here
+    return g(&f)
+    ^^^^^^
+===== FunctionRef_Invalid_4.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./FunctionRef_Invalid_4.wyil
+./FunctionRef_Invalid_4.whiley:13: expected type func_t, found null|func_t
+    func_t y = table[d]
+               ^^^^^^^^
+===== FunctionRef_Invalid_5.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./FunctionRef_Invalid_5.wyil
+./FunctionRef_Invalid_5.whiley:14: invalid field access
+    return f.read(arg)
+             ^^^^
+===== FunctionRef_Invalid_6.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./FunctionRef_Invalid_6.wyil
+./FunctionRef_Invalid_6.whiley:8: expected type int, found bool
+    return read(arg)
+                ^^^
+===== FunctionRef_Invalid_7.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./FunctionRef_Invalid_7.wyil
+./FunctionRef_Invalid_7.whiley:6: insufficient arguments for function or method invocation
+    return _this->func(arg)
+                  ^^^^^^^^^
+===== Function_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Function_Invalid_1.wyil
+./Function_Invalid_1.whiley:2: unable to resolve name (asdkljkljg)
+    asdkljkljg(x)
+    ^^^^^^^^^^
+===== Function_Invalid_10.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Function_Invalid_10.wyil
+./Function_Invalid_10.whiley:13: unable to resolve name (is ambiguous)
+	found function Function_Invalid_10::f(anat)->(int)
+	found function Function_Invalid_10::f(bnat)->(int)
+    f(1)
+    ^
+===== Function_Invalid_11.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Function_Invalid_11.wyil
+./Function_Invalid_11.whiley:4: expected type fun, found function(int,int)->(int)
+    fun f = &(int x, int y -> y)
+            ^^^^^^^^^^^^^^^^^^^^
+===== Function_Invalid_12.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Function_Invalid_12.wyil
+./Function_Invalid_12.whiley:16: expected type gun_t, found function(int)->(int)
+    gun_t z = &g
+              ^^
+===== Function_Invalid_13.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Function_Invalid_13.wyil
+./Function_Invalid_13.whiley:16: expected type gun_t, found function(int)->(int|bool)
+    gun_t z = &g
+              ^^
+===== Function_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Function_Invalid_2.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Function_Invalid_2.bpl(35,9): Error: more than one declaration of function/procedure name: f__pre
+Function_Invalid_2.bpl(40,9): Error: more than one declaration of function/procedure name: f
+Function_Invalid_2.bpl(48,10): Error: more than one declaration of function/procedure name: f__impl
+3 name resolution errors detected in Function_Invalid_2.bpl
+===== Function_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Function_Invalid_3.wyil
+./Function_Invalid_3.whiley:5: unable to resolve name (no match for f(int))
+    return f(1)
+           ^
+===== Function_Invalid_4.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Function_Invalid_4.wyil
+./Function_Invalid_4.whiley:5: method invocation not permitted
+    return g(x)
+           ^^^^
+===== Function_Invalid_9.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Function_Invalid_9.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Function_Invalid_9.bpl(35,9): Error: more than one declaration of function/procedure name: f__pre
+Function_Invalid_9.bpl(40,9): Error: more than one declaration of function/procedure name: f
+Function_Invalid_9.bpl(48,10): Error: more than one declaration of function/procedure name: f__impl
+3 name resolution errors detected in Function_Invalid_9.bpl
+===== If_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./If_Invalid_1.wyil
+./If_Invalid_1.whiley:2: expected type bool, found int
+    if z:
+       ^
+===== If_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./If_Invalid_2.wyil
+./If_Invalid_2.whiley:5: expected type bool, found int
+        return 0
+               ^
+===== If_Invalid_4.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./If_Invalid_4.wyil
+./If_Invalid_4.whiley:1: missing return statement
+function f(int x) -> int:
+^^^^^^^^^^^^^^^^^^^^^^^^^
+===== If_Invalid_5.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./If_Invalid_5.wyil
+./If_Invalid_5.whiley:1: missing return statement
+function greater(int x,int y) -> (int z)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+===== Import_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Import_Invalid_1.wyil
+./Import_Invalid_1.whiley:3: unable to resolve name (toString)
+    return toString(x)
+           ^^^^^^^^
+===== IntDiv_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./IntDiv_Invalid_1.wyil
+java.lang.IllegalArgumentException: function with no return values: 24(106, 5, 107, 108, 109, 110, 111)
+	at wy2boogie.translate.Wyil2Boogie.writeFunction(Wyil2Boogie.java:594)
+	at wy2boogie.translate.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:445)
+	at wy2boogie.translate.Wyil2Boogie.apply(Wyil2Boogie.java:352)
+	at wy2boogie.translate.Wyil2Boogie.apply(Wyil2Boogie.java:327)
+	at wy2boogie.tasks.BoogieCompileTask.build(BoogieCompileTask.java:91)
+	at wy2boogie.commands.BoogieCommand.translateWyilFile(BoogieCommand.java:207)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:129)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Error opening file "IntDiv_Invalid_1.bpl": Could not find file "/Users/utting/git/whiley/WhileyCompiler/tests/invalid/IntDiv_Invalid_1.bpl".
+===== Intersection_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Intersection_Invalid_1.wyil
+./Intersection_Invalid_1.whiley:1: expecting "Identifier" here
+type EmptyList is ((null|int[]) & (null|bool[]) t)
+                                ^
+===== Intersection_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Intersection_Invalid_2.wyil
+./Intersection_Invalid_2.whiley:5: expected end-of-line
+type InterList is UnitList & LinkedList
+                           ^
+===== Lambda_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Lambda_Invalid_3.wyil
+DEBUG: recording type func_t := function(int)->(int) where ()
+DECL_lambda:
+  name     : 
+  captures : []
+  type     : function(int)->(int)
+  types    : null
+  params   : (int x)
+  body    : f( + )
+  returns : ()
+  string  : 27(233, 234, 235, 236, 237, 238, 225, 305)
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Lambda_Invalid_3.bpl(67,5): Error BP5003: A postcondition might not hold on this return path.
+Lambda_Invalid_3.bpl(61,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    Lambda_Invalid_3.bpl(65,10): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== Lifetime_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Lifetime_Invalid_1.wyil
+./Lifetime_Invalid_1.whiley:2: expected type &*:int, found &this:int
+    &*:int ptr1 = this:new 42
+                  ^^^^^^^^^^^
+===== Lifetime_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Lifetime_Invalid_2.wyil
+./Lifetime_Invalid_2.whiley:4: expected type &this:int, found &myblock:int
+        x = myblock:new 1
+            ^^^^^^^^^^^^^
+===== Lifetime_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Lifetime_Invalid_3.wyil
+./Lifetime_Invalid_3.whiley:1: use of undeclared lifetime
+method foo() -> &this:int:
+                 ^^^^
+===== Lifetime_Invalid_4.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Lifetime_Invalid_4.wyil
+./Lifetime_Invalid_4.whiley:2: expected type &*:int, found &this:int
+    return this:new 1
+           ^^^^^^^^^^
+===== Lifetime_Invalid_5.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Lifetime_Invalid_5.wyil
+./Lifetime_Invalid_5.whiley:16: unable to resolve name (is ambiguous)
+	found method Lifetime_Invalid_5::m<a=*>(&*:int,&a:int)->(int)
+	found method Lifetime_Invalid_5::m<a=*>(&a:int,&*:int)->(int)
+	found method Lifetime_Invalid_5::m<a=*>(&a:int,&a:int)->(int)
+    m(new 1, new 2)
+    ^
+===== Lifetime_Invalid_6.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Lifetime_Invalid_6.wyil
+./Lifetime_Invalid_6.whiley:12: unable to resolve name (is ambiguous)
+	found method Lifetime_Invalid_6::m<a=this,b=this>(&a:int,&b:int)->(int)
+	found method Lifetime_Invalid_6::m<a=this>(&a:int,&a:int)->(int)
+    m(this:new 1, this:new 2)
+    ^
+===== Lifetime_Invalid_7.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Lifetime_Invalid_7.wyil
+./Lifetime_Invalid_7.whiley:16: unable to resolve name (is ambiguous)
+	found method Lifetime_Invalid_7::m<a=this,b=*>(&a:int|&b:bool,&a:int,bool)->(&b:int)
+	found method Lifetime_Invalid_7::m<a=this,b=this>(&a:int|&b:bool,&a:int,bool)->(&b:int)
+	found method Lifetime_Invalid_7::m<a=this>(&*:int,&a:int,int|bool)->(&a:int)
+    m(new 1, this:new 2, true)
+    ^
+===== Lifetime_Invalid_8.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Lifetime_Invalid_8.wyil
+./Lifetime_Invalid_8.whiley:11: unable to resolve name (is ambiguous)
+	found method Lifetime_Invalid_8::m<a=*,b=this>(&a:int|&b:bool,&a:int|&b:int)->()
+	found method Lifetime_Invalid_8::m<a=this,b=*>(&a:int|&b:bool,&a:int|&b:int)->()
+	found method Lifetime_Invalid_8::m<a=this,b=this>(&a:int|&b:bool,&a:int|&b:int)->()
+    m(x, y)
+    ^
+===== Lifetime_Invalid_9.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Lifetime_Invalid_9.wyil
+./Lifetime_Invalid_9.whiley:14: unable to resolve name (is ambiguous)
+	found method Lifetime_Invalid_9::swap<a=this,b=this>(&a:int,&b:int)->()
+	found method Lifetime_Invalid_9::swap<a=this>(&a:int,&a:int)->()
+    swap(x,y)
+    ^^^^
+===== Lifetime_Lambda_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Lifetime_Lambda_Invalid_1.wyil
+./Lifetime_Lambda_Invalid_1.whiley:4: expected type method<a>(&a:int,&a:int)->(&a:int), found method<a>(&a:int,&int)->(&a:int)
+    method<a>(&a:int, &a:int)->(&a:int) m = &<a>(&a:int x, &int y -> a:new 1)
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+===== Lifetime_Lambda_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Lifetime_Lambda_Invalid_2.wyil
+./Lifetime_Lambda_Invalid_2.whiley:4: expected type method<a>(&a:int,&int)->(&*:int), found method<a>(&a:int,&int)->(&a:int)
+    method<a>(&a:int, &int)->(&*:int) m = &<a>(&a:int x, &int y -> a:new 1)
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+===== Lifetime_Lambda_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Lifetime_Lambda_Invalid_3.wyil
+DECL_lambda:
+  name     : 
+  captures : []
+  type     : method<a>()->(&*:int)
+  types    : null
+  params   : ()
+  body    : *:new 1
+  returns : ()
+  string  : 27(62, 63, 64, 65, 66, 67, 55, 96)
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Lifetime_Lambda_Invalid_3.bpl(9,47): Error: cannot refer to a global variable in this context: ref__0
+1 name resolution errors detected in Lifetime_Lambda_Invalid_3.bpl
+===== Lifetime_Lambda_Invalid_4.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Lifetime_Lambda_Invalid_4.wyil
+./Lifetime_Lambda_Invalid_4.whiley:4: use of undeclared lifetime
+    method()->(&this:int) m = &(-> this:new 1)
+                                   ^^^^
+===== Lifetime_Lambda_Invalid_5.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Lifetime_Lambda_Invalid_5.wyil
+DEBUG: recording type mymethod := method()->(int) where ()
+DECL_lambda:
+  name     : 
+  captures : [&this:int x = this:new 1]
+  type     : method()->(int)
+  types    : null
+  params   : ()
+  body    : *x
+  returns : ()
+  string  : 27(116, 117, 118, 119, 120, 121, 110, 153)
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Lifetime_Lambda_Invalid_5.bpl(12,95): Error: cannot refer to a global variable in this context: w__heap
+1 name resolution errors detected in Lifetime_Lambda_Invalid_5.bpl
+===== Lifetime_Lambda_Invalid_6.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Lifetime_Lambda_Invalid_6.wyil
+DEBUG: recording type mymethod := method()->(int) where ()
+DECL_lambda:
+  name     : 
+  captures : [&this:int x = *:new 1]
+  type     : method[this]()->(int)
+  types    : null
+  params   : ()
+  body    :  + 
+  returns : ()
+  string  : 27(139, 140, 141, 142, 143, 144, 133, 181)
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Lifetime_Lambda_Invalid_6.bpl(12,109): Error: cannot refer to a global variable in this context: w__heap
+Lifetime_Lambda_Invalid_6.bpl(12,136): Error: cannot refer to a global variable in this context: w__heap
+Lifetime_Lambda_Invalid_6.bpl(12,144): Error: cannot refer to a global variable in this context: ref__0
+3 name resolution errors detected in Lifetime_Lambda_Invalid_6.bpl
+===== MethodCall_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./MethodCall_Invalid_1.wyil
+./MethodCall_Invalid_1.whiley:5: unable to resolve name (no match for f(&int,int))
+    f(_this, 1)
+    ^
+===== MethodCall_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./MethodCall_Invalid_2.wyil
+./MethodCall_Invalid_2.whiley:7: unable to resolve name (no match for f(&int,int))
+	found method MethodCall_Invalid_2::f(dummy,int)->(int)
+    f(_this, 1)
+    ^
+===== MethodCall_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./MethodCall_Invalid_3.wyil
+./MethodCall_Invalid_3.whiley:2: expected record type
+    _this.f(1)
+    ^^^^^
+===== MethodCall_Invalid_4.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./MethodCall_Invalid_4.wyil
+./MethodCall_Invalid_4.whiley:2: method invocation not permitted
+    return get(y)
+           ^^^^^^
+===== MethodCall_Invalid_5.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./MethodCall_Invalid_5.wyil
+./MethodCall_Invalid_5.whiley:2: method invocation not permitted
+    return [1, 2, 3, get()]
+                     ^^^^^
+===== MethodCall_Invalid_6.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./MethodCall_Invalid_6.wyil
+./MethodCall_Invalid_6.whiley:4: method invocation not permitted
+    return {y: get(), x: 1}
+               ^^^^^
+===== MethodCall_Invalid_7.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./MethodCall_Invalid_7.wyil
+./MethodCall_Invalid_7.whiley:4: method invocation not permitted
+    return {y: get(), x: 1}
+               ^^^^^
+===== MethodCall_Invalid_8.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./MethodCall_Invalid_8.wyil
+./MethodCall_Invalid_8.whiley:2: object allocation not permitted
+    &int x = new 1
+             ^^^^^
+===== MethodRef_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./MethodRef_Invalid_1.wyil
+./MethodRef_Invalid_1.whiley:8: method invocation not permitted
+    return r.read(state,0)
+             ^^^^^^^^^^^^^
+===== MethodRef_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./MethodRef_Invalid_2.wyil
+./MethodRef_Invalid_2.whiley:7: expected type int, found bool
+    return m(false)
+             ^^^^^
+===== MethodRef_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./MethodRef_Invalid_3.wyil
+./MethodRef_Invalid_3.whiley:7: method invocation not permitted
+    return m(1)
+           ^^^^
+===== Method_Invalid_9.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Method_Invalid_9.wyil
+./Method_Invalid_9.whiley:14: expected type fun_t, found method(int)->(int)
+    fun_t y = &m
+              ^^
+===== MultiAssign_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./MultiAssign_Invalid_1.wyil
+./MultiAssign_Invalid_1.whiley:8: unable to resolve name (x)
+    if x > y:
+       ^
+===== Native_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Native_Invalid_1.wyil
+mangle f : function(int[])->(int) to f$2
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Native_Invalid_1.bpl(31,1): Error BP5003: A postcondition might not hold on this return path.
+Native_Invalid_1.bpl(28,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    Native_Invalid_1.bpl(31,1): anon0
+Native_Invalid_1.bpl(56,1): Error BP5003: A postcondition might not hold on this return path.
+Native_Invalid_1.bpl(53,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    Native_Invalid_1.bpl(56,1): anon0
+
+Boogie program verifier finished with 0 verified, 2 errors
+
+java.lang.NullPointerException
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.stringifyArray(BoogieExampleFile.java:141)
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.toString(BoogieExampleFile.java:125)
+	at wy2boogie.core.BoogieExampleFile.toString(BoogieExampleFile.java:272)
+	at wy2boogie.commands.BoogieCommand.translateCounterexample(BoogieCommand.java:251)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:126)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+===== NegationType_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./NegationType_Invalid_1.wyil
+./NegationType_Invalid_1.whiley:3: expected type int|bool, found int|null
+    return x
+           ^
+===== NegationType_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./NegationType_Invalid_2.wyil
+./NegationType_Invalid_2.whiley:1: expecting "Identifier" here
+function f(int x) -> ((int|null) & (null|bool) r):
+                                 ^
+===== NegationType_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./NegationType_Invalid_3.wyil
+./NegationType_Invalid_3.whiley:4: expected type {,}, found LinkedList
+    return x
+           ^
+===== NegationType_Invalid_4.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./NegationType_Invalid_4.wyil
+./NegationType_Invalid_4.whiley:5: expected type t, found method(s)->()
+    t m = &test
+          ^^^^^
+===== OpenRecord_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./OpenRecord_Invalid_1.wyil
+./OpenRecord_Invalid_1.whiley:7: expecting ":" here
+    OpenRecord r = {y: 2, x: 1}
+    ^^^^^^^^^^
+===== OpenRecord_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./OpenRecord_Invalid_2.wyil
+./OpenRecord_Invalid_2.whiley:7: incomparable operands: OpenRecord-{} and {,}
+        if r is {int z, int y}:
+           ^^^^^^^^^^^^^^^^^^^
+===== OpenRecord_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./OpenRecord_Invalid_3.wyil
+./OpenRecord_Invalid_3.whiley:6: expected type OpenRecord2, found OpenRecord1
+    return r
+           ^
+===== OpenRecord_Invalid_4.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./OpenRecord_Invalid_4.wyil
+./OpenRecord_Invalid_4.whiley:6: expected type OpenRecord2, found OpenRecord1
+    return r
+           ^
+===== OpenRecord_Invalid_5.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./OpenRecord_Invalid_5.wyil
+./OpenRecord_Invalid_5.whiley:5: expected type OpenRecord2, found OpenRecord1
+    return r
+           ^
+===== OpenRecord_Invalid_6.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./OpenRecord_Invalid_6.wyil
+./OpenRecord_Invalid_6.whiley:6: expected type OpenRecord2, found OpenRecord1
+    return r
+           ^
+===== OpenRecord_Invalid_7.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./OpenRecord_Invalid_7.wyil
+./OpenRecord_Invalid_7.whiley:6: expected type OpenRecord2, found OpenRecord1
+    return r
+           ^
+===== Parameter_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Parameter_Invalid_1.wyil
+./Parameter_Invalid_1.whiley:1: name already declared
+function f(int x, int x) -> int:
+                      ^
+===== Parameter_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Parameter_Invalid_2.wyil
+./Parameter_Invalid_2.whiley:1: unknown token encountered
+function f(int $) -> int:
+               ^
+===== Parsing_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Parsing_Invalid_1.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Parsing_Invalid_1.bpl(35,9): Error: more than one declaration of function/procedure name: f__pre
+Parsing_Invalid_1.bpl(40,9): Error: more than one declaration of function/procedure name: f
+Parsing_Invalid_1.bpl(48,10): Error: more than one declaration of function/procedure name: f__impl
+3 name resolution errors detected in Parsing_Invalid_1.bpl
+===== Parsing_Invalid_10.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Parsing_Invalid_10.wyil
+./Parsing_Invalid_10.whiley:2: break outside switch or loop
+     break
+     ^^^^^
+===== Parsing_Invalid_11.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Parsing_Invalid_11.wyil
+./Parsing_Invalid_11.whiley:2: continue outside loop
+     continue
+     ^^^^^^^^
+===== Parsing_Invalid_12.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Parsing_Invalid_12.wyil
+./Parsing_Invalid_12.whiley:5: duplicate case label
+     case 1:
+          ^
+===== Parsing_Invalid_15.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Parsing_Invalid_15.wyil
+./Parsing_Invalid_15.whiley:2: empty type encountered
+    void x
+    ^^^^
+===== Parsing_Invalid_16.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Parsing_Invalid_16.wyil
+./Parsing_Invalid_16.whiley:2: duplicate record key
+     return {x: 1, x: 2, y: 3}
+                   ^
+===== Parsing_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Parsing_Invalid_2.wyil
+DEBUG: recording type nat := int where ()
+DEBUG: recording type nat := {,} where ()
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Parsing_Invalid_2.bpl(13,9): Error: more than one declaration of function/procedure name: is_nat
+1 name resolution errors detected in Parsing_Invalid_2.bpl
+===== Parsing_Invalid_21.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Parsing_Invalid_21.wyil
+./Parsing_Invalid_21.whiley:8: unable to resolve name (x)
+    return x
+           ^
+===== Parsing_Invalid_23.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Parsing_Invalid_23.wyil
+./Parsing_Invalid_23.whiley:5: unable to resolve name (y)
+    return y
+           ^
+===== Parsing_Invalid_24.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Parsing_Invalid_24.wyil
+./Parsing_Invalid_24.whiley:7: unable to resolve name (y)
+    return y
+           ^
+===== Parsing_Invalid_25.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Parsing_Invalid_25.wyil
+./Parsing_Invalid_25.whiley:6: unable to resolve name (x)
+    return x
+           ^
+===== Parsing_Invalid_26.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Parsing_Invalid_26.wyil
+./Parsing_Invalid_26.whiley:1: empty type encountered
+type Record is {
+               ^^^
+===== Parsing_Invalid_27.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Parsing_Invalid_27.wyil
+wy2boogie.translate.NotImplementedYet: type: void
+	at wy2boogie.translate.Wyil2Boogie.typePredicate(Wyil2Boogie.java:2165)
+	at wy2boogie.translate.Wyil2Boogie.typePredicate(Wyil2Boogie.java:2110)
+	at wy2boogie.translate.Wyil2Boogie.writeMethodPre(Wyil2Boogie.java:544)
+	at wy2boogie.translate.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:442)
+	at wy2boogie.translate.Wyil2Boogie.apply(Wyil2Boogie.java:352)
+	at wy2boogie.translate.Wyil2Boogie.apply(Wyil2Boogie.java:327)
+	at wy2boogie.tasks.BoogieCompileTask.build(BoogieCompileTask.java:91)
+	at wy2boogie.commands.BoogieCommand.translateWyilFile(BoogieCommand.java:207)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:129)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+===== Parsing_Invalid_28.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Parsing_Invalid_28.wyil
+wy2boogie.translate.NotImplementedYet: type: void
+	at wy2boogie.translate.Wyil2Boogie.typePredicate(Wyil2Boogie.java:2165)
+	at wy2boogie.translate.Wyil2Boogie.typePredicate(Wyil2Boogie.java:2110)
+	at wy2boogie.translate.Wyil2Boogie.typePredicate(Wyil2Boogie.java:2133)
+	at wy2boogie.translate.Wyil2Boogie.writeTypeSynonym(Wyil2Boogie.java:387)
+	at wy2boogie.translate.Wyil2Boogie.apply(Wyil2Boogie.java:348)
+	at wy2boogie.translate.Wyil2Boogie.apply(Wyil2Boogie.java:327)
+	at wy2boogie.tasks.BoogieCompileTask.build(BoogieCompileTask.java:91)
+	at wy2boogie.commands.BoogieCommand.translateWyilFile(BoogieCommand.java:207)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:129)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+===== Parsing_Invalid_29.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Parsing_Invalid_29.wyil
+./Parsing_Invalid_29.whiley:1: empty type encountered
+function f(void z) :
+           ^^^^
+===== Parsing_Invalid_30.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Parsing_Invalid_30.wyil
+./Parsing_Invalid_30.whiley:1: empty type encountered
+function f(int x, void z) :
+                  ^^^^
+===== Parsing_Invalid_31.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Parsing_Invalid_31.wyil
+./Parsing_Invalid_31.whiley:5: no return value
+    int a = m()
+            ^^^
+===== Parsing_Invalid_4.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Parsing_Invalid_4.wyil
+./Parsing_Invalid_4.whiley:3: duplicate record key
+  int field
+      ^^^^^
+===== Parsing_Invalid_5.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Parsing_Invalid_5.wyil
+./Parsing_Invalid_5.whiley:2: name already declared
+    int x = x
+        ^
+===== Parsing_Invalid_6.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Parsing_Invalid_6.wyil
+./Parsing_Invalid_6.whiley:3: name already declared
+    int x = x
+        ^
+===== Parsing_Invalid_8.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Parsing_Invalid_8.wyil
+./Parsing_Invalid_8.whiley:2: unable to resolve name (x)
+     x = 1
+     ^
+===== ProcessAccess_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ProcessAccess_Invalid_1.wyil
+./ProcessAccess_Invalid_1.whiley:6: expected record type
+    _this.op = 1
+    ^^^^^
+===== ProcessAccess_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ProcessAccess_Invalid_2.wyil
+./ProcessAccess_Invalid_2.whiley:6: expected type pState, found &*:({int z,int x})
+    _this = new {z: 4, x: 3}
+            ^^^^^^^^^^^^^^^^
+===== ProcessAccess_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./ProcessAccess_Invalid_3.wyil
+./ProcessAccess_Invalid_3.whiley:4: expected record type
+    p.data = _this.data
+    ^
+===== Process_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Process_Invalid_1.wyil
+./Process_Invalid_1.whiley:5: expected record type
+    _this.data = d
+    ^^^^^
+===== Property_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Property_Invalid_1.wyil
+./Property_Invalid_1.whiley:10: variable may be uninitialised
+        return y
+               ^
+===== Property_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Property_Invalid_2.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Property_Invalid_2.bpl(39,5): Error BP5003: A postcondition might not hold on this return path.
+Property_Invalid_2.bpl(35,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    Property_Invalid_2.bpl(38,7): anon0
+
+Boogie program verifier finished with 0 verified, 1 error
+
+===== Property_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Property_Invalid_3.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Property_Invalid_3.bpl(39,5): Error BP5003: A postcondition might not hold on this return path.
+Property_Invalid_3.bpl(35,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    Property_Invalid_3.bpl(38,8): anon0
+
+Boogie program verifier finished with 0 verified, 1 error
+
+===== Property_Invalid_4.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Property_Invalid_4.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Property_Invalid_4.bpl(38,5): Error BP5003: A postcondition might not hold on this return path.
+Property_Invalid_4.bpl(34,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    Property_Invalid_4.bpl(37,8): anon0
+
+Boogie program verifier finished with 0 verified, 1 error
+
+===== Property_Invalid_5.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Property_Invalid_5.wyil
+./Property_Invalid_5.whiley:10: expecting ":" here
+    nat i = 0
+    ^^^
+===== Property_Invalid_6.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Property_Invalid_6.wyil
+./Property_Invalid_6.whiley:13: expecting ":" here
+    nat i = 0
+    ^^^
+===== Property_Invalid_7.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Property_Invalid_7.wyil
+./Property_Invalid_7.whiley:16: expecting ":" here
+    nat i = 1
+    ^^^
+===== Property_Invalid_8.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Property_Invalid_8.wyil
+DEBUG: recording type nat := int where (nat(x))
+DEBUG: recording type pos := int where (pos(x))
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Property_Invalid_8.bpl(73,5): Error BP5003: A postcondition might not hold on this return path.
+Property_Invalid_8.bpl(69,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    Property_Invalid_8.bpl(72,7): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== Quantifiers_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Quantifiers_Invalid_1.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Quantifiers_Invalid_1.bpl(48,4): Error: call to undeclared procedure: f
+1 name resolution errors detected in Quantifiers_Invalid_1.bpl
+===== Quantifiers_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Quantifiers_Invalid_2.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Quantifiers_Invalid_2.bpl(48,4): Error: call to undeclared procedure: f
+1 name resolution errors detected in Quantifiers_Invalid_2.bpl
+===== Quantifiers_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Quantifiers_Invalid_3.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Quantifiers_Invalid_3.bpl(48,4): Error: call to undeclared procedure: f
+1 name resolution errors detected in Quantifiers_Invalid_3.bpl
+===== Quantifiers_Invalid_4.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Quantifiers_Invalid_4.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Quantifiers_Invalid_4.bpl(48,4): Error: call to undeclared procedure: f
+1 name resolution errors detected in Quantifiers_Invalid_4.bpl
+===== Quantifiers_Invalid_5.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Quantifiers_Invalid_5.wyil
+java.lang.IllegalArgumentException: function with no return values: 24(180, 130, 181, 182, 183, 184, 185)
+	at wy2boogie.translate.Wyil2Boogie.writeFunction(Wyil2Boogie.java:594)
+	at wy2boogie.translate.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:445)
+	at wy2boogie.translate.Wyil2Boogie.apply(Wyil2Boogie.java:352)
+	at wy2boogie.translate.Wyil2Boogie.apply(Wyil2Boogie.java:327)
+	at wy2boogie.tasks.BoogieCompileTask.build(BoogieCompileTask.java:91)
+	at wy2boogie.commands.BoogieCommand.translateWyilFile(BoogieCommand.java:207)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:129)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Error opening file "Quantifiers_Invalid_5.bpl": Could not find file "/Users/utting/git/whiley/WhileyCompiler/tests/invalid/Quantifiers_Invalid_5.bpl".
+===== Quantifiers_Invalid_6.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Quantifiers_Invalid_6.wyil
+java.lang.IllegalArgumentException: function with no return values: 24(180, 130, 181, 182, 183, 184, 185)
+	at wy2boogie.translate.Wyil2Boogie.writeFunction(Wyil2Boogie.java:594)
+	at wy2boogie.translate.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:445)
+	at wy2boogie.translate.Wyil2Boogie.apply(Wyil2Boogie.java:352)
+	at wy2boogie.translate.Wyil2Boogie.apply(Wyil2Boogie.java:327)
+	at wy2boogie.tasks.BoogieCompileTask.build(BoogieCompileTask.java:91)
+	at wy2boogie.commands.BoogieCommand.translateWyilFile(BoogieCommand.java:207)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:129)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Error opening file "Quantifiers_Invalid_6.bpl": Could not find file "/Users/utting/git/whiley/WhileyCompiler/tests/invalid/Quantifiers_Invalid_6.bpl".
+===== Quantifiers_Invalid_7.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Quantifiers_Invalid_7.wyil
+java.lang.IllegalArgumentException: function with no return values: 24(252, 178, 253, 254, 255, 256, 257)
+	at wy2boogie.translate.Wyil2Boogie.writeFunction(Wyil2Boogie.java:594)
+	at wy2boogie.translate.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:445)
+	at wy2boogie.translate.Wyil2Boogie.apply(Wyil2Boogie.java:352)
+	at wy2boogie.translate.Wyil2Boogie.apply(Wyil2Boogie.java:327)
+	at wy2boogie.tasks.BoogieCompileTask.build(BoogieCompileTask.java:91)
+	at wy2boogie.commands.BoogieCommand.translateWyilFile(BoogieCommand.java:207)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:129)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Error opening file "Quantifiers_Invalid_7.bpl": Could not find file "/Users/utting/git/whiley/WhileyCompiler/tests/invalid/Quantifiers_Invalid_7.bpl".
+===== Quantifiers_Invalid_8.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Quantifiers_Invalid_8.wyil
+java.lang.IllegalArgumentException: function with no return values: 24(257, 183, 258, 259, 260, 261, 262)
+	at wy2boogie.translate.Wyil2Boogie.writeFunction(Wyil2Boogie.java:594)
+	at wy2boogie.translate.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:445)
+	at wy2boogie.translate.Wyil2Boogie.apply(Wyil2Boogie.java:352)
+	at wy2boogie.translate.Wyil2Boogie.apply(Wyil2Boogie.java:327)
+	at wy2boogie.tasks.BoogieCompileTask.build(BoogieCompileTask.java:91)
+	at wy2boogie.commands.BoogieCommand.translateWyilFile(BoogieCommand.java:207)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:129)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Error opening file "Quantifiers_Invalid_8.bpl": Could not find file "/Users/utting/git/whiley/WhileyCompiler/tests/invalid/Quantifiers_Invalid_8.bpl".
+===== Record_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Record_Invalid_1.wyil
+./Record_Invalid_1.whiley:5: incomparable operands: R1 and R2
+    return r1 == r2
+           ^^^^^^^^
+===== Record_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Record_Invalid_2.wyil
+./Record_Invalid_2.whiley:1: unable to resolve name (Broken)
+type Global is {Broken field}
+                ^^^^^^
+===== Record_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Record_Invalid_3.wyil
+./Record_Invalid_3.whiley:5: variable may be uninitialised
+    r.tag = tag
+    ^
+===== Record_Invalid_4.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Record_Invalid_4.wyil
+./Record_Invalid_4.whiley:5: expected type Dimension, found {int x,int y}
+    return Point{x:x, y:y}
+                ^^^^^^^^^^
+===== Record_Invalid_5.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Record_Invalid_5.wyil
+./Record_Invalid_5.whiley:4: expected type Point, found {bool x,int y}
+    return Point{x:x, y:y}
+                ^^^^^^^^^^
+===== Record_Invalid_6.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Record_Invalid_6.wyil
+./Record_Invalid_6.whiley:4: expected type Point, found {int x,bool y}
+    return Point{x:x, y:y}
+                ^^^^^^^^^^
+===== RecursiveType_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./RecursiveType_Invalid_1.wyil
+DEBUG: recording type nat := int where ( >= )
+DEBUG: recording type LinkedList := int|{,} where ()
+DEBUG: recording type posLink := {,} where ()
+DEBUG: recording type posList := int|posLink where ()
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+RecursiveType_Invalid_1.bpl(52,9): Error BP5003: A postcondition might not hold on this return path.
+RecursiveType_Invalid_1.bpl(43,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    RecursiveType_Invalid_1.bpl(46,5): anon0
+    RecursiveType_Invalid_1.bpl(50,9): anon3_Else
+
+Boogie program verifier finished with 0 verified, 1 error
+
+===== RecursiveType_Invalid_10.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./RecursiveType_Invalid_10.wyil
+DEBUG: recording type nat := int where ( >= )
+DEBUG: recording type LinkedList := int|{,} where ()
+DEBUG: recording type posLink := {,} where ()
+DEBUG: recording type posList := int|posLink where ()
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+RecursiveType_Invalid_10.bpl(47,5): Error BP5003: A postcondition might not hold on this return path.
+RecursiveType_Invalid_10.bpl(43,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    RecursiveType_Invalid_10.bpl(46,7): anon0
+
+Boogie program verifier finished with 0 verified, 1 error
+
+===== RecursiveType_Invalid_11.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./RecursiveType_Invalid_11.wyil
+./RecursiveType_Invalid_11.whiley:1: empty type encountered
+type T is {T t}
+          ^^^^^
+===== RecursiveType_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./RecursiveType_Invalid_2.wyil
+DEBUG: recording type nat := int where ( >= )
+DEBUG: recording type expr := nat|{,,} where ()
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+RecursiveType_Invalid_2.bpl(59,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    RecursiveType_Invalid_2.bpl(59,5): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== RecursiveType_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./RecursiveType_Invalid_3.wyil
+./RecursiveType_Invalid_3.whiley:7: expected type expr, found {int op,int[] left,int right}
+    expr e = {op: 1, left: "HELLO", right: 2}
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+===== RecursiveType_Invalid_4.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./RecursiveType_Invalid_4.wyil
+DEBUG: recording type binop := {,,} where ( || )
+DEBUG: recording type expr := int|binop where ()
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+RecursiveType_Invalid_4.bpl(77,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    RecursiveType_Invalid_4.bpl(76,8): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== RecursiveType_Invalid_5.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./RecursiveType_Invalid_5.wyil
+./RecursiveType_Invalid_5.whiley:5: unable to resolve name (string)
+type Var is {string id}
+             ^^^^^^
+===== RecursiveType_Invalid_7.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./RecursiveType_Invalid_7.wyil
+DEBUG: recording type binop := {,,} where ( || )
+DEBUG: recording type expr := int|binop where ()
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+RecursiveType_Invalid_7.bpl(77,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    RecursiveType_Invalid_7.bpl(76,8): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== RecursiveType_Invalid_8.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./RecursiveType_Invalid_8.wyil
+DEBUG: recording type binop := {,,} where ( || )
+DEBUG: recording type asbinop := {,,} where ( || )
+DEBUG: recording type expr := int|binop where ()
+DEBUG: recording type asexpr := int|asbinop where ()
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+RecursiveType_Invalid_8.bpl(84,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    RecursiveType_Invalid_8.bpl(83,8): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== RecursiveType_Invalid_9.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./RecursiveType_Invalid_9.wyil
+DEBUG: recording type neg := int where ( < )
+DEBUG: recording type pos := int where ( > )
+DEBUG: recording type exp1 := neg|{} where ()
+DEBUG: recording type exp2 := pos|{} where ()
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+RecursiveType_Invalid_9.bpl(47,5): Error BP5003: A postcondition might not hold on this return path.
+RecursiveType_Invalid_9.bpl(43,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    RecursiveType_Invalid_9.bpl(46,7): anon0
+
+Boogie program verifier finished with 0 verified, 1 error
+
+===== Reference_Subtype_Variant_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Reference_Subtype_Variant_Invalid_1.wyil
+./Reference_Subtype_Variant_Invalid_1.whiley:7: unable to resolve name (no match for f(&int,&int))
+	found method Reference_Subtype_Variant_Invalid_1::f(&int,&int|bool)->(int)
+    return f(p,p)
+           ^
+===== Remainder_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Remainder_Invalid_1.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Remainder_Invalid_1.bpl(32,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    Remainder_Invalid_1.bpl(32,5): anon0
+
+Boogie program verifier finished with 0 verified, 1 error
+
+===== Remainder_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Remainder_Invalid_2.wyil
+./Remainder_Invalid_2.whiley:2: expected type int, found byte
+    return x % y
+               ^
+===== Remainder_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Remainder_Invalid_3.wyil
+./Remainder_Invalid_3.whiley:2: expected type int, found bool
+    return x % y
+           ^
+===== Requires_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Requires_Invalid_1.wyil
+java.lang.IllegalArgumentException: function with no return values: 24(151, 86, 152, 153, 154, 155, 156)
+	at wy2boogie.translate.Wyil2Boogie.writeFunction(Wyil2Boogie.java:594)
+	at wy2boogie.translate.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:445)
+	at wy2boogie.translate.Wyil2Boogie.apply(Wyil2Boogie.java:352)
+	at wy2boogie.translate.Wyil2Boogie.apply(Wyil2Boogie.java:327)
+	at wy2boogie.tasks.BoogieCompileTask.build(BoogieCompileTask.java:91)
+	at wy2boogie.commands.BoogieCommand.translateWyilFile(BoogieCommand.java:207)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:129)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Error opening file "Requires_Invalid_1.bpl": Could not find file "/Users/utting/git/whiley/WhileyCompiler/tests/invalid/Requires_Invalid_1.bpl".
+===== Return_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Return_Invalid_1.wyil
+./Return_Invalid_1.whiley:2: expected type bool, found int
+    return 1
+           ^
+===== Return_Invalid_10.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Return_Invalid_10.wyil
+./Return_Invalid_10.whiley:2: too many return values
+    return 1
+           ^
+===== Return_Invalid_11.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Return_Invalid_11.wyil
+./Return_Invalid_11.whiley:2: too many return values
+    return x
+           ^
+===== Return_Invalid_12.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Return_Invalid_12.wyil
+./Return_Invalid_12.whiley:3: unreachable code encountered (i.e. execution can never reach this statement)
+  return
+  ^^^^^^
+===== Return_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Return_Invalid_2.wyil
+./Return_Invalid_2.whiley:2: too many return values
+    return true
+           ^^^^
+===== Return_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Return_Invalid_3.wyil
+./Return_Invalid_3.whiley:2: too many return values
+    return z
+           ^
+===== Return_Invalid_4.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Return_Invalid_4.wyil
+./Return_Invalid_4.whiley:2: expected type bool, found int
+    return x
+           ^
+===== Return_Invalid_5.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Return_Invalid_5.wyil
+./Return_Invalid_5.whiley:2: expected type bool, found int
+    return x + y
+           ^^^^^
+===== Return_Invalid_6.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Return_Invalid_6.wyil
+./Return_Invalid_6.whiley:2: expected type int, found bool
+    return y
+           ^
+===== Return_Invalid_7.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Return_Invalid_7.wyil
+./Return_Invalid_7.whiley:2: expected type int, found bool
+    return !y
+           ^^
+===== Return_Invalid_8.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Return_Invalid_8.wyil
+./Return_Invalid_8.whiley:2: expected type int, found bool
+    return x && !y
+           ^^^^^^^
+===== Return_Invalid_9.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Return_Invalid_9.wyil
+./Return_Invalid_9.whiley:2: expected type int, found bool
+    return x || (y <= (z + 1))
+           ^^^^^^^^^^^^^^^^^^^
+===== StaticVar_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./StaticVar_Invalid_1.wyil
+./StaticVar_Invalid_1.whiley:1: expected type int, found int[]
+int x = [1,2,3]
+        ^^^^^^^
+===== StaticVar_Invalid_10.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./StaticVar_Invalid_10.wyil
+./StaticVar_Invalid_10.whiley:1: expecting ")" here
+(int&bool)[] x = []
+    ^
+===== StaticVar_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./StaticVar_Invalid_2.wyil
+./StaticVar_Invalid_2.whiley:1: expected type int[], found int
+int[] x = 1
+          ^
+===== StaticVar_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./StaticVar_Invalid_3.wyil
+./StaticVar_Invalid_3.whiley:2: expected type int[], found int
+int[] y = x
+          ^
+===== StaticVar_Invalid_4.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./StaticVar_Invalid_4.wyil
+./StaticVar_Invalid_4.whiley:1: cyclic static initialiser
+int x = 1+x
+        ^^^
+===== StaticVar_Invalid_5.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./StaticVar_Invalid_5.wyil
+DEBUG: recording type nat := int where ( >= )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 0 verified, 0 errors
+===== StaticVar_Invalid_6.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./StaticVar_Invalid_6.wyil
+./StaticVar_Invalid_6.whiley:1: cyclic static initialiser
+int x = y + 1
+        ^^^^^
+===== StaticVar_Invalid_7.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./StaticVar_Invalid_7.wyil
+./StaticVar_Invalid_7.whiley:1: cyclic static initialiser
+int x = [x][0]
+        ^^^^^^
+===== StaticVar_Invalid_8.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./StaticVar_Invalid_8.wyil
+./StaticVar_Invalid_8.whiley:1: cyclic static initialiser
+int x = [x;1][0]
+        ^^^^^^^^
+===== StaticVar_Invalid_9.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./StaticVar_Invalid_9.wyil
+./StaticVar_Invalid_9.whiley:1: cyclic static initialiser
+int x = {f:x}.f
+              ^
+===== Subtype_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Subtype_Invalid_1.wyil
+DEBUG: recording type scf1nat := int where ( >= )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Subtype_Invalid_1.bpl(54,4): Error: call to undeclared procedure: f
+1 name resolution errors detected in Subtype_Invalid_1.bpl
+===== Subtype_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Subtype_Invalid_2.wyil
+DEBUG: recording type scf2nat := int where ( >= )
+java.lang.IllegalArgumentException: function with no return values: 24(142, 47, 143, 144, 145, 146, 147)
+	at wy2boogie.translate.Wyil2Boogie.writeFunction(Wyil2Boogie.java:594)
+	at wy2boogie.translate.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:445)
+	at wy2boogie.translate.Wyil2Boogie.apply(Wyil2Boogie.java:352)
+	at wy2boogie.translate.Wyil2Boogie.apply(Wyil2Boogie.java:327)
+	at wy2boogie.tasks.BoogieCompileTask.build(BoogieCompileTask.java:91)
+	at wy2boogie.commands.BoogieCommand.translateWyilFile(BoogieCommand.java:207)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:129)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Error opening file "Subtype_Invalid_2.bpl": Could not find file "/Users/utting/git/whiley/WhileyCompiler/tests/invalid/Subtype_Invalid_2.bpl".
+===== Subtype_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Subtype_Invalid_3.wyil
+DEBUG: recording type scf3nat := int where ( > )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Subtype_Invalid_3.bpl(56,4): Error: call to undeclared procedure: f
+1 name resolution errors detected in Subtype_Invalid_3.bpl
+===== Subtype_Invalid_4.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Subtype_Invalid_4.wyil
+DEBUG: recording type scf4list := int[] where ( > )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Subtype_Invalid_4.bpl(54,4): Error: call to undeclared procedure: f
+1 name resolution errors detected in Subtype_Invalid_4.bpl
+===== Subtype_Invalid_5.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Subtype_Invalid_5.wyil
+DEBUG: recording type scf5nat := int where ( > )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Subtype_Invalid_5.bpl(56,4): Error: call to undeclared procedure: f
+1 name resolution errors detected in Subtype_Invalid_5.bpl
+===== Subtype_Invalid_6.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Subtype_Invalid_6.wyil
+DEBUG: recording type scf6nat := int where ( > )
+DEBUG: recording type scf6tup := {,} where ( > )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Subtype_Invalid_6.bpl(61,4): Error: call to undeclared procedure: f
+1 name resolution errors detected in Subtype_Invalid_6.bpl
+===== Subtype_Invalid_7.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Subtype_Invalid_7.wyil
+DEBUG: recording type scf7nat := int where ( < )
+DEBUG: recording type scf7tup := {} where ()
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Subtype_Invalid_7.bpl(59,4): Error: call to undeclared procedure: f
+1 name resolution errors detected in Subtype_Invalid_7.bpl
+===== Subtype_Invalid_8.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Subtype_Invalid_8.wyil
+DEBUG: recording type scf8nat := int where ( > )
+DEBUG: recording type scf8tup := {,} where ( > )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Subtype_Invalid_8.bpl(62,4): Error: call to undeclared procedure: f
+1 name resolution errors detected in Subtype_Invalid_8.bpl
+===== Subtype_Invalid_9.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Subtype_Invalid_9.wyil
+DEBUG: recording type scf9nat := int where ( > )
+DEBUG: recording type scf9tup := {,} where ( > )
+DEBUG: recording type scf9arr := {,}[] where (exists(int i = 238(621, 201, 216)). == )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Subtype_Invalid_9.bpl(66,4): Error: call to undeclared procedure: f
+1 name resolution errors detected in Subtype_Invalid_9.bpl
+===== Switch_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Switch_Invalid_1.wyil
+./Switch_Invalid_1.whiley:7: duplicate case label
+        case 1:
+             ^
+===== Switch_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Switch_Invalid_2.wyil
+./Switch_Invalid_2.whiley:5: unreachable code
+        case 1:
+^^^^^^^^^^^^^^^
+===== Switch_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Switch_Invalid_3.wyil
+./Switch_Invalid_3.whiley:5: duplicate default label
+        default:
+^^^^^^^^^^^^^^^^
+===== Switch_Invalid_4.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Switch_Invalid_4.wyil
+./Switch_Invalid_4.whiley:5: duplicate case label
+        case 1:
+             ^
+===== Switch_Invalid_5.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Switch_Invalid_5.wyil
+./Switch_Invalid_5.whiley:3: break outside switch or loop
+        break
+        ^^^^^
+===== Switch_Invalid_6.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Switch_Invalid_6.wyil
+./Switch_Invalid_6.whiley:1: missing return statement
+function f(int x) -> int:
+^^^^^^^^^^^^^^^^^^^^^^^^^
+===== Switch_Invalid_7.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Switch_Invalid_7.wyil
+./Switch_Invalid_7.whiley:2: unrecognised term
+    method = data[pos]
+    ^^^^^^
+===== TupleAssign_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./TupleAssign_Invalid_1.wyil
+DEBUG: recording type tac1tup := {,} where ( < )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+TupleAssign_Invalid_1.bpl(30,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    TupleAssign_Invalid_1.bpl(28,7): anon0
+
+Boogie program verifier finished with 0 verified, 1 error
+
+===== TupleAssign_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./TupleAssign_Invalid_2.wyil
+DEBUG: recording type tac2ta := {,} where ( < )
+DEBUG: recording type tac2tb := {,} where ( < )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+TupleAssign_Invalid_2.bpl(61,4): Error: call to undeclared procedure: f
+1 name resolution errors detected in TupleAssign_Invalid_2.bpl
+===== TupleAssign_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./TupleAssign_Invalid_3.wyil
+DEBUG: recording type tac3ta := {,} where ( < )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+TupleAssign_Invalid_3.bpl(32,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    TupleAssign_Invalid_3.bpl(29,7): anon0
+
+Boogie program verifier finished with 0 verified, 1 error
+
+===== TupleDefine_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./TupleDefine_Invalid_1.wyil
+./TupleDefine_Invalid_1.whiley:8: unable to resolve name (no match for f(bool))
+	found function TupleDefine_Invalid_1::f(int)->(int)
+    return f(p.y)
+           ^
+===== TupleDefine_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./TupleDefine_Invalid_2.wyil
+DEBUG: recording type point := {,} where ( && )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+TupleDefine_Invalid_2.bpl(56,4): Error: call to undeclared procedure: f
+1 name resolution errors detected in TupleDefine_Invalid_2.bpl
+===== Tuple_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Tuple_Invalid_3.wyil
+DEBUG: recording type nat := int where ( >= )
+DEBUG: recording type pair := {,} where ()
+wy2boogie.translate.NotImplementedYet: multiple return values:get
+	at wy2boogie.translate.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:439)
+	at wy2boogie.translate.Wyil2Boogie.apply(Wyil2Boogie.java:352)
+	at wy2boogie.translate.Wyil2Boogie.apply(Wyil2Boogie.java:327)
+	at wy2boogie.tasks.BoogieCompileTask.build(BoogieCompileTask.java:91)
+	at wy2boogie.commands.BoogieCommand.translateWyilFile(BoogieCommand.java:207)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:129)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+===== Tuple_Invalid_4.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Tuple_Invalid_4.wyil
+DEBUG: recording type nat := int where ( >= )
+DEBUG: recording type pair := {,} where ()
+wy2boogie.translate.NotImplementedYet: multiple return values:get
+	at wy2boogie.translate.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:439)
+	at wy2boogie.translate.Wyil2Boogie.apply(Wyil2Boogie.java:352)
+	at wy2boogie.translate.Wyil2Boogie.apply(Wyil2Boogie.java:327)
+	at wy2boogie.tasks.BoogieCompileTask.build(BoogieCompileTask.java:91)
+	at wy2boogie.commands.BoogieCommand.translateWyilFile(BoogieCommand.java:207)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:129)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+===== Tuple_Invalid_5.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Tuple_Invalid_5.wyil
+DEBUG: recording type nat := int where ( >= )
+DEBUG: recording type pair := {,} where ()
+wy2boogie.translate.NotImplementedYet: multiple return values:get
+	at wy2boogie.translate.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:439)
+	at wy2boogie.translate.Wyil2Boogie.apply(Wyil2Boogie.java:352)
+	at wy2boogie.translate.Wyil2Boogie.apply(Wyil2Boogie.java:327)
+	at wy2boogie.tasks.BoogieCompileTask.build(BoogieCompileTask.java:91)
+	at wy2boogie.commands.BoogieCommand.translateWyilFile(BoogieCommand.java:207)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:129)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+===== Tuple_Invalid_6.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Tuple_Invalid_6.wyil
+./Tuple_Invalid_6.whiley:7: expected type int, found bool
+    x,y = g()
+          ^^^
+===== Tuple_Invalid_7.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Tuple_Invalid_7.wyil
+./Tuple_Invalid_7.whiley:7: expected type int, found bool
+    x,y = g()
+          ^^^
+===== TypeEquals_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./TypeEquals_Invalid_1.wyil
+./TypeEquals_Invalid_1.whiley:7: branch always taken
+        if e is int:
+           ^^^^^^^^
+===== TypeEquals_Invalid_10.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./TypeEquals_Invalid_10.wyil
+./TypeEquals_Invalid_10.whiley:6: expected type bool, found (int|null)-null
+        return x
+               ^
+===== TypeEquals_Invalid_11.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./TypeEquals_Invalid_11.wyil
+./TypeEquals_Invalid_11.whiley:8: incomparable operands: ((int|null|bool)-null)-int and int
+        return x == 0
+               ^^^^^^
+===== TypeEquals_Invalid_12.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./TypeEquals_Invalid_12.wyil
+MUTATED INPUT x : int|null
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+TypeEquals_Invalid_12.bpl(38,9): Error BP5003: A postcondition might not hold on this return path.
+TypeEquals_Invalid_12.bpl(30,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    TypeEquals_Invalid_12.bpl(34,7): anon0
+    TypeEquals_Invalid_12.bpl(37,11): anon3_Then
+
+Boogie program verifier finished with 0 verified, 1 error
+
+===== TypeEquals_Invalid_13.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./TypeEquals_Invalid_13.wyil
+./TypeEquals_Invalid_13.whiley:10: expected type null, found (int|null)-nat
+        return x
+               ^
+===== TypeEquals_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./TypeEquals_Invalid_2.wyil
+./TypeEquals_Invalid_2.whiley:2: branch always taken
+    if e is bool:
+       ^^^^^^^^^
+===== TypeEquals_Invalid_5.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./TypeEquals_Invalid_5.wyil
+DEBUG: recording type pos := int where ( > )
+DEBUG: recording type rec1 := {,} where ()
+DEBUG: recording type rec2 := {,} where ()
+DEBUG: recording type rec12 := rec1|rec2 where ()
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+TypeEquals_Invalid_5.bpl(72,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    TypeEquals_Invalid_5.bpl(67,8): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== TypeEquals_Invalid_6.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./TypeEquals_Invalid_6.wyil
+DEBUG: recording type pos := int where ( > )
+DEBUG: recording type neg := int where ( < )
+DEBUG: recording type expr := pos|neg where ()
+java.lang.IllegalArgumentException: function with no return values: 24(283, 195, 284, 285, 286, 287, 288)
+	at wy2boogie.translate.Wyil2Boogie.writeFunction(Wyil2Boogie.java:594)
+	at wy2boogie.translate.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:445)
+	at wy2boogie.translate.Wyil2Boogie.apply(Wyil2Boogie.java:352)
+	at wy2boogie.translate.Wyil2Boogie.apply(Wyil2Boogie.java:327)
+	at wy2boogie.tasks.BoogieCompileTask.build(BoogieCompileTask.java:91)
+	at wy2boogie.commands.BoogieCommand.translateWyilFile(BoogieCommand.java:207)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:129)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Error opening file "TypeEquals_Invalid_6.bpl": Could not find file "/Users/utting/git/whiley/WhileyCompiler/tests/invalid/TypeEquals_Invalid_6.bpl".
+===== TypeEquals_Invalid_7.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./TypeEquals_Invalid_7.wyil
+./TypeEquals_Invalid_7.whiley:6: expected type bool|null, found ((int|null)-int)|((int|null)&int)
+        return x
+               ^
+===== TypeEquals_Invalid_8.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./TypeEquals_Invalid_8.wyil
+./TypeEquals_Invalid_8.whiley:6: expected type bool, found ((bool|int|null)&bool)|(((bool|int|null)-bool)&int)
+        return x
+               ^
+===== TypeEquals_Invalid_9.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./TypeEquals_Invalid_9.wyil
+./TypeEquals_Invalid_9.whiley:8: expected type bool, found ((bool|int|null)&null)|(((bool|int|null)-null)&int)
+        return x
+               ^
+===== Type_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Type_Invalid_1.wyil
+./Type_Invalid_1.whiley:1: method invocation not permitted
+type nat is (int x) where g(x)
+                          ^^^^
+===== Type_Invalid_10.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Type_Invalid_10.wyil
+DEBUG: recording type Other := Contractive where ()
+DEBUG: recording type Contractive := Other[] where ()
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 0 verified, 0 errors
+===== Type_Invalid_11.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Type_Invalid_11.wyil
+DEBUG: recording type nat := int where ( >= )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 0 verified, 0 errors
+===== Type_Invalid_12.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Type_Invalid_12.wyil
+./Type_Invalid_12.whiley:1: expecting ")" here
+function f((int&bool)[] p) -> int:
+               ^
+===== Type_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Type_Invalid_2.wyil
+./Type_Invalid_2.whiley:1: expected type bool, found int
+type nat is (int x) where g(x)
+                          ^^^^
+===== Type_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Type_Invalid_3.wyil
+./Type_Invalid_3.whiley:1: empty type encountered
+type contractive is { contractive next }
+                    ^^^^^^^^^^^^^^^^^^^^
+===== Type_Invalid_4.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Type_Invalid_4.wyil
+./Type_Invalid_4.whiley:1: empty type encountered
+type Point is {
+              ^^^
+===== Type_Invalid_5.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Type_Invalid_5.wyil
+./Type_Invalid_5.whiley:1: empty type encountered
+type Contractive is Contractive | int
+     ^^^^^^^^^^^
+===== Type_Invalid_6.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Type_Invalid_6.wyil
+./Type_Invalid_6.whiley:1: expected end-of-line
+type Contractive is Contractive & int
+                                ^
+===== Type_Invalid_7.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Type_Invalid_7.wyil
+./Type_Invalid_7.whiley:1: empty type encountered
+type Contractive is Contractive
+     ^^^^^^^^^^^
+===== Type_Invalid_8.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Type_Invalid_8.wyil
+./Type_Invalid_8.whiley:1: empty type encountered
+type Other is Contractive
+     ^^^^^
+===== Type_Invalid_9.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./Type_Invalid_9.wyil
+./Type_Invalid_9.whiley:2: expected end-of-line
+type Contractive is Other & int
+                          ^
+===== UnionType_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./UnionType_Invalid_1.wyil
+./UnionType_Invalid_1.whiley:4: expected type int, found IntBool
+    return x
+           ^
+===== UnionType_Invalid_10.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./UnionType_Invalid_10.wyil
+DEBUG: recording type nat := int where ( >= )
+DEBUG: recording type natlist := nat[] where ()
+DEBUG: recording type nlt := nat|natlist where ()
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+UnionType_Invalid_10.bpl(58,4): Error: call to undeclared procedure: g
+1 name resolution errors detected in UnionType_Invalid_10.bpl
+===== UnionType_Invalid_11.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./UnionType_Invalid_11.wyil
+./UnionType_Invalid_11.whiley:3: expected type void, found bool
+    x.f = false
+          ^^^^^
+===== UnionType_Invalid_12.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./UnionType_Invalid_12.wyil
+./UnionType_Invalid_12.whiley:3: expected type void, found bool
+    *x = false
+         ^^^^^
+===== UnionType_Invalid_13.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./UnionType_Invalid_13.wyil
+./UnionType_Invalid_13.whiley:5: expected type void, found int
+    xs[0] = 1
+            ^
+===== UnionType_Invalid_14.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./UnionType_Invalid_14.wyil
+./UnionType_Invalid_14.whiley:4: expected type void, found int
+    r.y = 1
+          ^
+===== UnionType_Invalid_15.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./UnionType_Invalid_15.wyil
+./UnionType_Invalid_15.whiley:3: expected type &bool|&int, found bool
+    x = false
+        ^^^^^
+===== UnionType_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./UnionType_Invalid_2.wyil
+./UnionType_Invalid_2.whiley:10: unable to resolve name (no match for f(IntBool))
+	found function UnionType_Invalid_2::f(int)->(int)
+    f(x)
+    ^
+===== UnionType_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./UnionType_Invalid_3.wyil
+./UnionType_Invalid_3.whiley:7: unable to resolve name (no match for f(IntList))
+	found function UnionType_Invalid_3::f(int[])->(int)
+    return f(xs)
+           ^
+===== UnionType_Invalid_4.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./UnionType_Invalid_4.wyil
+./UnionType_Invalid_4.whiley:8: expected type void, found bool
+    x[0] = false
+           ^^^^^
+===== UnionType_Invalid_5.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./UnionType_Invalid_5.wyil
+./UnionType_Invalid_5.whiley:8: expected record type
+    x.op = [1, 2, 3]
+    ^
+===== UnionType_Invalid_6.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./UnionType_Invalid_6.wyil
+./UnionType_Invalid_6.whiley:10: unable to resolve name (no match for f(IntList))
+	found function UnionType_Invalid_6::f({})->(int)
+    f(x)
+    ^
+===== UnionType_Invalid_7.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./UnionType_Invalid_7.wyil
+DEBUG: recording type bop := {,,} where ( && )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+UnionType_Invalid_7.bpl(73,4): Error: call to undeclared procedure: f
+1 name resolution errors detected in UnionType_Invalid_7.bpl
+===== UnionType_Invalid_8.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./UnionType_Invalid_8.wyil
+DEBUG: recording type urf1nat := int where ( > )
+DEBUG: recording type turf1nat := int where ( > )
+DEBUG: recording type wurf1nat := urf1nat|turf1nat where ()
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+UnionType_Invalid_8.bpl(69,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    UnionType_Invalid_8.bpl(69,5): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== UnionType_Invalid_9.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./UnionType_Invalid_9.wyil
+DEBUG: recording type pos := int where ( > )
+DEBUG: recording type poslist := pos[] where ()
+DEBUG: recording type plt := pos|poslist where ()
+DEBUG: recording type nat := int where ( >= )
+DEBUG: recording type natlist := nat[] where ()
+DEBUG: recording type nlt := nat|natlist where ()
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+UnionType_Invalid_9.bpl(80,5): Error BP5003: A postcondition might not hold on this return path.
+UnionType_Invalid_9.bpl(75,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    UnionType_Invalid_9.bpl(78,5): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== VarDecl_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./VarDecl_Invalid_1.wyil
+./VarDecl_Invalid_1.whiley:2: unable to resolve name (y)
+    int x = y
+            ^
+===== VarDecl_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./VarDecl_Invalid_2.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+VarDecl_Invalid_2.bpl(51,4): Error: call to undeclared procedure: f
+VarDecl_Invalid_2.bpl(52,4): Error: call to undeclared procedure: f
+2 name resolution errors detected in VarDecl_Invalid_2.bpl
+===== VarDecl_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./VarDecl_Invalid_3.wyil
+./VarDecl_Invalid_3.whiley:2: expected type int, found byte
+    int x = 0b010
+            ^^^^^
+===== VarDecl_Invalid_4.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./VarDecl_Invalid_4.wyil
+DEBUG: recording type nat := int where ( >= )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+VarDecl_Invalid_4.bpl(38,5): Error BP5003: A postcondition might not hold on this return path.
+VarDecl_Invalid_4.bpl(32,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    VarDecl_Invalid_4.bpl(36,7): anon0
+
+Boogie program verifier finished with 0 verified, 1 error
+
+===== While_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./While_Invalid_1.wyil
+./While_Invalid_1.whiley:8: variable may be uninitialised
+    return i
+           ^
+===== While_Invalid_10.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./While_Invalid_10.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+While_Invalid_10.bpl(39,9): Error BP5001: This assertion might not hold.
+Execution trace:
+    While_Invalid_10.bpl(33,7): anon0
+    While_Invalid_10.bpl(36,5): anon2_LoopHead
+    While_Invalid_10.bpl(39,9): anon2_LoopBody
+
+Boogie program verifier finished with 0 verified, 1 error
+
+java.lang.NullPointerException
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.stringifyArray(BoogieExampleFile.java:141)
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.toString(BoogieExampleFile.java:125)
+	at wy2boogie.core.BoogieExampleFile.toString(BoogieExampleFile.java:272)
+	at wy2boogie.commands.BoogieCommand.translateCounterexample(BoogieCommand.java:251)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:126)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+===== While_Invalid_11.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./While_Invalid_11.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+While_Invalid_11.bpl(37,9): Error BP5005: This loop invariant might not be maintained by the loop.
+Execution trace:
+    While_Invalid_11.bpl(33,7): anon0
+    While_Invalid_11.bpl(36,5): anon2_LoopHead
+    While_Invalid_11.bpl(39,9): anon2_LoopBody
+
+Boogie program verifier finished with 0 verified, 1 error
+
+===== While_Invalid_12.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./While_Invalid_12.wyil
+DEBUG: recording type nat := int where ( > )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+While_Invalid_12.bpl(50,5): Error BP5003: A postcondition might not hold on this return path.
+While_Invalid_12.bpl(33,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    While_Invalid_12.bpl(37,7): anon0
+    While_Invalid_12.bpl(39,5): anon4_LoopHead
+    While_Invalid_12.bpl(42,11): anon4_LoopBody
+    While_Invalid_12.bpl(44,13): anon5_Then
+    While_Invalid_12.bpl(48,5): BREAK__WHILE__1
+
+Boogie program verifier finished with 0 verified, 1 error
+
+===== While_Invalid_13.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./While_Invalid_13.wyil
+DEBUG: recording type nat := int where ( >= )
+MUTATED INPUT i : int
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+While_Invalid_13.bpl(43,9): Error BP5001: This assertion might not hold.
+Execution trace:
+    While_Invalid_13.bpl(38,7): anon0
+    While_Invalid_13.bpl(41,5): anon2_LoopHead
+    While_Invalid_13.bpl(43,9): anon2_LoopBody
+
+Boogie program verifier finished with 0 verified, 1 error
+
+java.lang.NullPointerException
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.stringifyArray(BoogieExampleFile.java:141)
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.toString(BoogieExampleFile.java:125)
+	at wy2boogie.core.BoogieExampleFile.toString(BoogieExampleFile.java:272)
+	at wy2boogie.commands.BoogieCommand.translateCounterexample(BoogieCommand.java:251)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:126)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+===== While_Invalid_14.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./While_Invalid_14.wyil
+./While_Invalid_14.whiley:11: unreachable code encountered (i.e. execution can never reach this statement)
+            break
+            ^^^^^
+===== While_Invalid_15.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./While_Invalid_15.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+While_Invalid_15.bpl(36,9): Error BP5005: This loop invariant might not be maintained by the loop.
+Execution trace:
+    While_Invalid_15.bpl(33,7): anon0
+    While_Invalid_15.bpl(34,5): CONTINUE__WHILE__1
+    While_Invalid_15.bpl(35,5): anon4_LoopHead
+    While_Invalid_15.bpl(38,9): anon4_LoopBody
+    While_Invalid_15.bpl(39,15): anon5_Then
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== While_Invalid_16.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./While_Invalid_16.wyil
+./While_Invalid_16.whiley:3: method invocation not permitted
+    while i < x where i >= g(x):
+                           ^^^^
+===== While_Invalid_17.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./While_Invalid_17.wyil
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+While_Invalid_17.bpl(61,9): Error BP5004: This loop invariant might not hold on entry.
+Execution trace:
+    While_Invalid_17.bpl(36,7): anon0
+While_Invalid_17.bpl(71,5): Error BP5003: A postcondition might not hold on this return path.
+While_Invalid_17.bpl(30,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    While_Invalid_17.bpl(36,7): anon0
+    While_Invalid_17.bpl(60,5): anon2_LoopHead
+    While_Invalid_17.bpl(60,5): anon2_LoopDone
+While_Invalid_17.bpl(92,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    While_Invalid_17.bpl(89,8): anon0
+While_Invalid_17.bpl(94,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    While_Invalid_17.bpl(89,8): anon0
+While_Invalid_17.bpl(96,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    While_Invalid_17.bpl(89,8): anon0
+While_Invalid_17.bpl(98,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    While_Invalid_17.bpl(89,8): anon0
+
+Boogie program verifier finished with 0 verified, 6 errors
+
+===== While_Invalid_18.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./While_Invalid_18.wyil
+DEBUG: recording type nat := int where ( >= )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+While_Invalid_18.bpl(48,9): Error BP5004: This loop invariant might not hold on entry.
+Execution trace:
+    While_Invalid_18.bpl(43,7): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+
+java.lang.NullPointerException
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.stringifyArray(BoogieExampleFile.java:141)
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.toString(BoogieExampleFile.java:125)
+	at wy2boogie.core.BoogieExampleFile.toString(BoogieExampleFile.java:272)
+	at wy2boogie.commands.BoogieCommand.translateCounterexample(BoogieCommand.java:251)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:126)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+===== While_Invalid_19.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./While_Invalid_19.wyil
+DEBUG: recording type nat := int where ( >= )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+While_Invalid_19.bpl(48,9): Error BP5004: This loop invariant might not hold on entry.
+Execution trace:
+    While_Invalid_19.bpl(43,7): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+
+java.lang.NullPointerException
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.stringifyArray(BoogieExampleFile.java:141)
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.toString(BoogieExampleFile.java:125)
+	at wy2boogie.core.BoogieExampleFile.toString(BoogieExampleFile.java:272)
+	at wy2boogie.commands.BoogieCommand.translateCounterexample(BoogieCommand.java:251)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:126)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+===== While_Invalid_2.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./While_Invalid_2.wyil
+./While_Invalid_2.whiley:5: unable to resolve name (j)
+    while i < |args| where j > 0:
+                           ^
+===== While_Invalid_20.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./While_Invalid_20.wyil
+DEBUG: recording type nat := int where ( >= )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+While_Invalid_20.bpl(51,9): Error BP5001: This assertion might not hold.
+Execution trace:
+    While_Invalid_20.bpl(43,7): anon0
+    While_Invalid_20.bpl(47,5): anon2_LoopHead
+    While_Invalid_20.bpl(50,9): anon2_LoopBody
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== While_Invalid_21.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./While_Invalid_21.wyil
+DEBUG: recording type nat := int where ( >= )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+While_Invalid_21.bpl(49,9): Error BP5005: This loop invariant might not be maintained by the loop.
+Execution trace:
+    While_Invalid_21.bpl(43,7): anon0
+    While_Invalid_21.bpl(47,5): anon2_LoopHead
+    While_Invalid_21.bpl(51,9): anon2_LoopBody
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== While_Invalid_22.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./While_Invalid_22.wyil
+DEBUG: recording type nat := int where ( >= )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+While_Invalid_22.bpl(51,9): Error BP5005: This loop invariant might not be maintained by the loop.
+Execution trace:
+    While_Invalid_22.bpl(43,7): anon0
+    While_Invalid_22.bpl(49,5): anon2_LoopHead
+    While_Invalid_22.bpl(53,9): anon2_LoopBody
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== While_Invalid_23.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./While_Invalid_23.wyil
+DEBUG: recording type nat := int where ( >= )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+While_Invalid_23.bpl(51,9): Error BP5004: This loop invariant might not hold on entry.
+Execution trace:
+    While_Invalid_23.bpl(43,7): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+
+===== While_Invalid_3.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./While_Invalid_3.wyil
+./While_Invalid_3.whiley:6: variable may be uninitialised
+        r = r + i
+            ^
+===== While_Invalid_4.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./While_Invalid_4.wyil
+./While_Invalid_4.whiley:6: expected type int, found int[]
+        r = [ls[i]; 1]
+            ^^^^^^^^^^
+===== While_Invalid_5.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./While_Invalid_5.wyil
+./While_Invalid_5.whiley:4: expected type int, found int[]
+    int r = [1]
+            ^^^
+===== While_Invalid_6.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./While_Invalid_6.wyil
+./While_Invalid_6.whiley:3: expected type int, found int[]
+    int r = [1]
+            ^^^
+===== While_Invalid_7.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./While_Invalid_7.wyil
+DEBUG: recording type nat := int where ( >= )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+While_Invalid_7.bpl(42,9): Error BP5001: This assertion might not hold.
+Execution trace:
+    While_Invalid_7.bpl(37,7): anon0
+    While_Invalid_7.bpl(40,5): anon2_LoopHead
+    While_Invalid_7.bpl(42,9): anon2_LoopBody
+
+Boogie program verifier finished with 0 verified, 1 error
+
+===== While_Invalid_8.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./While_Invalid_8.wyil
+MUTATED INPUT r : int[]
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+While_Invalid_8.bpl(38,9): Error BP5004: This loop invariant might not hold on entry.
+Execution trace:
+    While_Invalid_8.bpl(34,7): anon0
+While_Invalid_8.bpl(40,9): Error BP5001: This assertion might not hold.
+Execution trace:
+    While_Invalid_8.bpl(34,7): anon0
+    While_Invalid_8.bpl(37,5): anon2_LoopHead
+    While_Invalid_8.bpl(40,9): anon2_LoopBody
+
+Boogie program verifier finished with 0 verified, 2 errors
+
+java.lang.NullPointerException
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.stringifyArray(BoogieExampleFile.java:141)
+	at wy2boogie.core.BoogieExampleFile$BoogieModel.toString(BoogieExampleFile.java:125)
+	at wy2boogie.core.BoogieExampleFile.toString(BoogieExampleFile.java:272)
+	at wy2boogie.commands.BoogieCommand.translateCounterexample(BoogieCommand.java:251)
+	at wy2boogie.commands.BoogieCommand.execute(BoogieCommand.java:126)
+	at wycc.WyProject.execute(Unknown Source)
+	at wycc.WyMain.execute(Unknown Source)
+	at wycc.WyMain.main(Unknown Source)
+===== While_Invalid_9.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./While_Invalid_9.wyil
+./While_Invalid_9.whiley:4: expected type int, found int[]
+    int r = [1]
+            ^^^
+===== XOR_Invalid_1.whiley =====
+
+GOT: /Users/utting/git/whiley/WhileyCompiler/tests/invalid/./XOR_Invalid_1.wyil
+./XOR_Invalid_1.whiley:3: expected type byte, found int
+    return crc ^ 0b11010101
+           ^^^
