@@ -144,7 +144,7 @@ public class AssertionGenerator {
 
 			@Override
 			public void visitInvoke(Expr.Invoke funCall) {
-				String name = funCall.getName().toString();
+				QualifiedName name = funCall.getDeclaration().getQualifiedName();
 				Type.Callable type = funCall.getDeclaration().getType();
 				// properties do not have preconditions.
 				if (type instanceof Type.Function || type instanceof Type.Method) {

@@ -107,6 +107,7 @@ import wyil.util.AbstractVisitor;
  * TODO: implement missing language features, such as:
  * <ul>
  *   <li>DONE: Property declarations and uses.</li>
+ *   <li>Compilation units/modules: use fully qualified names everywhere.</li>
  *   <li>System.Console sys and sys.out.println(string)</li>
  *   <li>DONE: indirect invoke (12 tests)</li>
  *   <li>DONE: references, new (17 tests), and dereferencing (17 tests)</li>
@@ -166,7 +167,7 @@ public final class Wyil2Boogie {
     private int uniqueId = 0;
 
     /** Keeps track of the mangled names for every function and method. */
-    private Map<String, Map<Type.Callable, String>> functionOverloads;
+    private Map<QualifiedName, Map<Type.Callable, String>> functionOverloads;
 
     /** Input parameters of the current function/method. */
 	private Tuple<Decl.Variable> inDecls;
@@ -226,6 +227,7 @@ public final class Wyil2Boogie {
 	public Wyil2Boogie(PrintWriter writer) {
         this.out = writer;
         this.vcg = new AssertionGenerator(this);
+		initFunctionOverloading();
         // Create concrete type extractor
         EmptinessTest<SemanticType> strictEmptiness = new StrictTypeEmptinessTest();
 		this.concreteTypeExtractor = new ConcreteTypeExtractor(strictEmptiness);
@@ -271,7 +273,6 @@ public final class Wyil2Boogie {
 	@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 	private void declareHigherOrderFunction(QualifiedName name, Type.Callable type) {
         if (!this.referencedFunctions.contains(name)) {
-        	// FIXME: this won't work for qualified names in packages (e.g. std::integer::u8)
             final String func_const = mangleFuncName(name);
             this.out.printf("const unique %s:WFuncName;\n", func_const);
             // At the moment, we assume indirect-invoke is used rarely, so for ONE type of function in each program.
@@ -310,7 +311,7 @@ public final class Wyil2Boogie {
 					args.size(),
                     "closure__1(" + func_const + ", captured__)",
 					vCall.toString(),
-                    name.getName().toString(),
+                    mangleName(name),
 					vCall.toString());
             this.referencedFunctions.add(name);
         }
@@ -322,18 +323,7 @@ public final class Wyil2Boogie {
 
     public void apply(WyilFile wf) {
     	Decl.Module module = wf.getModule();
-    	// Iterate each locally declared compilation unit
-    	for(Decl.Unit unit : module.getUnits()) {
-    		apply(unit);
-    	}
-    	// FIXME: is this the right thing to do?
-    	for(Decl.Unit unit : module.getExterns()) {
-    		apply(unit);
-    	}
-    }
-
-    private void apply(Decl.Unit unit) {
-    	resolveFunctionOverloading(unit.getDeclarations());
+    	// Declare globals
 		this.out.printf("var %s:[WRef]WVal;\n", HEAP);
 		this.out.printf("var %s:[WRef]bool;\n", ALLOCATED);
 		// TODO: find a nicer way of making these local?
@@ -341,6 +331,29 @@ public final class Wyil2Boogie {
 			this.out.printf("var %s%d : WRef;\n", NEW_REF, i);
 		}
 		this.out.println();
+
+		// Sort out overloading of all declared names first.
+		for(Decl.Unit unit : module.getExterns()) {
+			this.out.println("//DEBUG: resolving extern unit " + unit.getName());
+			resolveFunctionOverloading(unit.getDeclarations());
+		}
+		for(Decl.Unit unit : module.getUnits()) {
+			this.out.println("//DEBUG: resolving compilation unit " + unit.getName());
+			resolveFunctionOverloading(unit.getDeclarations());
+		}
+
+    	// Iterate over all compilation units
+		for(Decl.Unit unit : module.getExterns()) {
+			this.out.println("//DEBUG: generating extern unit " + unit.getName());
+			apply(unit, false);
+		}
+    	for(Decl.Unit unit : module.getUnits()) {
+			this.out.println("//DEBUG: generating compilation unit " + unit.getName());
+    		apply(unit, true);
+    	}
+    }
+
+    private void apply(Decl.Unit unit, boolean verifyImpl) {
 		for(final Decl decl : unit.getDeclarations()) {
 			if (decl instanceof Decl.StaticVariable) {
 				writeConstant((Decl.StaticVariable) decl);
@@ -349,7 +362,7 @@ public final class Wyil2Boogie {
 				this.out.println();
 				this.out.flush();
 			} else if (decl instanceof Decl.FunctionOrMethod) {
-				writeProcedure((Decl.FunctionOrMethod) decl);
+				writeProcedure((Decl.FunctionOrMethod) decl, verifyImpl);
 				this.out.println();
 				this.out.flush();
 			} else if (decl instanceof Decl.Property) {
@@ -399,9 +412,10 @@ public final class Wyil2Boogie {
 	private void writeConstant(Decl.StaticVariable cd) {
 		declareFields(cd.getType(), new HashSet<>());
 		declareFuncConstants(cd.getInitialiser());
-		this.out.printf("const %s : WVal;\n", cd.getName());
-		this.out.printf("axiom %s == %s;\n", cd.getName(), boogieExpr(cd.getInitialiser()).asWVal());
-		final String typePred = typePredicate(cd.getName().get(), cd.getType());
+		AbstractCompilationUnit.Identifier name = cd.getName();
+		this.out.printf("const %s : WVal;\n", name);
+		this.out.printf("axiom %s == %s;\n", name, boogieExpr(cd.getInitialiser()).asWVal());
+		final String typePred = typePredicate(name.get(), cd.getType());
 		this.out.printf("axiom %s;\n\n", typePred);
 	}
 
@@ -423,12 +437,12 @@ public final class Wyil2Boogie {
 	 *
 	 * @param method
 	 */
-	private void writeProcedure(Decl.FunctionOrMethod method) {
+	private void writeProcedure(Decl.FunctionOrMethod method, boolean verifyImpl) {
 		this.loopCounter = 0;
 		final Type.Callable ft = method.getType();
 		declareFields(method.getBody());
 		declareFuncConstants(method.getBody());
-		final String name = mangledFunctionMethodName(method.getName().get(), method.getType());
+		final String name = mangledFunctionMethodName(method.getQualifiedName(), method.getType());
 		final int inSize = ft.getParameters().size();
 		final int outSize = ft.getReturns().size();
 		this.inDecls = method.getParameters();
@@ -463,27 +477,31 @@ public final class Wyil2Boogie {
 		for (final Expr postcondition : method.getEnsures()) {
 			this.out.printf("    ensures %s;\n", boogieBoolExpr(postcondition).toString());
 		}
-		final Map<String, Type> mutatedInputs = findMutatedInputs(method);
-		this.out.print("implementation ");
-		writeSignature(procedureName, method, mutatedInputs);
-		if (method.getBody() != null) {
-			this.out.println();
-			this.out.println("{");
-			writeLocalVarDecls(method.getBody());
-			// now create a local copy of each mutated input!
-			for (final String naughty : mutatedInputs.keySet()) {
-				tabIndent(1);
-				this.out.printf("var %s : WVal where ", naughty);
-				this.out.print(typePredicate(naughty, mutatedInputs.get(naughty)));
-				this.out.println(";");
+		// We do not generate implementation bodies for extern units.
+		// They will be proved correct elsewhere.
+		if (verifyImpl) {
+			final Map<String, Type> mutatedInputs = findMutatedInputs(method);
+			this.out.print("implementation ");
+			writeSignature(procedureName, method, mutatedInputs);
+			if (method.getBody() != null) {
+				this.out.println();
+				this.out.println("{");
+				writeLocalVarDecls(method.getBody());
+				// now create a local copy of each mutated input!
+				for (final String naughty : mutatedInputs.keySet()) {
+					tabIndent(1);
+					this.out.printf("var %s : WVal where ", naughty);
+					this.out.print(typePredicate(naughty, mutatedInputs.get(naughty)));
+					this.out.println(";");
+				}
+				// now assign the original inputs to the copies.
+				for (final String naughty : mutatedInputs.keySet()) {
+					tabIndent(1);
+					this.out.printf("%s := %s;\n", naughty, naughty + IMMUTABLE_INPUT);
+				}
+				writeBlock(0, method.getBody());
+				this.out.println("}");
 			}
-			// now assign the original inputs to the copies.
-			for (final String naughty : mutatedInputs.keySet()) {
-				tabIndent(1);
-				this.out.printf("%s := %s;\n", naughty, naughty + IMMUTABLE_INPUT);
-			}
-			writeBlock(0, method.getBody());
-			this.out.println("}");
 		}
 		this.inDecls = null;
 		this.outDecls = null;
@@ -556,7 +574,7 @@ public final class Wyil2Boogie {
 	 * @param prop Whiley property
 	 */
 	private void writeProperty(Decl.Property prop) {
-		final String name = mangledFunctionMethodName(prop.getName().get(), prop.getType());
+		final String name = mangledFunctionMethodName(prop.getQualifiedName(), prop.getType());
 		this.inDecls = prop.getParameters();
 		this.outDecls = prop.getReturns();
 		this.out.printf("function %s(", name);
@@ -1278,7 +1296,7 @@ public final class Wyil2Boogie {
 	private void writeInvoke(int indent, Expr.Invoke stmt) {
 		final Tuple<Expr> arguments = stmt.getOperands();
 		final String[] args = new String[arguments.size() + 1];
-		args[0] = mangledFunctionMethodName(stmt.getName().toString(), stmt.getDeclaration().getType());
+		args[0] = mangledFunctionMethodName(stmt.getDeclaration().getQualifiedName(), stmt.getDeclaration().getType());
 		for (int i = 0; i != arguments.size(); ++i) {
 			args[i + 1] = writeAllocations(indent, arguments.get(i)).asWVal().toString();
 		}
@@ -1741,10 +1759,9 @@ public final class Wyil2Boogie {
 	}
 
 	private BoogieExpr boogieInvoke(Expr.Invoke expr) {
-		// TODO: check that it is safe to use unqualified DeclID names?
 		BoogieType outType = WVAL;
-		final String name = expr.getName().toString();
 		final Type.Callable type = expr.getDeclaration().getType();
+		final String name = mangledFunctionMethodName(expr.getDeclaration().getQualifiedName(), type);
 		if (type instanceof Type.Method) {
 			if (expr != this.outerMethodCall) {
 				// The Whiley language spec 0.3.38, Section 3.5.5, says that because they are
@@ -1755,7 +1772,7 @@ public final class Wyil2Boogie {
 			outType = BOOL; // properties are translated to Boogie boolean functions.
 		}
 		final BoogieExpr out = new BoogieExpr(outType);
-		out.append(mangledFunctionMethodName(name, type) + "(");
+		out.append(name + "(");
 		final Tuple<Expr> operands = expr.getOperands();
 		for (int i = 0; i != operands.size(); ++i) {
 			if (i != 0) {
@@ -2277,14 +2294,11 @@ public final class Wyil2Boogie {
 	}
 
 	/**
-	 * Determines which functions/methods need renaming to resolve overloading.
+	 * Set up the function overloading system.
 	 *
-	 * This should be called once at the beginning of each file/module. It
-	 * initialises the global <code>functionOverloads</code> map.
-	 *
-	 * @param declarations
+	 * This declares all predefined Boogie functions that we use.
 	 */
-	private void resolveFunctionOverloading(Tuple<Decl> declarations) {
+	private void initFunctionOverloading() {
 		// some common types
 		// NOTE: the Any type was removed on 27 Oct 2017, so we simulate it by:  int|!int.
 		// NOTE: negation types also removed on 9 Nov 2017, so we now hack 'any' as int|bool.
@@ -2337,6 +2351,17 @@ public final class Wyil2Boogie {
 		addPredefinedFunction("fromFunction", new Type.Function(new Tuple<>(any1), new Tuple<>(anyFunction)));
 		addPredefinedFunction("fromMethod", new Type.Function(new Tuple<>(any1), new Tuple<>(anyMethod)));
 
+	}
+	/**
+	 * Determines which functions/methods need renaming to resolve overloading.
+	 *
+	 * This should be called once at the beginning of each file/module. It
+	 * initialises the global <code>functionOverloads</code> map.
+	 *
+	 * @param declarations
+	 */
+	private void resolveFunctionOverloading(Tuple<Decl> declarations) {
+
 		// first we look for exported/native functions, and mark them as NOT overloaded.
 		for (final Decl d : declarations) {
 			if (d instanceof Decl.Callable) {
@@ -2344,7 +2369,7 @@ public final class Wyil2Boogie {
 				final boolean isExported = m.match(Modifier.Export.class) != null;
 				final boolean isNative = m.match(Modifier.Native.class) != null;
 				if (isExported || isNative) {
-					addFunctionOverload(m.getName().get(), m.getType(), isExported, isNative);
+					addFunctionOverload(m.getQualifiedName(), m.getType(), isExported, isNative);
 				}
 			}
 		}
@@ -2355,20 +2380,21 @@ public final class Wyil2Boogie {
 				final boolean isExported = m.match(Modifier.Export.class) != null;
 				final boolean isNative = m.match(Modifier.Native.class) != null;
 				if (!isExported && !isNative) {
-					addFunctionOverload(m.getName().get(), m.getType(), false, false);
+					addFunctionOverload(m.getQualifiedName(), m.getType(), false, false);
 				}
 			}
 		}
 	}
 
-	private void addFunctionOverload(final String name, final Type.Callable type, final boolean isExported,
+	private void addFunctionOverload(final QualifiedName qname, final Type.Callable type, final boolean isExported,
 			final boolean isNative) {
-		Map<Type.Callable, String> map = this.functionOverloads.get(name);
+		Map<Type.Callable, String> map = this.functionOverloads.get(qname);
+		String name = mangleName(qname);
 		if (map == null) {
 			// first one with this name needs no mangling!
 			map = new HashMap<>();
 			map.put(type, name);
-			this.functionOverloads.put(name, map);
+			this.functionOverloads.put(qname, map);
 		} else if (isExported || isNative) {
 			throw new IllegalArgumentException("Cannot overload exported function: " + name);
 		} else if (!map.containsKey(type)) {
@@ -2379,10 +2405,13 @@ public final class Wyil2Boogie {
 	}
 
 	private void addPredefinedFunction(String predef, Type.Function type) {
+		AbstractCompilationUnit.Identifier id = new wybs.util.AbstractCompilationUnit.Identifier(predef);
+		AbstractCompilationUnit.Identifier[] empty = new AbstractCompilationUnit.Identifier[0];
+		QualifiedName qname = new QualifiedName(empty, id);
 		final Map<Type.Callable, String> map = new HashMap<>();
 		// System.err.printf("ADDING %s : %s as predefined.\n", predef, type);
 		map.put(type, predef); // no name mangling, because this is a predefined function.
-		this.functionOverloads.put(predef, map);
+		this.functionOverloads.put(qname, map);
 	}
 
 	/**
@@ -2393,22 +2422,23 @@ public final class Wyil2Boogie {
 	 * get the DeclID or the module of a function or method declaration. This may
 	 * become an issue if we start verifying multi-module programs.
 	 *
-	 * @param name
-	 *            the original name of the function or method.
+	 * @param qname
+	 *            the original fully qualified name of the function or method.
 	 * @param type
 	 *            the type of the function or method.
 	 * @return a human-readable name for the function/method.
 	 */
-	String mangledFunctionMethodName(String name, Type.Callable type) {
-		final Map<Type.Callable, String> map = this.functionOverloads.get(name);
+	String mangledFunctionMethodName(QualifiedName qname, Type.Callable type) {
+		String name = mangleName(qname);
+		final Map<Type.Callable, String> map = this.functionOverloads.get(qname);
 		if (map == null) {
 			System.err.printf("Warning: function/method %s : %s assumed to be external, so not mangled.\n", name, type);
-			return name; // no mangling!
+			return name; // fully qualified name, but no mangling!
 		}
 		final String result = map.get(type);
 		if (result == null) {
 			System.err.printf("Warning: unknown overload of function/method %s : %s was not mangled.\n", name, type);
-			return name; // no mangling!
+			return name; // fully qualified name, but no mangling!
 		}
 		return result;
 	}
@@ -2422,7 +2452,19 @@ public final class Wyil2Boogie {
 	 * @return starts with "func__" so these are in a separate namespace.
 	 */
 	private String mangleFuncName(QualifiedName name) {
-		return CONST_FUNC + name.getName().toString();
+		return CONST_FUNC + mangleName(name);
+	}
+
+	/**
+	 * Encodes a fully qualified name into an allowable Boogie name.
+	 *
+	 * For the moment this ignores package names.
+	 *
+	 * @param name
+	 * @return starts with "func__" so these are in a separate namespace.
+	 */
+	private String mangleName(QualifiedName name) {
+		return name.toString().replaceAll(":", "_");
 	}
 
 	/**
