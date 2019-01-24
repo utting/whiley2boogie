@@ -1,0 +1,391 @@
+AddressExpression_Invalid_1.whiley       CompileError
+AddressExpression_Invalid_2.whiley       CompileError
+ArrayAccess_Invalid_1.whiley             CompileError
+ArrayAccess_Invalid_2.whiley             PartVerified Boogie program verifier finished with 1 verified, 1 error
+ArrayAccess_Invalid_3.whiley             CompileError
+ArrayAccess_Invalid_4.whiley             PartVerified Boogie program verifier finished with 1 verified, 3 errors
+ArrayAccess_Invalid_5.whiley             PartVerified Boogie program verifier finished with 0 verified, 2 errors
+ArrayAssign_Invalid_1.whiley             CompileError
+ArrayAssign_Invalid_2.whiley             PartVerified Boogie program verifier finished with 0 verified, 1 error
+ArrayAssign_Invalid_3.whiley             PartVerified Boogie program verifier finished with 0 verified, 1 error
+ArrayConversion_Invalid_1.whiley         CompileError
+ArrayEmpty_Invalid_1.whiley              CompileError
+ArrayEmpty_Invalid_2.whiley              BplErrors
+ArrayEquals_Invalid_1.whiley             BplErrors
+ArrayGenerator_Invalid_1.whiley          PartVerified Boogie program verifier finished with 1 verified, 1 error
+ArrayGenerator_Invalid_2.whiley          PartVerified Boogie program verifier finished with 1 verified, 1 error
+ArrayGenerator_Invalid_3.whiley          CompileError
+ArrayGenerator_Invalid_4.whiley          CompileError
+ArrayLength_Invalid_1.whiley             PartVerified Boogie program verifier finished with 0 verified, 1 error
+ArrayLength_Invalid_2.whiley             PartVerified Boogie program verifier finished with 1 verified, 1 error
+ArrayLength_Invalid_3.whiley             BplErrors
+ArrayUpdate_Invalid_1.whiley             PartVerified Boogie program verifier finished with 0 verified, 1 error
+Array_Invalid_1.whiley                   CompileError
+Array_Invalid_10.whiley                  PartVerified Boogie program verifier finished with 2 verified, 1 error
+Array_Invalid_11.whiley                  PartVerified Boogie program verifier finished with 2 verified, 1 error
+Array_Invalid_12.whiley                  PartVerified Boogie program verifier finished with 2 verified, 1 error
+Array_Invalid_13.whiley                  PartVerified Boogie program verifier finished with 2 verified, 1 error
+Array_Invalid_14.whiley                  PartVerified Boogie program verifier finished with 2 verified, 1 error
+Array_Invalid_15.whiley                  PartVerified Boogie program verifier finished with 1 verified, 1 error
+Array_Invalid_16.whiley                  PartVerified Boogie program verifier finished with 1 verified, 2 errors
+Array_Invalid_17.whiley                  BplErrors
+Array_Invalid_18.whiley                  PartVerified Boogie program verifier finished with 2 verified, 1 error
+Array_Invalid_19.whiley                  PartVerified Boogie program verifier finished with 1 verified, 1 error
+Array_Invalid_2.whiley                   CompileError
+Array_Invalid_20.whiley                  PartVerified Boogie program verifier finished with 2 verified, 1 error
+Array_Invalid_21.whiley                  PartVerified Boogie program verifier finished with 2 verified, 1 error
+Array_Invalid_22.whiley                  PartVerified Boogie program verifier finished with 2 verified, 2 errors
+Array_Invalid_23.whiley                  PartVerified Boogie program verifier finished with 2 verified, 1 error
+Array_Invalid_24.whiley                  PartVerified Boogie program verifier finished with 1 verified, 1 error
+Array_Invalid_3.whiley                   CompileError
+Array_Invalid_4.whiley                   CompileError
+Array_Invalid_5.whiley                   CompileError
+Array_Invalid_6.whiley                   CompileError
+Array_Invalid_7.whiley                   CompileError
+Array_Invalid_8.whiley                   PartVerified Boogie program verifier finished with 1 verified, 2 errors
+Array_Invalid_9.whiley                   BplErrors
+Assert_Invalid_1.whiley                  CompileError
+Assert_Invalid_2.whiley                  CompileError
+Assert_Invalid_3.whiley                  PartVerified Boogie program verifier finished with 1 verified, 1 error
+Assign_Invalid_1.whiley                  CompileError
+Assign_Invalid_2.whiley                  CompileError
+Assign_Invalid_3.whiley                  CompileError
+Assign_Invalid_4.whiley                  CompileError
+Assign_Invalid_5.whiley                  CompileError
+Assign_Invalid_6.whiley                  CompileError
+Assign_Invalid_7.whiley                  CompileError
+Assign_Invalid_8.whiley                  CompileError
+Assign_Invalid_9.whiley                  CompileError
+Byte_Invalid_1.whiley                    CompileError
+Coercion_Invalid_2.whiley                CompileError
+Constant_Invalid_1.whiley                CompileError
+Constant_Invalid_2.whiley                CompileError
+ConstrainedArray_Invalid_1.whiley        PartVerified Boogie program verifier finished with 1 verified, 1 error
+ConstrainedArray_Invalid_2.whiley        PartVerified Boogie program verifier finished with 1 verified, 2 errors
+ConstrainedArray_Invalid_3.whiley        PartVerified Boogie program verifier finished with 1 verified, 1 error
+ConstrainedInt_Invalid_1.whiley          PartVerified Boogie program verifier finished with 1 verified, 1 error
+ConstrainedInt_Invalid_11.whiley         CompileError
+ConstrainedInt_Invalid_12.whiley         Exception
+ConstrainedInt_Invalid_2.whiley          PartVerified Boogie program verifier finished with 1 verified, 1 error
+ConstrainedInt_Invalid_3.whiley          PartVerified Boogie program verifier finished with 1 verified, 1 error
+ConstrainedInt_Invalid_4.whiley          PartVerified Boogie program verifier finished with 1 verified, 1 error
+ConstrainedInt_Invalid_5.whiley          PartVerified Boogie program verifier finished with 0 verified, 1 error
+ConstrainedInt_Invalid_6.whiley          PartVerified Boogie program verifier finished with 1 verified, 2 errors
+ConstrainedInt_Invalid_7.whiley          PartVerified Boogie program verifier finished with 1 verified, 1 error
+ConstrainedInt_Invalid_8.whiley          PartVerified Boogie program verifier finished with 1 verified, 1 error
+ConstrainedInt_Invalid_9.whiley          PartVerified Boogie program verifier finished with 1 verified, 2 errors
+ConstrainedRecord_Invalid_1.whiley       PartVerified Boogie program verifier finished with 1 verified, 1 error
+Continue_Invalid_1.whiley                CompileError
+Continue_Invalid_2.whiley                CompileError
+DefiniteAssign_Invalid_1.whiley          CompileError
+DefiniteAssign_Invalid_2.whiley          CompileError
+DefiniteAssign_Invalid_3.whiley          CompileError
+DefiniteAssign_Invalid_4.whiley          CompileError
+DoWhile_Invalid_1.whiley                 PartVerified Boogie program verifier finished with 1 verified, 1 error
+DoWhile_Invalid_2.whiley                 PartVerified Boogie program verifier finished with 1 verified, 2 errors
+DoWhile_Invalid_3.whiley                 PartVerified Boogie program verifier finished with 1 verified, 1 error
+DoWhile_Invalid_4.whiley                 PartVerified Boogie program verifier finished with 1 verified, 1 error
+DoWhile_Invalid_5.whiley                 CompileError
+DoWhile_Invalid_6.whiley                 BplErrors
+DoWhile_Invalid_7.whiley                 BplErrors
+DoWhile_Invalid_8.whiley                 BplErrors
+EndOfFile_Invalid_1.whiley               CompileError
+Ensures_Invalid_1.whiley                 PartVerified Boogie program verifier finished with 0 verified, 1 error
+Ensures_Invalid_2.whiley                 CompileError
+Ensures_Invalid_3.whiley                 PartVerified Boogie program verifier finished with 0 verified, 2 errors
+Export_Invalid_1.whiley                  FullyVerified
+Fail_Invalid_1.whiley                    PartVerified Boogie program verifier finished with 0 verified, 1 error
+Fail_Invalid_2.whiley                    CompileError
+Fail_Invalid_3.whiley                    PartVerified Boogie program verifier finished with 0 verified, 1 error
+Final_Invalid_1.whiley                   CompileError
+Final_Invalid_10.whiley                  CompileError
+Final_Invalid_11.whiley                  CompileError
+Final_Invalid_12.whiley                  CompileError
+Final_Invalid_13.whiley                  CompileError
+Final_Invalid_14.whiley                  CompileError
+Final_Invalid_15.whiley                  CompileError
+Final_Invalid_2.whiley                   CompileError
+Final_Invalid_3.whiley                   CompileError
+Final_Invalid_4.whiley                   CompileError
+Final_Invalid_5.whiley                   CompileError
+Final_Invalid_6.whiley                   CompileError
+Final_Invalid_7.whiley                   CompileError
+Final_Invalid_8.whiley                   CompileError
+Final_Invalid_9.whiley                   CompileError
+FunctionRef_Invalid_1.whiley             CompileError
+FunctionRef_Invalid_2.whiley             CompileError
+FunctionRef_Invalid_3.whiley             CompileError
+FunctionRef_Invalid_4.whiley             CompileError
+FunctionRef_Invalid_5.whiley             CompileError
+FunctionRef_Invalid_6.whiley             CompileError
+FunctionRef_Invalid_7.whiley             CompileError
+Function_Invalid_1.whiley                CompileError
+Function_Invalid_10.whiley               CompileError
+Function_Invalid_11.whiley               CompileError
+Function_Invalid_12.whiley               CompileError
+Function_Invalid_13.whiley               CompileError
+Function_Invalid_2.whiley                BplErrors
+Function_Invalid_3.whiley                CompileError
+Function_Invalid_4.whiley                CompileError
+Function_Invalid_9.whiley                BplErrors
+If_Invalid_1.whiley                      CompileError
+If_Invalid_2.whiley                      CompileError
+If_Invalid_4.whiley                      CompileError
+If_Invalid_5.whiley                      CompileError
+Import_Invalid_1.whiley                  UNKNOWN!!!
+
+WARNING: version numbering unavailable
+Exception in thread "main" wybs.lang.SyntaxError$InternalFailure: internal failure
+	at wyc.check.FlowTypeCheck.internalFailure(Unknown Source)
+	at wyc.check.FlowTypeCheck.checkStatement(Unknown Source)
+	at wyc.check.FlowTypeCheck.checkBlock(Unknown Source)
+	at wyc.check.FlowTypeCheck.checkFunctionOrMethodDeclaration(Unknown Source)
+	at wyc.check.FlowTypeCheck.check(Unknown Source)
+	at wyc.check.FlowTypeCheck.check(Unknown Source)
+	at wyc.check.FlowTypeCheck.check(Unknown Source)
+	at wyc.task.CompileTask.build(CompileTask.java:197)
+	at wybs.util.StdBuildRule.apply(Unknown Source)
+	at wybs.util.StdProject.build(Unknown Source)
+	at wyc.command.Compile.compile(Compile.java:354)
+	at wy2boogie.commands.Wy2Boogie.compile(Wy2Boogie.java:92)
+	at wyc.command.Compile.execute(Compile.java:310)
+	at wyc.command.Compile.execute(Compile.java:55)
+	at wycc.WyMain.main(Unknown Source)
+Caused by: java.lang.NullPointerException
+	at wybs.io.SyntacticHeapReader.readOperands(Unknown Source)
+	at wybs.io.SyntacticHeapReader.readItem(Unknown Source)
+	at wybs.io.SyntacticHeapReader.readItems(Unknown Source)
+	at wyil.io.WyilFileReader.read(WyilFileReader.java:44)
+	at wyc.lang.WhileyFile$2.read(Unknown Source)
+	at wyc.lang.WhileyFile$2.read(Unknown Source)
+	at wyfs.util.AbstractEntry.read(Unknown Source)
+	at wyc.util.WhileyFileResolver.loadModule(WhileyFileResolver.java:136)
+	at wyc.util.WhileyFileResolver.resolveAll(WhileyFileResolver.java:98)
+	at wyil.type.TypeSystem.resolveAll(TypeSystem.java:425)
+	at wyc.check.FlowTypeCheck.resolveAsCallable(Unknown Source)
+	at wyc.check.FlowTypeCheck.checkInvoke(Unknown Source)
+	at wyc.check.FlowTypeCheck.checkMultiExpression(Unknown Source)
+	at wyc.check.FlowTypeCheck.checkMultiExpressions(Unknown Source)
+	at wyc.check.FlowTypeCheck.checkReturn(Unknown Source)
+	... 14 more
+
+IntDiv_Invalid_1.whiley                  Exception
+Intersection_Invalid_1.whiley            CompileError
+Intersection_Invalid_2.whiley            CompileError
+Lambda_Invalid_3.whiley                  PartVerified Boogie program verifier finished with 1 verified, 1 error
+Lifetime_Invalid_1.whiley                CompileError
+Lifetime_Invalid_2.whiley                CompileError
+Lifetime_Invalid_3.whiley                CompileError
+Lifetime_Invalid_4.whiley                CompileError
+Lifetime_Invalid_5.whiley                CompileError
+Lifetime_Invalid_6.whiley                CompileError
+Lifetime_Invalid_7.whiley                CompileError
+Lifetime_Invalid_8.whiley                CompileError
+Lifetime_Invalid_9.whiley                CompileError
+Lifetime_Lambda_Invalid_1.whiley         CompileError
+Lifetime_Lambda_Invalid_2.whiley         CompileError
+Lifetime_Lambda_Invalid_3.whiley         BplErrors
+Lifetime_Lambda_Invalid_4.whiley         CompileError
+Lifetime_Lambda_Invalid_5.whiley         BplErrors
+Lifetime_Lambda_Invalid_6.whiley         BplErrors
+MethodCall_Invalid_1.whiley              CompileError
+MethodCall_Invalid_2.whiley              CompileError
+MethodCall_Invalid_3.whiley              CompileError
+MethodCall_Invalid_4.whiley              CompileError
+MethodCall_Invalid_5.whiley              CompileError
+MethodCall_Invalid_6.whiley              CompileError
+MethodCall_Invalid_7.whiley              CompileError
+MethodCall_Invalid_8.whiley              CompileError
+MethodRef_Invalid_1.whiley               CompileError
+MethodRef_Invalid_2.whiley               CompileError
+MethodRef_Invalid_3.whiley               CompileError
+Method_Invalid_9.whiley                  CompileError
+MultiAssign_Invalid_1.whiley             CompileError
+Native_Invalid_1.whiley                  PartVerified Boogie program verifier finished with 0 verified, 2 errors
+NegationType_Invalid_1.whiley            CompileError
+NegationType_Invalid_2.whiley            CompileError
+NegationType_Invalid_3.whiley            CompileError
+NegationType_Invalid_4.whiley            CompileError
+OpenRecord_Invalid_1.whiley              CompileError
+OpenRecord_Invalid_2.whiley              CompileError
+OpenRecord_Invalid_3.whiley              CompileError
+OpenRecord_Invalid_4.whiley              CompileError
+OpenRecord_Invalid_5.whiley              CompileError
+OpenRecord_Invalid_6.whiley              CompileError
+OpenRecord_Invalid_7.whiley              CompileError
+Parameter_Invalid_1.whiley               CompileError
+Parameter_Invalid_2.whiley               CompileError
+Parsing_Invalid_1.whiley                 BplErrors
+Parsing_Invalid_10.whiley                CompileError
+Parsing_Invalid_11.whiley                CompileError
+Parsing_Invalid_12.whiley                CompileError
+Parsing_Invalid_15.whiley                Exception
+Parsing_Invalid_16.whiley                CompileError
+Parsing_Invalid_2.whiley                 BplErrors
+Parsing_Invalid_21.whiley                CompileError
+Parsing_Invalid_23.whiley                CompileError
+Parsing_Invalid_24.whiley                CompileError
+Parsing_Invalid_25.whiley                CompileError
+Parsing_Invalid_26.whiley                CompileError
+Parsing_Invalid_27.whiley                Exception
+Parsing_Invalid_28.whiley                Exception
+Parsing_Invalid_29.whiley                CompileError
+Parsing_Invalid_30.whiley                CompileError
+Parsing_Invalid_31.whiley                CompileError
+Parsing_Invalid_4.whiley                 CompileError
+Parsing_Invalid_5.whiley                 CompileError
+Parsing_Invalid_6.whiley                 CompileError
+Parsing_Invalid_8.whiley                 CompileError
+ProcessAccess_Invalid_1.whiley           CompileError
+ProcessAccess_Invalid_2.whiley           CompileError
+ProcessAccess_Invalid_3.whiley           CompileError
+Process_Invalid_1.whiley                 CompileError
+Property_Invalid_1.whiley                CompileError
+Property_Invalid_2.whiley                PartVerified Boogie program verifier finished with 0 verified, 1 error
+Property_Invalid_3.whiley                PartVerified Boogie program verifier finished with 0 verified, 1 error
+Property_Invalid_4.whiley                PartVerified Boogie program verifier finished with 0 verified, 1 error
+Property_Invalid_5.whiley                CompileError
+Property_Invalid_6.whiley                CompileError
+Property_Invalid_7.whiley                CompileError
+Property_Invalid_8.whiley                PartVerified Boogie program verifier finished with 1 verified, 1 error
+Quantifiers_Invalid_1.whiley             BplErrors
+Quantifiers_Invalid_2.whiley             BplErrors
+Quantifiers_Invalid_3.whiley             BplErrors
+Quantifiers_Invalid_4.whiley             BplErrors
+Quantifiers_Invalid_5.whiley             Exception
+Quantifiers_Invalid_6.whiley             Exception
+Quantifiers_Invalid_7.whiley             Exception
+Quantifiers_Invalid_8.whiley             Exception
+Record_Invalid_1.whiley                  CompileError
+Record_Invalid_2.whiley                  CompileError
+Record_Invalid_3.whiley                  CompileError
+Record_Invalid_4.whiley                  CompileError
+Record_Invalid_5.whiley                  CompileError
+Record_Invalid_6.whiley                  CompileError
+RecursiveType_Invalid_1.whiley           PartVerified Boogie program verifier finished with 0 verified, 1 error
+RecursiveType_Invalid_10.whiley          PartVerified Boogie program verifier finished with 0 verified, 1 error
+RecursiveType_Invalid_11.whiley          CompileError
+RecursiveType_Invalid_2.whiley           PartVerified Boogie program verifier finished with 1 verified, 1 error
+RecursiveType_Invalid_3.whiley           CompileError
+RecursiveType_Invalid_4.whiley           PartVerified Boogie program verifier finished with 1 verified, 1 error
+RecursiveType_Invalid_5.whiley           CompileError
+RecursiveType_Invalid_7.whiley           PartVerified Boogie program verifier finished with 1 verified, 1 error
+RecursiveType_Invalid_8.whiley           PartVerified Boogie program verifier finished with 1 verified, 1 error
+RecursiveType_Invalid_9.whiley           PartVerified Boogie program verifier finished with 0 verified, 1 error
+Reference_Subtype_Variant_Invalid_1.whiley CompileError
+Remainder_Invalid_1.whiley               PartVerified Boogie program verifier finished with 0 verified, 1 error
+Remainder_Invalid_2.whiley               CompileError
+Remainder_Invalid_3.whiley               CompileError
+Requires_Invalid_1.whiley                Exception
+Return_Invalid_1.whiley                  CompileError
+Return_Invalid_10.whiley                 CompileError
+Return_Invalid_11.whiley                 CompileError
+Return_Invalid_12.whiley                 CompileError
+Return_Invalid_2.whiley                  CompileError
+Return_Invalid_3.whiley                  CompileError
+Return_Invalid_4.whiley                  CompileError
+Return_Invalid_5.whiley                  CompileError
+Return_Invalid_6.whiley                  CompileError
+Return_Invalid_7.whiley                  CompileError
+Return_Invalid_8.whiley                  CompileError
+Return_Invalid_9.whiley                  CompileError
+StaticVar_Invalid_1.whiley               CompileError
+StaticVar_Invalid_2.whiley               CompileError
+StaticVar_Invalid_3.whiley               CompileError
+StaticVar_Invalid_4.whiley               CompileError
+StaticVar_Invalid_5.whiley               FullyVerified
+StaticVar_Invalid_6.whiley               CompileError
+StaticVar_Invalid_7.whiley               CompileError
+StaticVar_Invalid_8.whiley               CompileError
+StaticVar_Invalid_9.whiley               CompileError
+Subtype_Invalid_1.whiley                 BplErrors
+Subtype_Invalid_2.whiley                 Exception
+Subtype_Invalid_3.whiley                 BplErrors
+Subtype_Invalid_4.whiley                 BplErrors
+Subtype_Invalid_5.whiley                 BplErrors
+Subtype_Invalid_6.whiley                 BplErrors
+Subtype_Invalid_7.whiley                 BplErrors
+Subtype_Invalid_8.whiley                 BplErrors
+Subtype_Invalid_9.whiley                 BplErrors
+Switch_Invalid_1.whiley                  CompileError
+Switch_Invalid_2.whiley                  CompileError
+Switch_Invalid_3.whiley                  CompileError
+Switch_Invalid_4.whiley                  CompileError
+Switch_Invalid_5.whiley                  CompileError
+Switch_Invalid_6.whiley                  CompileError
+Switch_Invalid_7.whiley                  CompileError
+TupleAssign_Invalid_1.whiley             PartVerified Boogie program verifier finished with 0 verified, 1 error
+TupleAssign_Invalid_2.whiley             BplErrors
+TupleAssign_Invalid_3.whiley             PartVerified Boogie program verifier finished with 0 verified, 1 error
+TupleDefine_Invalid_1.whiley             CompileError
+TupleDefine_Invalid_2.whiley             BplErrors
+Tuple_Invalid_3.whiley                   Exception
+Tuple_Invalid_4.whiley                   Exception
+Tuple_Invalid_5.whiley                   Exception
+Tuple_Invalid_6.whiley                   CompileError
+Tuple_Invalid_7.whiley                   CompileError
+TypeEquals_Invalid_1.whiley              CompileError
+TypeEquals_Invalid_10.whiley             CompileError
+TypeEquals_Invalid_11.whiley             CompileError
+TypeEquals_Invalid_12.whiley             PartVerified Boogie program verifier finished with 0 verified, 1 error
+TypeEquals_Invalid_13.whiley             CompileError
+TypeEquals_Invalid_2.whiley              CompileError
+TypeEquals_Invalid_5.whiley              PartVerified Boogie program verifier finished with 1 verified, 1 error
+TypeEquals_Invalid_6.whiley              Exception
+TypeEquals_Invalid_7.whiley              CompileError
+TypeEquals_Invalid_8.whiley              CompileError
+TypeEquals_Invalid_9.whiley              CompileError
+Type_Invalid_1.whiley                    CompileError
+Type_Invalid_10.whiley                   FullyVerified
+Type_Invalid_11.whiley                   FullyVerified
+Type_Invalid_2.whiley                    CompileError
+Type_Invalid_3.whiley                    CompileError
+Type_Invalid_4.whiley                    CompileError
+Type_Invalid_5.whiley                    CompileError
+Type_Invalid_6.whiley                    CompileError
+Type_Invalid_7.whiley                    CompileError
+Type_Invalid_8.whiley                    CompileError
+Type_Invalid_9.whiley                    CompileError
+UnionType_Invalid_1.whiley               CompileError
+UnionType_Invalid_10.whiley              BplErrors
+UnionType_Invalid_11.whiley              CompileError
+UnionType_Invalid_12.whiley              CompileError
+UnionType_Invalid_13.whiley              CompileError
+UnionType_Invalid_14.whiley              CompileError
+UnionType_Invalid_15.whiley              CompileError
+UnionType_Invalid_2.whiley               CompileError
+UnionType_Invalid_3.whiley               CompileError
+UnionType_Invalid_4.whiley               CompileError
+UnionType_Invalid_5.whiley               CompileError
+UnionType_Invalid_6.whiley               CompileError
+UnionType_Invalid_7.whiley               BplErrors
+UnionType_Invalid_8.whiley               PartVerified Boogie program verifier finished with 1 verified, 2 errors
+UnionType_Invalid_9.whiley               PartVerified Boogie program verifier finished with 1 verified, 1 error
+VarDecl_Invalid_1.whiley                 CompileError
+VarDecl_Invalid_2.whiley                 BplErrors
+VarDecl_Invalid_3.whiley                 CompileError
+VarDecl_Invalid_4.whiley                 PartVerified Boogie program verifier finished with 0 verified, 1 error
+While_Invalid_1.whiley                   CompileError
+While_Invalid_10.whiley                  PartVerified Boogie program verifier finished with 0 verified, 1 error
+While_Invalid_11.whiley                  PartVerified Boogie program verifier finished with 0 verified, 1 error
+While_Invalid_12.whiley                  PartVerified Boogie program verifier finished with 0 verified, 1 error
+While_Invalid_13.whiley                  PartVerified Boogie program verifier finished with 0 verified, 1 error
+While_Invalid_14.whiley                  CompileError
+While_Invalid_15.whiley                  PartVerified Boogie program verifier finished with 1 verified, 1 error
+While_Invalid_16.whiley                  CompileError
+While_Invalid_17.whiley                  PartVerified Boogie program verifier finished with 0 verified, 6 errors
+While_Invalid_18.whiley                  BplErrors
+While_Invalid_19.whiley                  BplErrors
+While_Invalid_2.whiley                   CompileError
+While_Invalid_20.whiley                  BplErrors
+While_Invalid_21.whiley                  BplErrors
+While_Invalid_22.whiley                  BplErrors
+While_Invalid_23.whiley                  BplErrors
+While_Invalid_3.whiley                   CompileError
+While_Invalid_4.whiley                   CompileError
+While_Invalid_5.whiley                   CompileError
+While_Invalid_6.whiley                   CompileError
+While_Invalid_7.whiley                   PartVerified Boogie program verifier finished with 0 verified, 1 error
+While_Invalid_8.whiley                   PartVerified Boogie program verifier finished with 0 verified, 2 errors
+While_Invalid_9.whiley                   CompileError
+XOR_Invalid_1.whiley                     CompileError

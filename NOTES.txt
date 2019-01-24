@@ -27,6 +27,51 @@ Investigated running output Boogie programs using Boogaloo:
     (It doesn't really 'run' the programs - it just searches for counter-examples)
 
 
+Results 2019-01-22 (on MacBook Pro 2013)
+==================
+$ time wyboogie *.whiley >OUT100b.txt 2>&1
+real	14m9.191s
+user	18m21.203s
+sys	1m51.504s
+$ wystats OUT100d.txt
+Error Compiling:          20 	32/1000
+NotImplementedYet:        35 	57/1000
+Other Exceptions:          2 	3/1000
+Errors in BPL:            11 	18/1000
+Fully Verified:          490 	803/1000
+Verify time outs:          4 	6/1000
+Verify errors:            48 	78/1000
+Total:  610
+
+The differences are that with the (guarded) array equality axiom:
+* 9 partially verified test programs become fully verified.
+* 1 timeout proof becomes provably true. (ConstrainedRecord_Valid_9.whiley)
+* 1 timeout proof becomes provably false. (BoolList_Valid_3.whiley)
+$ wydiff OUT100_no_array_eq_axiom.results OUT100.results
+Array_Valid_7.whiley                     PartVerified Boogie  |	Array_Valid_7.whiley                     FullyVerified
+Array_Valid_8.whiley                     PartVerified Boogie  |	Array_Valid_8.whiley                     FullyVerified
+Assign_Valid_5.whiley                    PartVerified Boogie  |	Assign_Valid_5.whiley                    FullyVerified
+BoolList_Valid_3.whiley                  PartVerified Boogie  |	BoolList_Valid_3.whiley                  PartVerified Boogie
+ConstrainedList_Valid_26.whiley          PartVerified Boogie  |	ConstrainedList_Valid_26.whiley          FullyVerified
+ConstrainedRecord_Valid_9.whiley         PartVerified Boogie  |	ConstrainedRecord_Valid_9.whiley         PartVerified Boogie
+ListAssign_Valid_1.whiley                PartVerified Boogie  |	ListAssign_Valid_1.whiley                FullyVerified
+ListAssign_Valid_6.whiley                PartVerified Boogie  |	ListAssign_Valid_6.whiley                FullyVerified
+ListGenerator_Valid_12.whiley            PartVerified Boogie  |	ListGenerator_Valid_12.whiley            FullyVerified
+Subtype_Valid_1.whiley                   PartVerified Boogie  |	Subtype_Valid_1.whiley                   FullyVerified
+Subtype_Valid_7.whiley                   PartVerified Boogie  |	Subtype_Valid_7.whiley                   FullyVerified
+
+And for tests/invalid:
+$ wystats OUT100.txt
+Error Compiling:         235 	64%
+NotImplementedYet:         5 	1%
+Other Exceptions:          9 	2%
+Errors in BPL:            29 	7%
+Fully Verified:            5 	1%
+Verify time outs:          0 	0%
+Verify errors:            84 	22%
+Total:  367
+Note: the 5 pass programs are mostly due to needing two-pass verification.
+
 Results 2017-10-27
 ==================
 Add support for Value.UTF8 (Strings) in createConst.

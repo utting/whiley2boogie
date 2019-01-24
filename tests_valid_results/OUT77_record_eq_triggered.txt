@@ -1,0 +1,698 @@
+SCRIPT=/Users/utting/git/whiley/Whiley2Boogie/scripts
+===== Assert_Valid_1.whiley =====
+
+WARNING: version numbering unavailable
+MUTATED INPUT xs : int[]
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Assert_Valid_1.bpl(57,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    Assert_Valid_1.bpl(55,5): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+===== BoolList_Valid_3.whiley =====
+
+WARNING: version numbering unavailable
+DEBUG: recording type Board := bool[][] where ()
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+BoolList_Valid_3.bpl(33,16): Verification of 'update__impl' timed out after 10 seconds
+BoolList_Valid_3.bpl(53,9): Timed out on BP5005: This loop invariant might not be maintained by the loop.
+Execution trace:
+    BoolList_Valid_3.bpl(40,12): anon0
+    BoolList_Valid_3.bpl(51,5): anon5_LoopHead
+    BoolList_Valid_3.bpl(55,11): anon5_LoopBody
+    BoolList_Valid_3.bpl(59,9): anon6_LoopHead
+    BoolList_Valid_3.bpl(59,9): anon6_LoopDone
+BoolList_Valid_3.bpl(176,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    BoolList_Valid_3.bpl(165,11): anon0
+    BoolList_Valid_3.bpl(166,5): anon7_Else
+    BoolList_Valid_3.bpl(172,5): anon8_Else
+
+Boogie program verifier finished with 2 verified, 1 error, 1 time out
+===== Cast_Valid_5.whiley =====
+
+WARNING: version numbering unavailable
+DEBUG: recording type u8 := int where ( && )
+MUTATED INPUT b : byte
+MUTATED INPUT v : u8
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Cast_Valid_5.bpl(83,9): Error BP5005: This loop invariant might not be maintained by the loop.
+Execution trace:
+    Cast_Valid_5.bpl(74,7): anon0
+    Cast_Valid_5.bpl(80,5): anon4_LoopHead
+    Cast_Valid_5.bpl(85,9): anon4_LoopBody
+    Cast_Valid_5.bpl(86,15): anon5_Then
+    Cast_Valid_5.bpl(88,11): anon3
+Cast_Valid_5.bpl(94,5): Error BP5003: A postcondition might not hold on this return path.
+Cast_Valid_5.bpl(67,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    Cast_Valid_5.bpl(74,7): anon0
+    Cast_Valid_5.bpl(80,5): anon4_LoopHead
+    Cast_Valid_5.bpl(80,5): anon4_LoopDone
+
+Boogie program verifier finished with 3 verified, 2 errors
+===== Complex_Valid_2.whiley =====
+
+WARNING: version numbering unavailable
+DEBUG: recording type string := int[] where ()
+DEBUG: recording type PieceKind := int where ( && )
+DEBUG: recording type Piece := {bool colour,PieceKind kind} where ()
+DEBUG: recording type RowCol := int where ()
+DEBUG: recording type Pos := {RowCol col,RowCol row} where ()
+DEBUG: recording type SingleMove := {Pos to,Pos from,Piece piece} where ()
+DEBUG: recording type SingleTake := {Pos to,Piece taken,Pos from,Piece piece} where ()
+DEBUG: recording type SimpleMove := SingleMove|SingleTake where ()
+DEBUG: recording type CastleMove := {bool isWhite,bool kingSide} where ()
+DEBUG: recording type CheckMove := {Move check} where ()
+DEBUG: recording type Move := CheckMove|CastleMove|SimpleMove where ()
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Complex_Valid_2.bpl(235,9): Error BP5001: This assertion might not hold.
+Execution trace:
+    Complex_Valid_2.bpl(230,5): anon0
+    Complex_Valid_2.bpl(231,9): anon11_Then
+Complex_Valid_2.bpl(237,9): Error BP5001: This assertion might not hold.
+Execution trace:
+    Complex_Valid_2.bpl(230,5): anon0
+    Complex_Valid_2.bpl(231,9): anon11_Then
+Complex_Valid_2.bpl(240,9): Error BP5001: This assertion might not hold.
+Execution trace:
+    Complex_Valid_2.bpl(230,5): anon0
+    Complex_Valid_2.bpl(231,9): anon11_Then
+Complex_Valid_2.bpl(243,9): Error BP5003: A postcondition might not hold on this return path.
+Complex_Valid_2.bpl(226,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    Complex_Valid_2.bpl(230,5): anon0
+    Complex_Valid_2.bpl(231,9): anon11_Then
+Complex_Valid_2.bpl(250,13): Error BP5001: This assertion might not hold.
+Execution trace:
+    Complex_Valid_2.bpl(230,5): anon0
+    Complex_Valid_2.bpl(245,9): anon11_Else
+    Complex_Valid_2.bpl(246,13): anon12_Then
+
+Boogie program verifier finished with 4 verified, 5 errors
+===== Complex_Valid_3.whiley =====
+
+WARNING: version numbering unavailable
+DEBUG: recording type BNode := {int item,BTree left,BTree right} where ()
+DEBUG: recording type BTree := null|BNode where ( && )
+MUTATED INPUT tree : BTree
+MUTATED INPUT tree : BTree
+MUTATED INPUT tree : BTree
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Complex_Valid_3.bpl(81,5): Error BP5003: A postcondition might not hold on this return path.
+Complex_Valid_3.bpl(64,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    Complex_Valid_3.bpl(68,10): anon0
+    Complex_Valid_3.bpl(72,9): anon6_Else
+    Complex_Valid_3.bpl(73,13): anon7_Then
+    Complex_Valid_3.bpl(80,7): anon5
+
+Boogie program verifier finished with 3 verified, 1 error
+===== ConstrainedList_Valid_14.whiley =====
+
+WARNING: version numbering unavailable
+DEBUG: recording type wierd := int[] where (exists(int i = 158(45, 27, 41)). > )
+MUTATED INPUT xs : int[]
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ConstrainedList_Valid_14.bpl(40,5): Error BP5003: A postcondition might not hold on this return path.
+ConstrainedList_Valid_14.bpl(32,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    ConstrainedList_Valid_14.bpl(36,8): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+===== ConstrainedList_Valid_18.whiley =====
+
+WARNING: version numbering unavailable
+DEBUG: recording type nat := int where ( >= )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ConstrainedList_Valid_18.bpl(37,5): Error BP5003: A postcondition might not hold on this return path.
+ConstrainedList_Valid_18.bpl(33,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    ConstrainedList_Valid_18.bpl(36,8): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+===== ConstrainedList_Valid_19.whiley =====
+
+WARNING: version numbering unavailable
+DEBUG: recording type nat := int where ( >= )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ConstrainedList_Valid_19.bpl(64,5): Error BP5003: A postcondition might not hold on this return path.
+ConstrainedList_Valid_19.bpl(59,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    ConstrainedList_Valid_19.bpl(62,5): anon0
+
+Boogie program verifier finished with 2 verified, 1 error
+===== ConstrainedList_Valid_2.whiley =====
+
+WARNING: version numbering unavailable
+mangle abs : function(int[],nat)->(nat[]) to abs$2
+mangle abs : function(int)->(nat) to abs$3
+DEBUG: recording type nat := int where ( >= )
+MUTATED INPUT items : int[]
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ConstrainedList_Valid_2.bpl(37,5): Error BP5003: A postcondition might not hold on this return path.
+ConstrainedList_Valid_2.bpl(32,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    ConstrainedList_Valid_2.bpl(35,5): anon0
+ConstrainedList_Valid_2.bpl(68,9): Error BP5003: A postcondition might not hold on this return path.
+ConstrainedList_Valid_2.bpl(61,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    ConstrainedList_Valid_2.bpl(65,11): anon0
+    ConstrainedList_Valid_2.bpl(67,11): anon3_Then
+
+Boogie program verifier finished with 2 verified, 2 errors
+===== ConstrainedList_Valid_8.whiley =====
+
+WARNING: version numbering unavailable
+DEBUG: recording type nat := int where ( >= )
+MUTATED INPUT list : nat[]
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ConstrainedList_Valid_8.bpl(63,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ConstrainedList_Valid_8.bpl(60,8): anon0
+ConstrainedList_Valid_8.bpl(65,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ConstrainedList_Valid_8.bpl(60,8): anon0
+ConstrainedList_Valid_8.bpl(67,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ConstrainedList_Valid_8.bpl(60,8): anon0
+
+Boogie program verifier finished with 1 verified, 3 errors
+===== ConstrainedRecord_Valid_8.whiley =====
+
+WARNING: version numbering unavailable
+DEBUG: recording type nat := int where ( >= )
+DEBUG: recording type piece := int where ( || )
+DEBUG: recording type Board := {piece[] pieces,nat move} where ( && )
+DEBUG: recording type EmptyBoard := Board where (forall(int i = 158(398, 368, 394)). == )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ConstrainedRecord_Valid_8.bpl(84,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ConstrainedRecord_Valid_8.bpl(77,5): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+===== ConstrainedRecord_Valid_9.whiley =====
+
+WARNING: version numbering unavailable
+DEBUG: recording type nat := int where ( >= )
+DEBUG: recording type Matrix := {int height,int width,int[][] data} where ( && )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ConstrainedRecord_Valid_9.bpl(118,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ConstrainedRecord_Valid_9.bpl(80,12): anon0
+    ConstrainedRecord_Valid_9.bpl(83,5): anon4_LoopHead
+    ConstrainedRecord_Valid_9.bpl(83,5): anon4_LoopDone
+ConstrainedRecord_Valid_9.bpl(134,16): Verification of 'test' timed out after 10 seconds
+ConstrainedRecord_Valid_9.bpl(141,5): Timed out on BP5001: This assertion might not hold.
+Execution trace:
+    ConstrainedRecord_Valid_9.bpl(139,5): anon0
+ConstrainedRecord_Valid_9.bpl(146,5): Timed out on BP5001: This assertion might not hold.
+Execution trace:
+    ConstrainedRecord_Valid_9.bpl(139,5): anon0
+ConstrainedRecord_Valid_9.bpl(148,5): Timed out on BP5001: This assertion might not hold.
+Execution trace:
+    ConstrainedRecord_Valid_9.bpl(139,5): anon0
+ConstrainedRecord_Valid_9.bpl(155,5): Timed out on BP5001: This assertion might not hold.
+Execution trace:
+    ConstrainedRecord_Valid_9.bpl(139,5): anon0
+
+Boogie program verifier finished with 1 verified, 1 error, 1 time out
+===== DoWhile_Valid_6.whiley =====
+
+WARNING: version numbering unavailable
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+DoWhile_Valid_6.bpl(39,9): Error BP5001: This assertion might not hold.
+Execution trace:
+    DoWhile_Valid_6.bpl(34,7): anon0
+    DoWhile_Valid_6.bpl(35,5): anon2_Then
+    DoWhile_Valid_6.bpl(36,9): CONTINUE__DO__WHILE__1
+
+Boogie program verifier finished with 1 verified, 1 error
+===== DoWhile_Valid_8.whiley =====
+
+WARNING: version numbering unavailable
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+DoWhile_Valid_8.bpl(41,9): Error BP5001: This assertion might not hold.
+Execution trace:
+    DoWhile_Valid_8.bpl(33,7): anon0
+    DoWhile_Valid_8.bpl(34,5): anon4_Then
+    DoWhile_Valid_8.bpl(35,9): CONTINUE__DO__WHILE__1
+    DoWhile_Valid_8.bpl(36,9): anon5_Else
+DoWhile_Valid_8.bpl(47,5): Error BP5003: A postcondition might not hold on this return path.
+DoWhile_Valid_8.bpl(29,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    DoWhile_Valid_8.bpl(33,7): anon0
+    DoWhile_Valid_8.bpl(34,5): anon4_Then
+    DoWhile_Valid_8.bpl(35,9): CONTINUE__DO__WHILE__1
+    DoWhile_Valid_8.bpl(37,13): anon5_Then
+    DoWhile_Valid_8.bpl(45,5): BREAK__DO__WHILE__1
+
+Boogie program verifier finished with 1 verified, 2 errors
+===== FunctionRef_Valid_9.whiley =====
+
+WARNING: version numbering unavailable
+mangle test : method()->() to test$2
+DEBUG: recording type Proc := &{function(int)->(int) func} where ()
+DEBUG: Expr.LambdaAccess:
+  name     : id
+  paraTypes: ()
+  signature: function(int)->(int)
+  type     : function(int)->(int)
+  types    : null
+  data    : null
+  string  : 139(335, 339, 620)
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+FunctionRef_Valid_9.bpl(49,5): Error BP5003: A postcondition might not hold on this return path.
+FunctionRef_Valid_9.bpl(45,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    FunctionRef_Valid_9.bpl(48,7): anon0
+
+Boogie program verifier finished with 3 verified, 1 error
+===== Function_Valid_6.whiley =====
+
+WARNING: version numbering unavailable
+DEBUG: recording type fr5nat := int where ( >= )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Function_Valid_6.bpl(98,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    Function_Valid_6.bpl(97,8): anon0
+
+Boogie program verifier finished with 2 verified, 1 error
+===== Function_Valid_7.whiley =====
+
+WARNING: version numbering unavailable
+DEBUG: recording type fr5nat := int where ()
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Function_Valid_7.bpl(98,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    Function_Valid_7.bpl(97,8): anon0
+
+Boogie program verifier finished with 2 verified, 1 error
+===== Function_Valid_8.whiley =====
+
+WARNING: version numbering unavailable
+DEBUG: recording type nat := int where ( >= )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Function_Valid_8.bpl(98,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    Function_Valid_8.bpl(97,8): anon0
+
+Boogie program verifier finished with 2 verified, 1 error
+===== Function_Valid_9.whiley =====
+
+WARNING: version numbering unavailable
+DEBUG: recording type nat := int where ()
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Function_Valid_9.bpl(98,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    Function_Valid_9.bpl(97,8): anon0
+
+Boogie program verifier finished with 2 verified, 1 error
+===== ListAccess_Valid_6.whiley =====
+
+WARNING: version numbering unavailable
+assuming lhs of ==> ! (isNull(r))
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ListAccess_Valid_6.bpl(40,13): Error BP5001: This assertion might not hold.
+Execution trace:
+    ListAccess_Valid_6.bpl(33,7): anon0
+    ListAccess_Valid_6.bpl(36,5): anon5_LoopHead
+    ListAccess_Valid_6.bpl(39,9): anon5_LoopBody
+    ListAccess_Valid_6.bpl(40,13): anon6_Then
+
+Boogie program verifier finished with 1 verified, 1 error
+===== ListAssign_Valid_3.whiley =====
+
+WARNING: version numbering unavailable
+MUTATED INPUT ls : int[][]
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ListAssign_Valid_3.bpl(69,5): Error BP5003: A postcondition might not hold on this return path.
+ListAssign_Valid_3.bpl(62,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    ListAssign_Valid_3.bpl(66,5): anon0
+
+Boogie program verifier finished with 2 verified, 1 error
+===== MessageSend_Valid_2.whiley =====
+
+WARNING: version numbering unavailable
+DEBUG: recording type Proc := &{int state} where ()
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+MessageSend_Valid_2.bpl(28,5): Error BP5003: A postcondition might not hold on this return path.
+MessageSend_Valid_2.bpl(24,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    MessageSend_Valid_2.bpl(27,7): anon0
+
+Boogie program verifier finished with 2 verified, 1 error
+===== MessageSend_Valid_5.whiley =====
+
+WARNING: version numbering unavailable
+DEBUG: recording type Sum := &{int result,int[] items} where ()
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+MessageSend_Valid_5.bpl(61,5): Error BP5003: A postcondition might not hold on this return path.
+MessageSend_Valid_5.bpl(57,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    MessageSend_Valid_5.bpl(60,7): anon0
+
+Boogie program verifier finished with 3 verified, 1 error
+===== Process_Valid_10.whiley =====
+
+WARNING: version numbering unavailable
+DEBUG: recording type Queue := {int[] items,int length} where ()
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Process_Valid_10.bpl(29,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    Process_Valid_10.bpl(28,13): anon0
+Process_Valid_10.bpl(31,5): Error BP5003: A postcondition might not hold on this return path.
+Process_Valid_10.bpl(25,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    Process_Valid_10.bpl(28,13): anon0
+Process_Valid_10.bpl(49,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    Process_Valid_10.bpl(49,5): anon0
+
+Boogie program verifier finished with 2 verified, 3 errors
+===== Process_Valid_7.whiley =====
+
+WARNING: version numbering unavailable
+DEBUG: recording type MyProc2 := &{int|bool data} where ()
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Process_Valid_7.bpl(46,5): Error BP5003: A postcondition might not hold on this return path.
+Process_Valid_7.bpl(42,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    Process_Valid_7.bpl(45,7): anon0
+
+Boogie program verifier finished with 3 verified, 1 error
+===== Process_Valid_8.whiley =====
+
+WARNING: version numbering unavailable
+DEBUG: recording type MyProc2 := {int|bool data} where ()
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Process_Valid_8.bpl(46,5): Error BP5003: A postcondition might not hold on this return path.
+Process_Valid_8.bpl(42,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    Process_Valid_8.bpl(45,7): anon0
+
+Boogie program verifier finished with 3 verified, 1 error
+===== Process_Valid_9.whiley =====
+
+WARNING: version numbering unavailable
+DEBUG: recording type Queue := {int[] items,int length} where ()
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Process_Valid_9.bpl(29,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    Process_Valid_9.bpl(28,13): anon0
+Process_Valid_9.bpl(31,5): Error BP5003: A postcondition might not hold on this return path.
+Process_Valid_9.bpl(25,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    Process_Valid_9.bpl(28,13): anon0
+Process_Valid_9.bpl(49,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    Process_Valid_9.bpl(49,5): anon0
+
+Boogie program verifier finished with 3 verified, 3 errors
+===== Property_Valid_7.whiley =====
+
+WARNING: version numbering unavailable
+mangle max : function(int[])->(int) to max$2
+DEBUG: recording type nat := int where ( >= )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Property_Valid_7.bpl(48,9): Error BP5004: This loop invariant might not hold on entry.
+Execution trace:
+    Property_Valid_7.bpl(42,7): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+===== RecordAssign_Valid_6.whiley =====
+
+WARNING: version numbering unavailable
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+RecordAssign_Valid_6.bpl(27,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    RecordAssign_Valid_6.bpl(25,7): anon0
+
+Boogie program verifier finished with 0 verified, 1 error
+===== RecursiveType_Valid_12.whiley =====
+
+WARNING: version numbering unavailable
+DEBUG: recording type Tree := null|Node where ()
+DEBUG: recording type Node := {int data,Tree rhs,Tree lhs} where ( && )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+RecursiveType_Valid_12.bpl(71,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    RecursiveType_Valid_12.bpl(65,5): anon0
+RecursiveType_Valid_12.bpl(74,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    RecursiveType_Valid_12.bpl(65,5): anon0
+
+Boogie program verifier finished with 1 verified, 2 errors
+===== RecursiveType_Valid_19.whiley =====
+
+WARNING: version numbering unavailable
+DEBUG: recording type nat := int where ( >= )
+DEBUG: recording type pos := int where ( > )
+DEBUG: recording type expr := nat|{expr rhs,expr lhs} where ()
+DEBUG: recording type posExpr := pos|{posExpr rhs,posExpr lhs} where ()
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+RecursiveType_Valid_19.bpl(50,5): Error BP5003: A postcondition might not hold on this return path.
+RecursiveType_Valid_19.bpl(44,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    RecursiveType_Valid_19.bpl(48,8): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+===== RecursiveType_Valid_20.whiley =====
+
+WARNING: version numbering unavailable
+DEBUG: recording type nat := int where ()
+DEBUG: recording type pos := int where ()
+DEBUG: recording type expr := nat|{expr rhs,expr lhs} where ()
+DEBUG: recording type posExpr := pos|{posExpr rhs,posExpr lhs} where ()
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+RecursiveType_Valid_20.bpl(48,5): Error BP5003: A postcondition might not hold on this return path.
+RecursiveType_Valid_20.bpl(42,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    RecursiveType_Valid_20.bpl(46,8): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+===== RecursiveType_Valid_22.whiley =====
+
+WARNING: version numbering unavailable
+DEBUG: recording type SortedList := null|SortedListNode where ()
+DEBUG: recording type SortedListNode := {SortedList next,int data} where ( || )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+RecursiveType_Valid_22.bpl(105,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    RecursiveType_Valid_22.bpl(103,5): anon0
+RecursiveType_Valid_22.bpl(107,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    RecursiveType_Valid_22.bpl(103,5): anon0
+RecursiveType_Valid_22.bpl(109,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    RecursiveType_Valid_22.bpl(103,5): anon0
+RecursiveType_Valid_22.bpl(111,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    RecursiveType_Valid_22.bpl(103,5): anon0
+
+Boogie program verifier finished with 2 verified, 4 errors
+===== RecursiveType_Valid_28.whiley =====
+
+WARNING: version numbering unavailable
+DEBUG: recording type Link := {int data,LinkedList next} where ()
+DEBUG: recording type LinkedList := null|Link where ()
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+RecursiveType_Valid_28.bpl(80,9): Error BP5001: This assertion might not hold.
+Execution trace:
+    RecursiveType_Valid_28.bpl(76,5): anon0
+    RecursiveType_Valid_28.bpl(80,9): anon3_Else
+RecursiveType_Valid_28.bpl(81,9): Error BP5001: This assertion might not hold.
+Execution trace:
+    RecursiveType_Valid_28.bpl(76,5): anon0
+    RecursiveType_Valid_28.bpl(80,9): anon3_Else
+
+Boogie program verifier finished with 2 verified, 2 errors
+===== Reference_Valid_6.whiley =====
+
+WARNING: version numbering unavailable
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Reference_Valid_6.bpl(56,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    Reference_Valid_6.bpl(44,12): anon0
+Reference_Valid_6.bpl(57,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    Reference_Valid_6.bpl(44,12): anon0
+
+Boogie program verifier finished with 1 verified, 2 errors
+===== TypeEquals_Valid_32.whiley =====
+
+WARNING: version numbering unavailable
+DEBUG: recording type expr := int[]|bool where ()
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+TypeEquals_Valid_32.bpl(84,9): Error BP5003: A postcondition might not hold on this return path.
+TypeEquals_Valid_32.bpl(76,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    TypeEquals_Valid_32.bpl(80,5): anon0
+    TypeEquals_Valid_32.bpl(81,9): anon3_Then
+
+Boogie program verifier finished with 2 verified, 1 error
+===== While_Valid_11.whiley =====
+
+WARNING: version numbering unavailable
+DEBUG: recording type nat := int where ( >= )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+While_Valid_11.bpl(62,5): Error BP5003: A postcondition might not hold on this return path.
+While_Valid_11.bpl(32,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    While_Valid_11.bpl(37,7): anon0
+    While_Valid_11.bpl(44,5): anon5_LoopHead
+    While_Valid_11.bpl(44,5): anon5_LoopDone
+
+Boogie program verifier finished with 1 verified, 1 error
+===== While_Valid_2.whiley =====
+
+WARNING: version numbering unavailable
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+While_Valid_2.bpl(51,9): Error BP5005: This loop invariant might not be maintained by the loop.
+Execution trace:
+    While_Valid_2.bpl(38,8): anon0
+    While_Valid_2.bpl(49,5): anon6_LoopHead
+    While_Valid_2.bpl(54,9): anon6_LoopBody
+    While_Valid_2.bpl(58,16): anon7_Then
+While_Valid_2.bpl(52,9): Error BP5005: This loop invariant might not be maintained by the loop.
+Execution trace:
+    While_Valid_2.bpl(38,8): anon0
+    While_Valid_2.bpl(49,5): anon6_LoopHead
+    While_Valid_2.bpl(54,9): anon6_LoopBody
+    While_Valid_2.bpl(60,13): anon7_Else
+    While_Valid_2.bpl(62,20): anon8_Then
+
+Boogie program verifier finished with 1 verified, 2 errors
+===== While_Valid_23.whiley =====
+
+WARNING: version numbering unavailable
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+While_Valid_23.bpl(40,9): Error BP5004: This loop invariant might not hold on entry.
+Execution trace:
+    While_Valid_23.bpl(34,5): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+===== While_Valid_5.whiley =====
+
+WARNING: version numbering unavailable
+DEBUG: recording type nat := int where ( >= )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+While_Valid_5.bpl(59,5): Error BP5003: A postcondition might not hold on this return path.
+While_Valid_5.bpl(32,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    While_Valid_5.bpl(37,7): anon0
+    While_Valid_5.bpl(44,5): anon4_LoopHead
+    While_Valid_5.bpl(44,5): anon4_LoopDone
+
+Boogie program verifier finished with 1 verified, 1 error
+===== While_Valid_59.whiley =====
+
+WARNING: version numbering unavailable
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+While_Valid_59.bpl(57,5): Error BP5003: A postcondition might not hold on this return path.
+While_Valid_59.bpl(36,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    While_Valid_59.bpl(42,7): anon0
+    While_Valid_59.bpl(45,5): anon2_LoopHead
+    While_Valid_59.bpl(45,5): anon2_LoopDone
+While_Valid_59.bpl(78,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    While_Valid_59.bpl(75,8): anon0
+While_Valid_59.bpl(80,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    While_Valid_59.bpl(75,8): anon0
+While_Valid_59.bpl(82,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    While_Valid_59.bpl(75,8): anon0
+While_Valid_59.bpl(84,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    While_Valid_59.bpl(75,8): anon0
+
+Boogie program verifier finished with 0 verified, 5 errors
+===== While_Valid_60.whiley =====
+
+WARNING: version numbering unavailable
+DEBUG: recording type nat := int where ( >= )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+While_Valid_60.bpl(58,5): Error BP5003: A postcondition might not hold on this return path.
+While_Valid_60.bpl(37,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    While_Valid_60.bpl(43,7): anon0
+    While_Valid_60.bpl(46,5): anon2_LoopHead
+    While_Valid_60.bpl(46,5): anon2_LoopDone
+While_Valid_60.bpl(79,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    While_Valid_60.bpl(76,8): anon0
+While_Valid_60.bpl(81,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    While_Valid_60.bpl(76,8): anon0
+While_Valid_60.bpl(83,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    While_Valid_60.bpl(76,8): anon0
+While_Valid_60.bpl(85,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    While_Valid_60.bpl(76,8): anon0
+
+Boogie program verifier finished with 0 verified, 5 errors
+===== While_Valid_61.whiley =====
+
+WARNING: version numbering unavailable
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+While_Valid_61.bpl(71,5): Error BP5003: A postcondition might not hold on this return path.
+While_Valid_61.bpl(30,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    While_Valid_61.bpl(36,7): anon0
+    While_Valid_61.bpl(60,5): anon2_LoopHead
+    While_Valid_61.bpl(60,5): anon2_LoopDone
+While_Valid_61.bpl(92,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    While_Valid_61.bpl(89,8): anon0
+While_Valid_61.bpl(94,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    While_Valid_61.bpl(89,8): anon0
+While_Valid_61.bpl(96,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    While_Valid_61.bpl(89,8): anon0
+While_Valid_61.bpl(98,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    While_Valid_61.bpl(89,8): anon0
+
+Boogie program verifier finished with 0 verified, 5 errors
+===== While_Valid_62.whiley =====
+
+WARNING: version numbering unavailable
+DEBUG: recording type nat := int where ( >= )
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+While_Valid_62.bpl(58,5): Error BP5003: A postcondition might not hold on this return path.
+While_Valid_62.bpl(37,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    While_Valid_62.bpl(43,7): anon0
+    While_Valid_62.bpl(46,5): anon2_LoopHead
+    While_Valid_62.bpl(46,5): anon2_LoopDone
+While_Valid_62.bpl(79,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    While_Valid_62.bpl(76,8): anon0
+While_Valid_62.bpl(81,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    While_Valid_62.bpl(76,8): anon0
+While_Valid_62.bpl(83,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    While_Valid_62.bpl(76,8): anon0
+While_Valid_62.bpl(85,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    While_Valid_62.bpl(76,8): anon0
+
+Boogie program verifier finished with 0 verified, 5 errors
+===== While_Valid_69.whiley =====
+
+WARNING: version numbering unavailable
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+While_Valid_69.bpl(61,5): Error BP5003: A postcondition might not hold on this return path.
+While_Valid_69.bpl(29,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    While_Valid_69.bpl(34,8): anon0
+    While_Valid_69.bpl(49,5): anon2_LoopHead
+    While_Valid_69.bpl(49,5): anon2_LoopDone
+
+Boogie program verifier finished with 1 verified, 1 error
