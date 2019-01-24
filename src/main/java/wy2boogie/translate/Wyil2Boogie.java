@@ -36,15 +36,10 @@ import java.util.stream.Stream;
 import static wyil.lang.WyilFile.*;
 
 import wybs.util.AbstractCompilationUnit;
-import wyil.check.FlowTypeCheck;
 import wyil.lang.WyilFile;
 import wyil.type.subtyping.EmptinessTest;
-import wyil.type.subtyping.RelaxedTypeEmptinessTest;
 import wyil.type.subtyping.StrictTypeEmptinessTest;
-import wyil.type.subtyping.SubtypeOperator;
 import wyil.type.util.ConcreteTypeExtractor;
-import wyil.type.util.ReadWriteTypeExtractor;
-import wyc.lang.WhileyFile;
 import wyil.util.AbstractVisitor;
 
 /**
@@ -85,7 +80,7 @@ import wyil.util.AbstractVisitor;
 
  * TODO: handle heap and references better.
  *       1. cleanup: generate ref__i variables only when necessary, or avoid them completely.
- *       2. pass w__heap as a parameter to functions that use the heap.
+ *       2. pass w__heap as a parameter to methods that use the heap. (functions are not allowed to access heap!)
  *       3. add typing constraints for dereferenced values.
  *       4. strengthen the theory of heap updating and dereferencing.
  *
@@ -277,7 +272,7 @@ public final class Wyil2Boogie {
 	private void declareHigherOrderFunction(QualifiedName name, Type.Callable type) {
         if (!this.referencedFunctions.contains(name)) {
         	// FIXME: this won't work for qualified names in packages (e.g. std::integer::u8)
-            final String func_const = CONST_FUNC + name;
+            final String func_const = mangleFuncName(name);
             this.out.printf("const unique %s:WFuncName;\n", func_const);
             // At the moment, we assume indirect-invoke is used rarely, so for ONE type of function in each program.
             // TODO: extend this to handle more than one type of indirect-invoke result (different applyTo operators?)
@@ -315,13 +310,13 @@ public final class Wyil2Boogie {
 					args.size(),
                     "closure__1(" + func_const + ", captured__)",
 					vCall.toString(),
-                    name,
+                    name.getName().toString(),
 					vCall.toString());
             this.referencedFunctions.add(name);
         }
     }
 
-    // ======================================================================
+	// ======================================================================
     // Apply Method
     // ======================================================================
 
@@ -1829,8 +1824,8 @@ public final class Wyil2Boogie {
 	private BoogieExpr boogieLambda(Expr.LambdaAccess lambda) {
 		// FIXME: encoding will be required for package declarations, such as
 		// "std::integer::u8"
-		String name = lambda.getDeclaration().getQualifiedName().toString();
-		final String func_const = CONST_FUNC + name;
+		QualifiedName name = lambda.getDeclaration().getQualifiedName();
+		final String func_const = mangleFuncName(name);
 		System.out.println("DEBUG: Expr.LambdaAccess:"
 				+ "\n  name     : " + lambda.getName()
 				+ "\n  paraTypes: " + lambda.getParameterTypes()
@@ -2416,6 +2411,18 @@ public final class Wyil2Boogie {
 			return name; // no mangling!
 		}
 		return result;
+	}
+
+	/**
+	 * Encodes a fully qualified name into an allowable Boogie name.
+	 *
+	 * For the moment this ignores package names.
+	 *
+	 * @param name
+	 * @return starts with "func__" so these are in a separate namespace.
+	 */
+	private String mangleFuncName(QualifiedName name) {
+		return CONST_FUNC + name.getName().toString();
 	}
 
 	/**
