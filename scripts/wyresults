@@ -6,7 +6,7 @@ then
     # 'out' is the whole output for that file, just for debugging pattern-matching problems.
     awk 'BEGIN{test="";fmt0="%-40s %s"; fmt=fmt0"\n"} \
          {if ($1 == "=====" && test=="") {test=$2; out=""} \
-          else if ($1 == "wyboogie.NotImplementedYet:") {printf fmt,test,"NotImplYet"; test=""} \
+          else if ($1 == "wy2boogie.translate.NotImplementedYet:") {printf fmt,test,"NotImplYet"; test=""} \
           else if ($0 ~ "Exception: " && test) {printf fmt,test,"Exception"; test=""} \
           else if ($0 ~ "Error compiling") {printf fmt,test,"CompileError"; test=""} \
           else if ($0 ~ "^ *\\^+ *$") {printf fmt,test,"CompileError"; test=""} \
@@ -17,28 +17,6 @@ then
           else if ($1 == "=====" && test) {printf fmt,test,"UNKNOWN!!!"; print out; out=""; test=$2} \
           else {out = out$0"\n"}
          }' "$@"
-
-#    echo -n "Error Compiling:    "
-#    grep -i '^Error compiling' "$@" | wc -l
-
-#    echo -n "NotImplementedYet:  "
-#    grep -i NotImplementedYet: "$@" | wc -l
-
-#    echo -n "Other Exceptions:   "
-#    grep -i exception "$@" | wc -l
-
-#    echo -n "Errors in BPL:      "
-#    grep -i 'bpl.*error:' "$@" | wc -l
-
-#    echo -n "Fully Verified:     "
-#    grep -i ' verified, 0 errors$' "$@" | wc -l
-    
-#    echo -n "Verify time outs:   "
-#    grep -i ' verified, 0 errors, ' "$@" | wc -l
-    
-#    echo -n "Verify errors:      "
-#    grep -i ' verified, [^0] error' "$@" | wc -l
-    
 else
     echo "Usage: $0 OUT*.txt"
     exit 1
