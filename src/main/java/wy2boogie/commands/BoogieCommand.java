@@ -156,7 +156,7 @@ public class BoogieCommand implements Command {
 			Trie id = Trie.fromString(output.replace(".wyil", ""));
 			files.add(output);
 			Path.Entry<WyilFile> target = createWyilFile(id);
-			System.out.println("GOT: " + target);
+			// System.out.println("GOT: " + target);
 			// Reuse code from the compile task for this purpose
 			wyc.task.CompileTask.build(Logger.NULL, project.getBuildProject(), target, sources);
 			// Done

@@ -67,7 +67,7 @@ public class AssertionGenerator {
 
     /** Translate a Whiley expression into a Boogie expression. */
     private BoogieExpr expr(Expr expr) {
-        return wy2b.boogieExpr(expr);
+        return wy2b.writeAllocations(0, expr);
     }
 
     /**

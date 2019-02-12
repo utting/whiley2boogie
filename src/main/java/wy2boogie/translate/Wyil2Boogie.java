@@ -79,10 +79,10 @@ import wyil.util.AbstractVisitor;
  * TODO: declare local variables for any missing output parameters of 'call' statements (see Array_Valid_9.whiley).
 
  * TODO: handle heap and references better.
- *       1. cleanup: generate ref__i variables only when necessary, or avoid them completely.
- *       2. pass w__heap as a parameter to methods that use the heap. (functions are not allowed to access heap!)
+ *       1. [DONE] cleanup: generate ref__i variables only when necessary, or avoid them completely.
+ *       2. [DONE] pass w__heap as a parameter to methods that use the heap. (functions are not allowed to access heap!)
  *       3. add typing constraints for dereferenced values.
- *       4. strengthen the theory of heap updating and dereferencing.
+ *       4. [DONE] strengthen the theory of heap updating and dereferencing.
  *
  * TODO: move ALL method calls out of expressions?  (5 tests do this!)
  *       See MethodCall_Valid_4.whiley for a complex example.
@@ -107,7 +107,7 @@ import wyil.util.AbstractVisitor;
  * TODO: implement missing language features, such as:
  * <ul>
  *   <li>DONE: Property declarations and uses.</li>
- *   <li>Compilation units/modules: use fully qualified names everywhere.</li>
+ *   <li>DONE: Compilation units/modules: use fully qualified names everywhere.</li>
  *   <li>System.Console sys and sys.out.println(string)</li>
  *   <li>DONE: indirect invoke (12 tests)</li>
  *   <li>DONE: references, new (17 tests), and dereferencing (17 tests)</li>
@@ -213,7 +213,7 @@ public final class Wyil2Boogie {
     private int switchCount;
 
     /** Records the values within all the 'new' expressions in the current statement. */
-    private final List<String> newAllocations = new ArrayList<>();
+    private List<String> newAllocations = null;
 
 	/** Records type synonyms, so we can unfold them during when generating equality tests. */
 	private Map<String, Type> typeDefs = new HashMap<>();
@@ -326,10 +326,6 @@ public final class Wyil2Boogie {
     	// Declare globals
 		this.out.printf("var %s:[WRef]WVal;\n", HEAP);
 		this.out.printf("var %s:[WRef]bool;\n", ALLOCATED);
-		// TODO: find a nicer way of making these local?
-		for (int i = 0; i < NEW_REF_MAX; i++) {
-			this.out.printf("var %s%d : WRef;\n", NEW_REF, i);
-		}
 		this.out.println();
 
 		// Sort out overloading of all declared names first.
@@ -405,7 +401,7 @@ public final class Wyil2Boogie {
 		this.out.println(" }");
 
 		// remember this type synonym for later
-		System.out.println("DEBUG: recording type " + td.getName().get() + " := " + t + " where " + td.getInvariant());
+		// System.out.println("DEBUG: recording type " + td.getName().get() + " := " + t + " where " + td.getInvariant());
 		this.typeDefs.put(td.getName().get(), t); // we do not need the invariants
 	}
 
@@ -442,6 +438,10 @@ public final class Wyil2Boogie {
 		final Type.Callable ft = method.getType();
 		declareFields(method.getBody());
 		declareFuncConstants(method.getBody());
+		Map<String, String> locals = findLocalVarDecls(method.getBody());
+		// We assume that ALL methods are allowed to use the heap, and all functions do not.
+		// (otherwise, we would have to calculate the transitive closure of the call graph).
+		boolean usesHeap = true; // locals.containsKey(HEAP);
 		final String name = mangledFunctionMethodName(method.getQualifiedName(), method.getType());
 		final int inSize = ft.getParameters().size();
 		final int outSize = ft.getReturns().size();
@@ -458,13 +458,13 @@ public final class Wyil2Boogie {
 		if (method instanceof Decl.Function) {
 			writeFunction(name, (Decl.Function) method);
 			procedureName = name + "__impl";
+			usesHeap = false;
 		}
 		this.out.print("procedure ");
 		writeSignature(procedureName, method, null);
 		this.out.println(";");
-		this.out.printf("    modifies %s, %s;\n", HEAP, ALLOCATED);
-		for (int i = 0; i < NEW_REF_MAX; i++) {
-			this.out.printf("    modifies %s%d;\n", NEW_REF, i);
+		if (usesHeap) {
+			this.out.printf("    modifies %s, %s;\n", HEAP, ALLOCATED);
 		}
 		this.out.printf("    requires %s(%s);\n", name + METHOD_PRE, getNames(this.inDecls));
 		// Part of the postcondition is the type and type constraints of each output
@@ -486,7 +486,7 @@ public final class Wyil2Boogie {
 			if (method.getBody() != null) {
 				this.out.println();
 				this.out.println("{");
-				writeLocalVarDecls(method.getBody());
+				writeLocalVarDecls(locals);
 				// now create a local copy of each mutated input!
 				for (final String naughty : mutatedInputs.keySet()) {
 					tabIndent(1);
@@ -702,8 +702,7 @@ public final class Wyil2Boogie {
 	}
 
 	/**
-	 * Writes just the declarations and type constraints of local variables of a
-	 * function/method.
+	 * Find all the local variables needed for a function/method.
 	 *
 	 * This is done only at the top level of each procedure. Boogie requires all
 	 * local variables to be declared at the start of each function/procedure. So
@@ -717,50 +716,95 @@ public final class Wyil2Boogie {
 	 * method, looking for local variable declarations, and ignoring expressions and
 	 * quantifiers.
 	 *
-	 * @param body
+	 * This also records any temporary WRef variables that are needed.
+	 * And it records whether or not the body uses the HEAP.
+	 *
+	 * @param body function or method body.
+	 * @return a map from local variable names to their Boogie types.
+	 *       If the HEAP is used, then it also includes HEAP as a key, mapped to null.
 	 */
-	private void writeLocalVarDecls(Stmt.Block body) {
+	private Map<String, String> findLocalVarDecls(Stmt.Block body) {
 		// We start after the input and output parameters.
 		this.switchCount = 0;
-		final Map<String, Type> locals = new LinkedHashMap<>(); // preserve order, but remove duplicates
-		// Create visitor to traverse method or function body
-		AbstractVisitor visitor = new AbstractVisitor() {
-			@Override
-			public void visitVariable(Decl.Variable decl) {
-				final String name = decl.getName().get();
-				final Type prevType = locals.get(name);
-				if (prevType == null) {
-					locals.put(name, decl.getType());
-					tabIndent(1);
-					out.printf("var %s : WVal where %s;\n", name, typePredicate(name, decl.getType()));
-				} else if (!prevType.equals(decl.getType())) {
-					throw new NotImplementedYet("local var " + name + " has multiple types", decl);
-				}
-			}
-			@Override
-			public void visitSwitch(Stmt.Switch decl) {
-				switchCount++;
-				tabIndent(1);
-				// we don't bother recording these in the 'done' map, since each switch has a
-				// unique variable.
-				out.printf("var %s : WVal;\n", createSwitchVar(switchCount));
-			}
-
-			@Override
-			public void visitExistentialQuantifier(Expr.ExistentialQuantifier expr) {
-				// do not recurse in, because vars inside quantifiers are bound vars in Boogie.
-			}
-
-			@Override
-			public void visitUniversalQuantifier(Expr.UniversalQuantifier expr) {
-				// do not recurse in, because vars inside quantifiers are bound vars in Boogie.
-			}
-		};
-		// Run the visitor
+		PrePassVisitor visitor = new PrePassVisitor();
 		visitor.visitBlock(body);
-		// reset to zero so that we generate same numbers as we generate code.
+		// reset to zero so that we generate same switch labels as we generate code.
 		this.switchCount = 0;
+
+		// System.err.println("DEBUG: localVarDecls = " + visitor.locals);
+		return visitor.locals;
 	}
+
+	private void writeLocalVarDecls(Map<String, String> locals) {
+		for (String name : locals.keySet()) {
+			String boogieType = locals.get(name);
+			if (boogieType != null) {
+				tabIndent(1);
+				out.printf("var %s : %s;\n", name, boogieType);
+			}
+		}
+	}
+
+	/**
+	 *  These visitor objects traverse a method or function body to determine what local vars need declaring.
+ 	 */
+	private class PrePassVisitor extends AbstractVisitor {
+		private int newCount = 0;
+		final Map<String, String> locals = new LinkedHashMap<>(); // preserve order, but remove duplicates
+
+		@Override
+		public void visitVariable(Decl.Variable decl) {
+			final String name = decl.getName().get();
+			final String prevType = locals.get(name);
+			final String boogieType = "WVal where " + typePredicate(name, decl.getType());
+			if (prevType != null && !prevType.equals(boogieType)) {
+				throw new NotImplementedYet("local var " + name + " has multiple types", decl);
+			}
+			locals.put(name, boogieType);
+			super.visitVariable(decl);
+		}
+
+		@Override
+		public void visitSwitch(Stmt.Switch decl) {
+			switchCount++;
+			// we don't bother recording these in the 'done' map, since each switch has a
+			// unique variable.
+			String var = createSwitchVar(switchCount);
+			locals.put(var,"WVal");
+			super.visitSwitch(decl);
+		}
+
+		@Override
+		public void visitExistentialQuantifier(Expr.ExistentialQuantifier expr) {
+			// do not recurse in, because vars inside quantifiers are bound vars in Boogie.
+		}
+
+		@Override
+		public void visitUniversalQuantifier(Expr.UniversalQuantifier expr) {
+			// do not recurse in, because vars inside quantifiers are bound vars in Boogie.
+		}
+
+		@Override
+		public void visitNew(Expr.New expr) {
+			String var = NEW_REF + newCount;
+			locals.put(var, "WRef");
+			locals.put(HEAP, null); // this is just a marker that the heap is used
+			newCount++;
+			super.visitNew(expr);
+		}
+
+		@Override
+		public void visitDereference(Expr.Dereference expr) {
+			locals.put(HEAP, null); // this is just a marker that the heap is used
+			super.visitDereference(expr);
+		}
+
+		@Override
+		public void visitStatement(Stmt stmt) {
+			newCount = 0; // reset before each statement.
+			super.visitStatement(stmt);
+		}
+	};
 
 	/** A unique name for each switch statement within a procedure. */
 	private String createSwitchVar(int count) {
@@ -865,7 +909,7 @@ public final class Wyil2Boogie {
 			break;
 		}
 		case STMT_skip:
-			writeSkip((Stmt.Skip) c);
+			writeSkip(indent, (Stmt.Skip) c);
 			break;
 		case STMT_switch: {
 			Stmt.Switch s = (Stmt.Switch) c;
@@ -999,18 +1043,12 @@ public final class Wyil2Boogie {
 			this.out.print("call ");
 			this.outerMethodCall = null;
 		}
-		for (int i = 0; i != lhsVars.length; ++i) {
-			if (i != 0) {
-				this.out.print(", ");
-			}
-			this.out.print(lhsVars[i]);
-		}
 		if (lhs.size() > 0) {
 			final HashSet<String> noDups = new HashSet<>(Arrays.asList(lhsVars));
 			if (noDups.size() < lhs.size()) {
 				throw new NotImplementedYet("Conflicting LHS assignments not handled yet.", stmt);
 			}
-			this.out.print(" := ");
+			this.out.printf("%s := ", commaSep(lhsVars));
 		}
 		if (lhs.size() != rhs.size()) {
 			if (Stream.of(lhsIndexes).anyMatch(x -> !x.isEmpty())) {
@@ -1020,13 +1058,24 @@ public final class Wyil2Boogie {
 				throw new NotImplementedYet("Assignment with non-matching LHS and RHS lengths.", stmt);
 			}
 		}
-		for (int i = 0; i != rhsExprs.length; ++i) {
+		this.out.printf("%s;\n", commaSep(rhsExprs));
+	}
+
+	/**
+	 * Concatenates a list of strings, with commas between them.
+	 *
+	 * @param strings
+	 * @return concatenation of the input strings, separated with commas.
+	 */
+	private String commaSep(String[] strings) {
+		final StringBuilder sb = new StringBuilder();
+		for (int i = 0; i != strings.length; ++i) {
 			if (i != 0) {
-				this.out.print(", ");
+				sb.append(", ");
 			}
-			this.out.print(rhsExprs[i]);
+			sb.append(strings[i]);
 		}
-		this.out.println(";");
+		return sb.toString();
 	}
 
 	/**
@@ -1034,22 +1083,32 @@ public final class Wyil2Boogie {
 	 * expressions that could contain 'new' expressions should be processed via this
 	 * method. It returns the resulting Boogie expression just like expr(...), but
 	 * first updates the heap etc.
+	 *
+	 * Since expressions can be nested, this may be called again from with boogieExpr.
+	 * So it allows reentrant calls but saves all writing of heap updates to the end of the top-level call.
 	 */
-	private BoogieExpr writeAllocations(int indent, Expr expr) {
-		this.newAllocations.clear();
-		final BoogieExpr result = boogieExpr(expr);
-		if (this.newAllocations.size() > 0) {
-			String tab = ""; // first tab already done
-			for (int i = 0; i < this.newAllocations.size(); i++) {
-				final String ref = NEW_REF + i;
-				this.out.printf("%s// allocate %s\n", tab, ref);
-				tab = createIndent(indent + 1);
-				this.out.printf("%s%s := %s(%s);\n", tab, ref, NEW, ALLOCATED);
-				this.out.printf("%s%s := %s[%s := true];\n", tab, ALLOCATED, ALLOCATED, ref);
-				this.out.printf("%s%s := %s[%s := %s];\n\n", tab, HEAP, HEAP, ref, this.newAllocations.get(i));
+	BoogieExpr writeAllocations(int indent, Expr expr) {
+		final BoogieExpr result;
+		if (this.newAllocations == null) {
+			// this is a top-level expression within a statement.
+			this.newAllocations = new ArrayList<>();
+			result = boogieExpr(expr);
+			if (this.newAllocations.size() > 0) {
+				String tab = ""; // first tab already done
+				for (int i = 0; i < this.newAllocations.size(); i++) {
+					final String ref = NEW_REF + i;
+					this.out.printf("%s// allocate %s\n", tab, ref);
+					tab = createIndent(indent + 1);
+					this.out.printf("%s%s := %s(%s);\n", tab, ref, NEW, ALLOCATED);
+					this.out.printf("%s%s := %s[%s := true];\n", tab, ALLOCATED, ALLOCATED, ref);
+					this.out.printf("%s%s := %s[%s := %s];\n\n", tab, HEAP, HEAP, ref, this.newAllocations.get(i));
+				}
+				this.out.printf(tab);
 			}
-			this.out.printf(tab);
-			this.newAllocations.clear();
+			this.newAllocations = null;
+		} else {
+			// this handles any reentrant calls to writeAllocations. That is, nested expressions.
+			result = boogieExpr(expr);
 		}
 		return result;
 	}
@@ -1104,7 +1163,6 @@ public final class Wyil2Boogie {
 	 * Extracts base variable that is being assigned to. Builds a list of all
 	 * indexes into the 'indexes' list.
 	 *
-	 * TODO: wrap writeAllocations(indent, rhs[i]) around each expr(...) in case the
 	 * indexes contain 'new' expressions!
 	 *
 	 * @param loc
@@ -1126,7 +1184,7 @@ public final class Wyil2Boogie {
 			return extractLhsBase((LVal) e.getOperand(), indexes);
 		} else if (loc instanceof Expr.Dereference) {
 			Expr.Dereference e = (Expr.Dereference) loc;
-			final String ref = boogieExpr(e.getOperand()).as(WREF).toString();
+			final String ref = writeAllocations(0, e.getOperand()).as(WREF).toString();
 			indexes.add(0, new DerefIndex(ref));
 			return HEAP;
 		} else if (loc instanceof Expr.VariableAccess) {
@@ -1285,33 +1343,22 @@ public final class Wyil2Boogie {
 	// TODO: decide how to encode indirect method calls
 	private void writeIndirectInvoke(int indent, Expr.IndirectInvoke stmt) {
 		final Tuple<Expr> arguments = stmt.getArguments();
-		final String[] args = new String[arguments.size() + 1];
-		args[0] = writeAllocations(indent, stmt.getSource()).as(METHOD).toString(); // and/or as(FUNC)??
-		for (int i = 0; i != arguments.size(); ++i) {
-			args[i + 1] = writeAllocations(indent, arguments.get(i)).asWVal().toString();
-		}
-		writeCall(args);
+		String func = writeAllocations(indent, stmt.getSource()).as(METHOD).toString(); // and/or as(FUNC)??
+		writeInvokeArgs(indent, func, arguments);
 	}
 
 	private void writeInvoke(int indent, Expr.Invoke stmt) {
 		final Tuple<Expr> arguments = stmt.getOperands();
-		final String[] args = new String[arguments.size() + 1];
-		args[0] = mangledFunctionMethodName(stmt.getDeclaration().getQualifiedName(), stmt.getDeclaration().getType());
-		for (int i = 0; i != arguments.size(); ++i) {
-			args[i + 1] = writeAllocations(indent, arguments.get(i)).asWVal().toString();
-		}
-		writeCall(args);
+		String func = mangledFunctionMethodName(stmt.getDeclaration().getQualifiedName(), stmt.getDeclaration().getType());
+		writeInvokeArgs(indent, func, arguments);
 	}
 
-	private void writeCall(String[] args) {
-		this.out.printf("%s(", args[0]);
-		for (int i = 1; i != args.length; ++i) {
-			if (i != 1) {
-				this.out.print(", ");
-			}
-			this.out.print(args[i]);
+	private void writeInvokeArgs(int indent, String func, Tuple<Expr> arguments) {
+		final String[] args = new String[arguments.size()];
+		for (int i = 0; i != arguments.size(); ++i) {
+			args[i] = writeAllocations(indent, arguments.get(i)).asWVal().toString();
 		}
-		this.out.println(");");
+		this.out.printf("%s(%s);\n", func, commaSep(args));
 	}
 
 	// TODO: named block
@@ -1378,9 +1425,11 @@ public final class Wyil2Boogie {
 		this.out.println("return;");
 	}
 
-	private void writeSkip(Stmt.Skip b) {
+	private void writeSkip(int indent, Stmt.Skip b) {
 		// no output needed. Boogie uses {...} blocks, so empty statements are okay.
-		this.out.println("// " + b);
+		// But we output an assert true, just for fun.
+		tabIndent(indent + 1);
+		this.out.println("assert true; // skip");
 	}
 
 	/**
@@ -1872,8 +1921,8 @@ public final class Wyil2Boogie {
 
 	private BoogieExpr boogieDereference(Expr.Dereference expr) {
 		final BoogieExpr be = boogieExpr(expr.getOperand()).as(WREF);
-		// TODO: assume the type information of out.
-		return new BoogieExpr(WVAL, "w__heap[" + be.toString() + "]");
+		// TODO: add an 'assume' statement about the type information of the deref result.
+		return new BoogieExpr(WVAL, HEAP + "[" + be.toString() + "]");
 	}
 
 	private BoogieExpr boogieIs(Expr.Is c) {
@@ -2166,9 +2215,9 @@ public final class Wyil2Boogie {
 			return sb.toString();
 		}
 		if (type instanceof Type.Reference) {
-			// TODO: add typing of dereference element, once we pass w__heap into functions.
+			// TODO: add typing of dereference element, once we pass HEAP into functions.
 			// Type.Reference ref = (Type.Reference) type;
-			// String deref = "w__heap[toRef(" + var + ")]";
+			// String deref = HEAP + "[toRef(" + var + ")]";
 			return "isRef(" + var + ")"; // && " + typePredicate(deref, ref.getElement());
 		}
 		if (type instanceof Type.Function) {
@@ -2591,7 +2640,7 @@ public final class Wyil2Boogie {
 				captureNames.toString(),
 				paramNames.toString()
 				);
-		BoogieExpr body = boogieExpr(decl.getBody()).asWVal();
+		BoogieExpr body = writeAllocations(0, decl.getBody()).asWVal();
 		if (decls.length() == 0) {
 			this.out.printf("axiom %s == %s;\n\n",
 					call,
