@@ -1,0 +1,187 @@
+*** MODEL
+$data -> T@WField!val!1
+$next -> T@WField!val!0
+%lbl%@4 -> false
+%lbl%+0 -> true
+%lbl%+5 -> true
+eg -> T@WVal!val!0
+eg@0 -> T@WVal!val!3
+eg@1 -> T@WVal!val!4
+empty__record -> |T@[WField]WVal!val!0|
+length__test__pre -> true
+null -> T@WVal!val!0
+undef__field -> T@WVal!val!1
+toRecord -> {
+  T@WVal!val!3 -> |T@[WField]WVal!val!2|
+  T@WVal!val!4 -> |T@[WField]WVal!val!3|
+  else -> |T@[WField]WVal!val!2|
+}
+length__length -> {
+  T@WVal!val!0 -> T@WVal!val!5
+  T@WVal!val!4 -> T@WVal!val!8
+  else -> T@WVal!val!5
+}
+length__length__pre -> {
+  T@WVal!val!0 -> true
+  T@WVal!val!4 -> true
+  else -> true
+}
+isRecord -> {
+  T@WVal!val!3 -> true
+  T@WVal!val!4 -> true
+  T@WVal!val!2 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!0 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!8 -> false
+  else -> false
+}
+isObject -> {
+  T@WVal!val!3 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!2 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!0 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!8 -> false
+  else -> false
+}
+isFunction -> {
+  T@WVal!val!3 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!2 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!0 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!8 -> false
+  else -> false
+}
+i@@6!31!1 -> {
+  T@WVal!val!3 T@WVal!val!4 -> T@WField!val!1
+  T@WVal!val!4 T@WVal!val!3 -> T@WField!val!1
+  else -> T@WField!val!1
+}
+tickleBool -> {
+  true -> true
+  false -> true
+  else -> true
+}
+isArray -> {
+  T@WVal!val!3 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!2 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!0 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!8 -> false
+  else -> false
+}
+Store_[WField]WVal -> {
+  |T@[WField]WVal!val!0| T@WField!val!1 T@WVal!val!2 -> |T@[WField]WVal!val!1|
+  |T@[WField]WVal!val!1| T@WField!val!0 T@WVal!val!0 -> |T@[WField]WVal!val!2|
+  |T@[WField]WVal!val!2| T@WField!val!1 T@WVal!val!7 -> |T@[WField]WVal!val!3|
+  else -> |T@[WField]WVal!val!1|
+}
+fromInt -> {
+  3 -> T@WVal!val!2
+  4 -> T@WVal!val!7
+  0 -> T@WVal!val!5
+  1 -> T@WVal!val!6
+  1797 -> T@WVal!val!8
+  else -> T@WVal!val!2
+}
+toInt -> {
+  T@WVal!val!2 -> 3
+  T@WVal!val!7 -> 4
+  T@WVal!val!5 -> 0
+  T@WVal!val!6 -> 1
+  T@WVal!val!8 -> 1797
+  else -> 3
+}
+Select_[WField]WVal -> {
+  |T@[WField]WVal!val!3| T@WField!val!0 -> T@WVal!val!0
+  |T@[WField]WVal!val!2| T@WField!val!0 -> T@WVal!val!0
+  |T@[WField]WVal!val!3| T@WField!val!1 -> T@WVal!val!7
+  |T@[WField]WVal!val!2| T@WField!val!1 -> T@WVal!val!2
+  |T@[WField]WVal!val!1| T@WField!val!1 -> T@WVal!val!2
+  else -> T@WVal!val!0
+}
+fromRecord -> {
+  |T@[WField]WVal!val!2| -> T@WVal!val!3
+  |T@[WField]WVal!val!3| -> T@WVal!val!4
+  else -> T@WVal!val!3
+}
+isNull -> {
+  T@WVal!val!3 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!2 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!0 -> true
+  T@WVal!val!5 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!8 -> false
+  else -> false
+}
+isRef -> {
+  T@WVal!val!3 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!2 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!0 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!8 -> false
+  else -> false
+}
+is_Node -> {
+  T@WVal!val!4 -> true
+  else -> true
+}
+isInt -> {
+  T@WVal!val!2 -> true
+  T@WVal!val!7 -> true
+  T@WVal!val!3 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!0 -> false
+  T@WVal!val!5 -> true
+  T@WVal!val!6 -> true
+  T@WVal!val!8 -> true
+  else -> true
+}
+r@@1!49!2 -> {
+  T@WVal!val!0 -> T@WVal!val!5
+  T@WVal!val!4 -> T@WVal!val!8
+  else -> T@WVal!val!5
+}
+is_List -> {
+  T@WVal!val!0 -> true
+  T@WVal!val!4 -> true
+  else -> true
+}
+isMethod -> {
+  T@WVal!val!3 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!2 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!0 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!8 -> false
+  else -> false
+}
+isBool -> {
+  T@WVal!val!3 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!2 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!0 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!8 -> false
+  else -> false
+}
+*** END_MODEL

@@ -1,0 +1,8 @@
+*** Model 1
+                              eg  := null
+                            eg@0.next  == null
+                            eg@0.data  == 3
+                            eg@1.next  == null
+                            eg@1.data  == 4
+               length__test__pre  := true
+

@@ -1,0 +1,530 @@
+*** MODEL
+%lbl%@2 -> false
+%lbl%+0 -> true
+%lbl%+4 -> true
+ConstrainedList_Valid_8__test__pre -> true
+null -> T@WVal!val!0
+undef__field -> T@WVal!val!1
+xs -> T@WVal!val!2
+xs@0 -> T@WVal!val!6
+xs@1 -> T@WVal!val!9
+arrayconst -> {
+  T@WVal!val!11 -> |T@[Int]WVal!val!0|
+  else -> |T@[Int]WVal!val!0|
+}
+arraylen -> {
+  T@WVal!val!2 -> 5
+  T@WVal!val!6 -> 4
+  T@WVal!val!9 -> 4
+  else -> 4
+}
+isRecord -> {
+  T@WVal!val!2 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!3 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!8 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!9 -> false
+  T@WVal!val!10 -> false
+  T@WVal!val!11 -> false
+  T@WVal!val!13 -> false
+  else -> false
+}
+isFunction -> {
+  T@WVal!val!2 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!3 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!8 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!9 -> false
+  T@WVal!val!10 -> false
+  T@WVal!val!11 -> false
+  T@WVal!val!13 -> false
+  else -> false
+}
+isObject -> {
+  T@WVal!val!2 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!3 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!8 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!9 -> false
+  T@WVal!val!10 -> false
+  T@WVal!val!11 -> false
+  T@WVal!val!13 -> false
+  else -> false
+}
+i@@4!24!0 -> {
+  T@WVal!val!9 T@WVal!val!6 -> 0
+  T@WVal!val!6 T@WVal!val!9 -> 0
+  else -> 0
+}
+toArray -> {
+  T@WVal!val!2 -> |T@[Int]WVal!val!4|
+  T@WVal!val!6 -> |T@[Int]WVal!val!5|
+  T@WVal!val!9 -> |T@[Int]WVal!val!6|
+  else -> |T@[Int]WVal!val!4|
+}
+tickleBool -> {
+  true -> true
+  false -> true
+  else -> true
+}
+isArray -> {
+  T@WVal!val!2 -> true
+  T@WVal!val!6 -> true
+  T@WVal!val!5 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!3 -> false
+  T@WVal!val!9 -> true
+  T@WVal!val!8 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!10 -> false
+  T@WVal!val!11 -> false
+  T@WVal!val!13 -> false
+  else -> false
+}
+isNull -> {
+  T@WVal!val!2 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!3 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!8 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!9 -> false
+  T@WVal!val!10 -> false
+  T@WVal!val!11 -> false
+  else -> false
+}
+fromInt -> {
+  1 -> T@WVal!val!11
+  2 -> T@WVal!val!3
+  3 -> T@WVal!val!4
+  4 -> T@WVal!val!5
+  0 -> T@WVal!val!7
+  10 -> T@WVal!val!8
+  15 -> T@WVal!val!10
+  else -> T@WVal!val!11
+}
+fromArray -> {
+  |T@[Int]WVal!val!3| 4 -> T@WVal!val!6
+  |T@[Int]WVal!val!4| 5 -> T@WVal!val!2
+  |T@[Int]WVal!val!5| 4 -> T@WVal!val!6
+  |T@[Int]WVal!val!6| 4 -> T@WVal!val!9
+  else -> T@WVal!val!6
+}
+isRef -> {
+  T@WVal!val!2 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!3 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!8 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!9 -> false
+  T@WVal!val!10 -> false
+  T@WVal!val!11 -> false
+  T@WVal!val!13 -> false
+  else -> false
+}
+toInt -> {
+  T@WVal!val!5 -> 4
+  T@WVal!val!4 -> 3
+  T@WVal!val!3 -> 2
+  T@WVal!val!7 -> 0
+  T@WVal!val!8 -> 10
+  T@WVal!val!10 -> 15
+  T@WVal!val!11 -> 1
+  else -> 4
+}
+Store_[$int]WVal -> {
+  |T@[Int]WVal!val!0| 1 T@WVal!val!3 -> |T@[Int]WVal!val!1|
+  |T@[Int]WVal!val!1| 2 T@WVal!val!4 -> |T@[Int]WVal!val!2|
+  |T@[Int]WVal!val!2| 3 T@WVal!val!5 -> |T@[Int]WVal!val!3|
+  else -> |T@[Int]WVal!val!1|
+}
+rs!50!3 -> {
+  T@WVal!val!8 T@WVal!val!7 T@WVal!val!6 -> T@WVal!val!9
+  else -> T@WVal!val!9
+}
+isInt -> {
+  T@WVal!val!2 -> false
+  T@WVal!val!5 -> true
+  T@WVal!val!4 -> true
+  T@WVal!val!3 -> true
+  T@WVal!val!6 -> false
+  T@WVal!val!7 -> true
+  T@WVal!val!8 -> true
+  T@WVal!val!9 -> false
+  T@WVal!val!10 -> true
+  T@WVal!val!11 -> true
+  T@WVal!val!13 -> false
+  else -> true
+}
+is_nat -> {
+  T@WVal!val!7 -> true
+  T@WVal!val!8 -> true
+  T@WVal!val!13 -> false
+  T@WVal!val!11 -> true
+  else -> true
+}
+ConstrainedList_Valid_8__update -> {
+  T@WVal!val!6 T@WVal!val!7 T@WVal!val!8 -> T@WVal!val!9
+  else -> T@WVal!val!9
+}
+i__1!47!2 -> {
+  T@WVal!val!9 -> 3
+  else -> 3
+}
+Select_[$int]WVal -> {
+  |T@[Int]WVal!val!3| 3 -> T@WVal!val!5
+  |T@[Int]WVal!val!2| 2 -> T@WVal!val!4
+  |T@[Int]WVal!val!1| 1 -> T@WVal!val!3
+  |T@[Int]WVal!val!5| 0 -> T@WVal!val!11
+  |T@[Int]WVal!val!6| 0 -> T@WVal!val!12
+  |T@[Int]WVal!val!6| 3 -> T@WVal!val!13
+  |T@[Int]WVal!val!3| 0 -> T@WVal!val!11
+  |T@[Int]WVal!val!2| 0 -> T@WVal!val!11
+  |T@[Int]WVal!val!1| 0 -> T@WVal!val!11
+  |T@[Int]WVal!val!0| 0 -> T@WVal!val!11
+  else -> T@WVal!val!11
+}
+ConstrainedList_Valid_8__update__pre -> {
+  T@WVal!val!6 T@WVal!val!7 T@WVal!val!8 -> true
+  T@WVal!val!9 T@WVal!val!4 T@WVal!val!10 -> false
+  else -> true
+}
+isMethod -> {
+  T@WVal!val!2 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!3 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!8 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!9 -> false
+  T@WVal!val!10 -> false
+  T@WVal!val!11 -> false
+  T@WVal!val!13 -> false
+  else -> false
+}
+isBool -> {
+  T@WVal!val!2 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!3 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!8 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!9 -> false
+  T@WVal!val!10 -> false
+  T@WVal!val!11 -> false
+  T@WVal!val!13 -> false
+  else -> false
+}
+*** END_MODEL
+*** MODEL
+%lbl%@2 -> true
+%lbl%@3 -> false
+%lbl%+0 -> true
+%lbl%+4 -> true
+ConstrainedList_Valid_8__test__pre -> true
+null -> T@WVal!val!0
+undef__field -> T@WVal!val!1
+xs -> T@WVal!val!2
+xs@0 -> T@WVal!val!6
+xs@1 -> T@WVal!val!8
+xs@2 -> T@WVal!val!10
+arrayconst -> {
+  T@WVal!val!17 -> |T@[Int]WVal!val!0|
+  T@WVal!val!16 -> |T@[Int]WVal!val!4|
+  else -> |T@[Int]WVal!val!0|
+}
+arraylen -> {
+  T@WVal!val!2 -> 5
+  T@WVal!val!6 -> 4
+  T@WVal!val!8 -> 4
+  T@WVal!val!11 -> 4
+  T@WVal!val!10 -> 4
+  else -> 4
+}
+isRecord -> {
+  T@WVal!val!2 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!3 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!16 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!8 -> false
+  T@WVal!val!11 -> false
+  T@WVal!val!9 -> false
+  T@WVal!val!10 -> false
+  T@WVal!val!17 -> false
+  T@WVal!val!12 -> false
+  T@WVal!val!13 -> false
+  else -> false
+}
+isFunction -> {
+  T@WVal!val!2 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!3 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!16 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!8 -> false
+  T@WVal!val!11 -> false
+  T@WVal!val!9 -> false
+  T@WVal!val!10 -> false
+  T@WVal!val!17 -> false
+  T@WVal!val!12 -> false
+  T@WVal!val!13 -> false
+  else -> false
+}
+isObject -> {
+  T@WVal!val!2 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!3 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!16 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!8 -> false
+  T@WVal!val!11 -> false
+  T@WVal!val!9 -> false
+  T@WVal!val!10 -> false
+  T@WVal!val!17 -> false
+  T@WVal!val!12 -> false
+  T@WVal!val!13 -> false
+  else -> false
+}
+i@@4!24!0 -> {
+  T@WVal!val!8 T@WVal!val!6 -> 0
+  T@WVal!val!6 T@WVal!val!8 -> 0
+  T@WVal!val!11 T@WVal!val!6 -> 0
+  T@WVal!val!11 T@WVal!val!8 -> 0
+  T@WVal!val!6 T@WVal!val!11 -> 0
+  T@WVal!val!8 T@WVal!val!11 -> 0
+  T@WVal!val!10 T@WVal!val!6 -> 0
+  T@WVal!val!10 T@WVal!val!8 -> 1
+  T@WVal!val!10 T@WVal!val!11 -> 0
+  T@WVal!val!6 T@WVal!val!10 -> 0
+  T@WVal!val!8 T@WVal!val!10 -> 0
+  T@WVal!val!11 T@WVal!val!10 -> 0
+  else -> 0
+}
+toArray -> {
+  T@WVal!val!2 -> |T@[Int]WVal!val!8|
+  T@WVal!val!6 -> |T@[Int]WVal!val!9|
+  T@WVal!val!8 -> |T@[Int]WVal!val!10|
+  T@WVal!val!11 -> |T@[Int]WVal!val!11|
+  T@WVal!val!10 -> |T@[Int]WVal!val!12|
+  else -> |T@[Int]WVal!val!8|
+}
+tickleBool -> {
+  true -> true
+  false -> true
+  else -> true
+}
+isArray -> {
+  T@WVal!val!2 -> true
+  T@WVal!val!6 -> true
+  T@WVal!val!5 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!3 -> false
+  T@WVal!val!8 -> true
+  T@WVal!val!16 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!11 -> true
+  T@WVal!val!10 -> true
+  T@WVal!val!9 -> false
+  T@WVal!val!17 -> false
+  T@WVal!val!12 -> false
+  T@WVal!val!13 -> false
+  else -> false
+}
+isNull -> {
+  T@WVal!val!2 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!3 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!16 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!8 -> false
+  T@WVal!val!11 -> false
+  T@WVal!val!9 -> false
+  T@WVal!val!10 -> false
+  T@WVal!val!17 -> false
+  T@WVal!val!12 -> false
+  T@WVal!val!13 -> false
+  else -> false
+}
+fromInt -> {
+  1 -> T@WVal!val!17
+  2 -> T@WVal!val!3
+  3 -> T@WVal!val!4
+  4 -> T@WVal!val!5
+  0 -> T@WVal!val!7
+  10 -> T@WVal!val!16
+  15 -> T@WVal!val!9
+  636 -> T@WVal!val!12
+  6758 -> T@WVal!val!13
+  else -> T@WVal!val!17
+}
+fromArray -> {
+  |T@[Int]WVal!val!3| 4 -> T@WVal!val!6
+  |T@[Int]WVal!val!7| 4 -> T@WVal!val!11
+  |T@[Int]WVal!val!8| 5 -> T@WVal!val!2
+  |T@[Int]WVal!val!9| 4 -> T@WVal!val!6
+  |T@[Int]WVal!val!10| 4 -> T@WVal!val!8
+  |T@[Int]WVal!val!11| 4 -> T@WVal!val!11
+  |T@[Int]WVal!val!12| 4 -> T@WVal!val!10
+  else -> T@WVal!val!6
+}
+isRef -> {
+  T@WVal!val!2 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!3 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!16 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!8 -> false
+  T@WVal!val!11 -> false
+  T@WVal!val!9 -> false
+  T@WVal!val!10 -> false
+  T@WVal!val!17 -> false
+  T@WVal!val!12 -> false
+  T@WVal!val!13 -> false
+  else -> false
+}
+toInt -> {
+  T@WVal!val!5 -> 4
+  T@WVal!val!4 -> 3
+  T@WVal!val!3 -> 2
+  T@WVal!val!7 -> 0
+  T@WVal!val!16 -> 10
+  T@WVal!val!9 -> 15
+  T@WVal!val!17 -> 1
+  T@WVal!val!12 -> 636
+  T@WVal!val!13 -> 6758
+  else -> 4
+}
+Store_[$int]WVal -> {
+  |T@[Int]WVal!val!0| 1 T@WVal!val!3 -> |T@[Int]WVal!val!1|
+  |T@[Int]WVal!val!1| 2 T@WVal!val!4 -> |T@[Int]WVal!val!2|
+  |T@[Int]WVal!val!2| 3 T@WVal!val!5 -> |T@[Int]WVal!val!3|
+  |T@[Int]WVal!val!4| 1 T@WVal!val!3 -> |T@[Int]WVal!val!5|
+  |T@[Int]WVal!val!5| 2 T@WVal!val!4 -> |T@[Int]WVal!val!6|
+  |T@[Int]WVal!val!6| 3 T@WVal!val!9 -> |T@[Int]WVal!val!7|
+  else -> |T@[Int]WVal!val!1|
+}
+rs!50!3 -> {
+  T@WVal!val!16 T@WVal!val!7 T@WVal!val!6 -> T@WVal!val!8
+  T@WVal!val!9 T@WVal!val!4 T@WVal!val!8 -> T@WVal!val!10
+  else -> T@WVal!val!8
+}
+isInt -> {
+  T@WVal!val!2 -> false
+  T@WVal!val!5 -> true
+  T@WVal!val!4 -> true
+  T@WVal!val!3 -> true
+  T@WVal!val!6 -> false
+  T@WVal!val!7 -> true
+  T@WVal!val!16 -> true
+  T@WVal!val!8 -> false
+  T@WVal!val!9 -> true
+  T@WVal!val!11 -> false
+  T@WVal!val!10 -> false
+  T@WVal!val!17 -> true
+  T@WVal!val!12 -> true
+  T@WVal!val!13 -> true
+  else -> true
+}
+is_nat -> {
+  T@WVal!val!7 -> true
+  T@WVal!val!16 -> true
+  T@WVal!val!4 -> true
+  T@WVal!val!9 -> true
+  T@WVal!val!12 -> true
+  T@WVal!val!17 -> true
+  T@WVal!val!13 -> true
+  else -> true
+}
+ConstrainedList_Valid_8__update -> {
+  T@WVal!val!6 T@WVal!val!7 T@WVal!val!16 -> T@WVal!val!8
+  T@WVal!val!8 T@WVal!val!4 T@WVal!val!9 -> T@WVal!val!10
+  else -> T@WVal!val!8
+}
+Select_[$int]WVal -> {
+  |T@[Int]WVal!val!3| 3 -> T@WVal!val!5
+  |T@[Int]WVal!val!2| 2 -> T@WVal!val!4
+  |T@[Int]WVal!val!1| 1 -> T@WVal!val!3
+  |T@[Int]WVal!val!9| 0 -> T@WVal!val!17
+  |T@[Int]WVal!val!10| 0 -> T@WVal!val!12
+  |T@[Int]WVal!val!7| 3 -> T@WVal!val!9
+  |T@[Int]WVal!val!6| 2 -> T@WVal!val!4
+  |T@[Int]WVal!val!5| 1 -> T@WVal!val!3
+  |T@[Int]WVal!val!10| 1 -> T@WVal!val!13
+  |T@[Int]WVal!val!12| 1 -> T@WVal!val!14
+  |T@[Int]WVal!val!12| 0 -> T@WVal!val!15
+  |T@[Int]WVal!val!11| 0 -> T@WVal!val!16
+  |T@[Int]WVal!val!7| 0 -> T@WVal!val!16
+  |T@[Int]WVal!val!3| 0 -> T@WVal!val!17
+  |T@[Int]WVal!val!2| 0 -> T@WVal!val!17
+  |T@[Int]WVal!val!6| 0 -> T@WVal!val!16
+  |T@[Int]WVal!val!1| 0 -> T@WVal!val!17
+  |T@[Int]WVal!val!5| 0 -> T@WVal!val!16
+  |T@[Int]WVal!val!0| 0 -> T@WVal!val!17
+  |T@[Int]WVal!val!4| 0 -> T@WVal!val!16
+  else -> T@WVal!val!17
+}
+ConstrainedList_Valid_8__update__pre -> {
+  T@WVal!val!6 T@WVal!val!7 T@WVal!val!16 -> true
+  T@WVal!val!8 T@WVal!val!4 T@WVal!val!9 -> true
+  else -> true
+}
+isMethod -> {
+  T@WVal!val!2 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!3 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!16 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!8 -> false
+  T@WVal!val!11 -> false
+  T@WVal!val!9 -> false
+  T@WVal!val!10 -> false
+  T@WVal!val!17 -> false
+  T@WVal!val!12 -> false
+  T@WVal!val!13 -> false
+  else -> false
+}
+isBool -> {
+  T@WVal!val!2 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!3 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!16 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!8 -> false
+  T@WVal!val!11 -> false
+  T@WVal!val!9 -> false
+  T@WVal!val!10 -> false
+  T@WVal!val!17 -> false
+  T@WVal!val!12 -> false
+  T@WVal!val!13 -> false
+  else -> false
+}
+*** END_MODEL

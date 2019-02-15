@@ -1,0 +1,5 @@
+*** Model 1
+     Function_Valid_6__test__pre  := true
+                             |ys| == 2
+                           |ys@0| == 3
+
