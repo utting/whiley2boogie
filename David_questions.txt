@@ -6,7 +6,7 @@ How to run 'wy boogie' with assertions enabled?
 
 Equality:
   1. type-specific equals tests?
-  2. or just Boogie '=='?  Plus axioms for each open/closed record type?
+  *2. or just Boogie '=='?  Plus axioms for each open/closed record type?
     Second approach seems better.
     1: does not handle recursive types (easily?)
     1: with open records, not possible to statically know the valid fields.
@@ -15,6 +15,9 @@ Equality:
        (Boogie says it does not offer extensionality of maps!)
        Try issue 832.
 
+    Dec 2017: Switched to using Approach 2.
+          Have added guarded equality axiom for arrays.
+          TODO: Need to do same for each type of (closed?) record.
 
 
 Bugs?
@@ -23,6 +26,8 @@ Bugs?
   * wy boogie ConstrainedReference_Valid_1.whiley (and wy compile) return status 0, but give this error:
     ./ConstrainedReference_Valid_1.whiley:7: expected reference type
             return (*v) + 1
+        See wycc issue #40: wy return status is always success.
+
 
 
 Java 9: support?  Add GitHub issue, or pull request with changes.
