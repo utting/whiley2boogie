@@ -8,6 +8,27 @@ import wyfs.lang.Path;
 import java.io.*;
 import java.util.*;
 
+/**
+ * Classes for translating a Boogie counter-example file into more Whiley-like notation.
+ *
+ * TODO:
+ * We could translate functions and function preconditions more precisely.
+ * For example:
+ * <pre>
+ * ConstrainedList_Valid_8__update__pre -> {
+ *   T@WVal!val!6 T@WVal!val!7 T@WVal!val!8 -> true
+ *   T@WVal!val!9 T@WVal!val!4 T@WVal!val!10 -> false
+ *   else -> true
+ * }
+ * </pre>
+ * could be translated to something like:
+ * <pre>
+ *     update__pre(xs@0, 0, 10) == true
+ *     update__pre(xs@1, 3, 15) == false
+ * </pre>
+ * Similarly for functions that return results.
+ *
+ */
 public class BoogieExampleFile extends AbstractCompilationUnit {
 	// =========================================================================
 	// Content Type
