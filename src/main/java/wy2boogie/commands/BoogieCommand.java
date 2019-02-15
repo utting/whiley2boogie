@@ -248,7 +248,7 @@ public class BoogieCommand implements Command {
 				BoogieExampleFile beg = f.read();
 				final ByteArrayOutputStream out = new ByteArrayOutputStream();
 		        final PrintWriter writer = new PrintWriter(out);
-		        writer.println(beg.toString());
+		        writer.print(beg.toString());
 		        writer.close();
 		        Path.Entry<WhileyExampleFile> target = projectRoot.create(f.id(), WhileyExampleFile.ContentType);
 		        target.write(new WhileyExampleFile(target, out.toByteArray()));
