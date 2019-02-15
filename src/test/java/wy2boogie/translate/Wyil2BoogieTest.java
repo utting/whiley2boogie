@@ -1,13 +1,11 @@
 package wy2boogie.translate;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
-
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
 
 import wybs.util.StdProject;
 import wyil.check.FlowTypeCheck;
@@ -15,10 +13,6 @@ import wyil.lang.WyilFile.Type;
 
 public class Wyil2BoogieTest {
 
-    @Before
-    public void setup() {
-
-    }
 
     @Test
     public void testIndents() {

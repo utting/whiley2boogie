@@ -37,7 +37,7 @@
       <id>utting</id>
       <name>Mark Utting</name>
       <email>utting@usc.edu.au</email>
-      <url>http://www.usc.edu.au/explore/structure/faculty-of-arts-business-and-law/staff/dr-mark-utting</url>
+      <url>https://www.usc.edu.au/staff-repository/dr-mark-utting</url>
     </developer>
   </developers>
 
@@ -52,9 +52,9 @@
       <version>0.6.1</version>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.12</version>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>5.4.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

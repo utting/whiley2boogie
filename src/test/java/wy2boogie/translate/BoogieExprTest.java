@@ -1,8 +1,8 @@
 package wy2boogie.translate;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import wy2boogie.translate.BoogieExpr;
 import wy2boogie.translate.BoogieType;
@@ -140,13 +140,15 @@ public class BoogieExprTest {
         assertNull(prod2.getOp());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testBadOp() {
         BoogieExpr ex = new BoogieExpr(BoogieType.INT, "x");
         BoogieExpr e2 = new BoogieExpr(BoogieType.INT, "2");
         BoogieExpr sum = new BoogieExpr(BoogieType.INT);
         sum.addOp(ex, " + ", e2);
-        sum.needsBrackets("+");
+        assertThrows(IllegalArgumentException.class,
+                () -> sum.needsBrackets("+")
+        );
     }
 
     @Test
