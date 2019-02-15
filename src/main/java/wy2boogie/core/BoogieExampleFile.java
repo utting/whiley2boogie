@@ -15,8 +15,30 @@ public class BoogieExampleFile extends AbstractCompilationUnit {
 
 	/**
 	 * Records the name-value relationships of one Boogie counter-example.
+	 *
+	 *
 	 */
 	public static class BoogieModel {
+		/**
+		 * This map-of-maps records all the mappings in the Boogie counter-example.
+		 * For example:
+		 * <pre>
+		 * toInt -> {
+		 *   T@WVal!val!2 -> 0
+		 *   T@WVal!val!3 -> 8855
+		 *   else -> 0
+		 * }
+		 * </pre>
+		 * will add the key "toInt" as a key, with its value being a map
+		 * that maps "T@WVal!val!2" to "0" ... and "else" to "0".
+		 * In addition to these "to..." maps, we also use the "is..." maps
+		 * to decide which map each symbolic name should belong to (see the isType method).
+		 *
+		 * Note that globals are put into a map whose names is "".
+		 *
+		 * These maps are later used (see getValue) to 'concretise' symbolic names into concrete values.
+		 * For example, to rewrite "T@WVal!val!2" to "0".
+		 */
 		private final Map<String, Map<String, String>> maps;
 
 		private Map<String, String> currentMap;
@@ -24,18 +46,24 @@ public class BoogieExampleFile extends AbstractCompilationUnit {
 		private String currentMapName;
 
 		public static final String[] ATOM_TYPES = {"Int", "Bool", "Null", "Ref"};
+		private Set<String> ignoredGlobals;
 		// , "Array", "Record", "Function", "Method"};
 
 		public BoogieModel() {
+			ignoredGlobals = new HashSet<>();
+			ignoredGlobals.add("null");
+			ignoredGlobals.add("empty__record");
+			ignoredGlobals.add("undef__field");
+
 			maps = new LinkedHashMap<>();
-			currentMap = new HashMap<>();
-			toFieldName = new HashMap<>();
+			currentMap = new LinkedHashMap<>(); // we preserve name order
+			toFieldName = new LinkedHashMap<>(); // preserve name order
 			currentMapName = "";
 			maps.put(currentMapName, currentMap); // we start with the global map, whose name is the empty string.
 		}
 
 		/**
-		 * Start a new named map isType this model.
+		 * Start a new named map in this model.
 		 *
 		 * @param name
 		 */
@@ -63,14 +91,19 @@ public class BoogieExampleFile extends AbstractCompilationUnit {
 		}
 
 		/**
-		 * Get the value of a key isType a given map.
+		 * Get the value of a key in a given map.
 		 *
-		 * @param map the name of a map, which must exist.  The 'global' map is called "".
-		 * @param key the name of a key isType that map.
-		 * @return null if the key is not isType the map.
+		 * @param mapName the name of a map, which must exist.  The 'global' map is called "".
+		 * @param key the name of a key in that map.
+		 * @return null if the key is not in the map.
 		 */
-		public String getValue(String map, String key) {
-			return maps.get(map).get(key);
+		public String getValue(String mapName, String key) {
+			Map<String, String> map1 = maps.get(mapName);
+			if (map1 == null) {
+				throw new IllegalArgumentException("missing map " + mapName + " while looking for key " + key
+				  + "maps=" + maps);
+			}
+			return map1.get(key);
 		}
 
 		/**
@@ -100,13 +133,16 @@ public class BoogieExampleFile extends AbstractCompilationUnit {
 		 */
 		public String concretise(String value) {
 			String result = null;
-			for (String typ : ATOM_TYPES) {
-				if (isType(typ, value)) {
-					result = getValue("to" + typ, value);
-				}
-			}
 			if (isType("Null", value)) {
+				// We handle the "Null" type specially, because it has only a single value.
+				// And the .beg files do not have any "toNull" map.
 				result = "null";
+			} else {
+				for (String typ : ATOM_TYPES) {
+					if (isType(typ, value)) {
+						result = getValue("to" + typ, value);
+					}
+				}
 			}
 			if (result == null) {
 				result = value;
@@ -118,15 +154,17 @@ public class BoogieExampleFile extends AbstractCompilationUnit {
 		public String toString() {
 			StringBuilder result = new StringBuilder();
 			for (String g : getGlobals()) {
-				String value = getValue("", g);
-				if (g.startsWith("%lbl%")) {
+				if (ignoredGlobals.contains(g) || g.startsWith("%lbl%")) {
 					// ignore labels for now
-				} else if (isType("Array", value)) {
+					continue;
+				}
+				String value = getValue("", g);
+				if (isType("Array", value)) {
 					stringifyArray(result, g, value);
 				} else if (isType("Record", value)) {
 					stringifyRecord(result, g, value);
 				} else {
-					result.append(String.format("  %20s := %s\n", g, concretise(value)));
+					result.append(String.format("  %30s  := %s\n", g, concretise(value)));
 				}
 			}
 			return result.toString();
@@ -135,7 +173,7 @@ public class BoogieExampleFile extends AbstractCompilationUnit {
 		private void stringifyArray(StringBuilder result, String g, String value) {
 			String len = getValue("arraylen", value);
 			String array = getValue( "toArray", value);
-			result.append(String.format("  %21s == %s\n", "|" + g + "|", concretise(len)));
+			result.append(String.format("  %31s == %s\n", "|" + g + "|", concretise(len)));
 			if (array != null) {
                 Map<String, String> aMap = maps.get("Select_[$int]WVal");
                 for (String k : aMap.keySet()) {
@@ -143,7 +181,7 @@ public class BoogieExampleFile extends AbstractCompilationUnit {
                         String[] kk = k.split(" ");
                         String index = kk[1];
                         String indexVal = aMap.get(k);
-                        result.append(String.format("  %20s[%s] := %s\n", g, index, concretise(indexVal)));
+                        result.append(String.format("  %30s[%s]  := %s\n", g, index, concretise(indexVal)));
                     }
                 }
             }
@@ -167,7 +205,7 @@ public class BoogieExampleFile extends AbstractCompilationUnit {
 							field = this.toFieldName.get(field);
 						}
 						String indexVal = aMap.get(k);
-						result.append(String.format("  %20s.%s == %s\n", g, field, concretise(indexVal)));
+						result.append(String.format("  %30s.%s  == %s\n", g, field, concretise(indexVal)));
 					}
 				}
 			}
@@ -229,7 +267,7 @@ public class BoogieExampleFile extends AbstractCompilationUnit {
 					line = reader.readLine();
 				}
 				if (model == null) {
-					throw new IOException("No models found isType " + e.location());
+					throw new IOException("No models found in " + e.location());
 				} else {
 					result.models.add(model);
 				}
