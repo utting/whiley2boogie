@@ -239,9 +239,13 @@ public class BoogieCommand implements Command {
 			ArrayList<Path.Entry<BoogieExampleFile>> delta = new ArrayList<>();
 			for (String arg : args) {
 				// strip extension
-				arg = arg.replace(".beg", "");
+				String base = arg.replace(".beg", "");
 				//
-				delta.add(projectRoot.get(Trie.fromString(arg), BoogieExampleFile.ContentType));
+				Path.Entry<BoogieExampleFile> entry = projectRoot.get(Trie.fromString(base), BoogieExampleFile.ContentType);
+				if (entry == null) {
+					throw new RuntimeException("Cannot create Path.Entry for " + arg + ".  Try .beg?");
+				}
+				delta.add(entry);
 			}
 			// Go through all listed beg files and translate them
 			for (Path.Entry<BoogieExampleFile> f : delta) {
