@@ -67,6 +67,14 @@ import wyil.util.AbstractVisitor;
  * DONE: added generic equality axiom for records (to wval.bpl).
  *       Instead of generating equality axioms for each record type defined in Whiley.
  *
+ * NO: use 'free' precondtions/postconditions for typing conditions???
+ *       Since these are guaranteed by the Whiley Compiler, but only for verified programs.
+ *       So we really still need to prove non-structural typing conditions, so they should not be 'free'.
+ *
+ * TODO: infer stronger frame conditions for methods that update the heap?
+ *       See "This is Boogie 2" page 18 for an example of encoding frames into Boogie.
+ *       See also page 22 on using 'free' postcondition (all o:Ref • old(Heap)[o,alloc] ==> Heap[o,alloc])
+ *
  * TODO: add type invariants to loops.  See While_Valid_62.whiley.
  *
  * TODO: refactor so that statements are returned as strings?
