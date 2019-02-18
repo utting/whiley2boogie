@@ -26,6 +26,16 @@ Investigated running output Boogie programs using Boogaloo:
     https://bitbucket.org/nadiapolikarpova/boogaloo/wiki/Home 
     (It doesn't really 'run' the programs - it just searches for counter-examples)
 
+Invalid Tests that pass (2019-02-18)
+====================================
+# none of these should be 'FullyVerified'
+$ grep Full OUT101_packages.results
+Ensures_Invalid_1.whiley                 FullyVerified  TODO: prove that each function is feasible.
+Export_Invalid_1.whiley                  FullyVerified  Why is this not valid?  Passes Whiley verifier.
+StaticVar_Invalid_5.whiley               FullyVerified  TODO: prove that each constant satisfies the claimed type.
+Type_Invalid_10.whiley                   FullyVerified  Circular types.  Compiler should detect this?
+Type_Invalid_11.whiley                   FullyVerified  Why is this not valid?  Passes Whiley verifier.
+
 
 Results 2019-01-22 (on MacBook Pro 2013)
 ==================
@@ -33,15 +43,15 @@ $ time wyboogie *.whiley >OUT100b.txt 2>&1
 real	14m9.191s
 user	18m21.203s
 sys	1m51.504s
-$ wystats OUT100d.txt
-Error Compiling:          20 	32/1000
-NotImplementedYet:        35 	57/1000
-Other Exceptions:          2 	3/1000
-Errors in BPL:            11 	18/1000
-Fully Verified:          490 	803/1000
-Verify time outs:          4 	6/1000
-Verify errors:            48 	78/1000
-Total:  610
+$ wystats OUT100d.txt  (modified to record 1/10 of %).
+Error Compiling:          20 	3.2%
+NotImplementedYet:        35 	5.7%
+Other Exceptions:          2 	0.3%
+Errors in BPL:            11 	1.8%
+Fully Verified:          490 	80.3%
+Verify time outs:          4 	0.6%
+Verify errors:            48 	7.8%
+Total:  610                  (sum is 99.7%)
 
 The differences are that with the (guarded) array equality axiom:
 * 9 partially verified test programs become fully verified.

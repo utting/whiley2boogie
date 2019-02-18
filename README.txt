@@ -17,11 +17,16 @@ Setup
 
 Usage
 =====
-1. Run 'wy boogie <YourProgram>.whiley' to translate your Whiley program to Boogie.
+1. Run 'wy boogie <YourProgram>.whiley' to translate your Whiley program to Boogie (*.bpl).
      wy boogie Program.whiley
    
 2. Concatenate wval.bpl and Program.bpl and send them to Boogie.  E.g. (in this directory)  
      Boogie wval.bpl Program.bpl
+
+3. [Optional] if Boogie reports that some obligations were not proved, you can ask for counter-examples.
+   Run:  boogie /printModel:4 /printModelToFile:Program.beg wval.bpl Program.bpl
+   Then: wy boogie --counterexample Program.beg
+   This will translate Program.beg into a more concise and Whiley-like syntax in Program.wyeg.
 
 Notes
 =====
