@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import wyil.lang.WyilFile;
 import wyil.util.AbstractVisitor;
 
 import static wyil.lang.WyilFile.*;
@@ -29,8 +28,9 @@ public class AssertionGenerator {
 
     /** All the bound vars that we need to universally quantify over. */
     private List<BoogieExpr> context = new ArrayList<>();
+	private String currentFunctionMethodName;
 
-    public AssertionGenerator(Wyil2Boogie wyil2Boogie) {
+	public AssertionGenerator(Wyil2Boogie wyil2Boogie) {
         wy2b = wyil2Boogie;
     }
 
@@ -76,8 +76,17 @@ public class AssertionGenerator {
      * @param conjecture the predicate to check.
      */
     private void generateCheck(BoogieExpr conjecture) {
-        wy2b.generateAssertion(currentIndent, bndVars, context, conjecture);
+        wy2b.generateAssertion(currentIndent, "assert", bndVars, context, conjecture);
     }
+
+	/**
+	 * Generate a Boogie assertion to check the given conjecture.
+	 *
+	 * @param conjecture the predicate to check.
+	 */
+	private void generateAssume(BoogieExpr conjecture) {
+		wy2b.generateAssertion(currentIndent, "assume", bndVars, context, conjecture);
+	}
 
     /**
      * Main entry point for this assertion generator.
@@ -130,10 +139,11 @@ public class AssertionGenerator {
 			}
 
 			// case Bytecode.OPCODE_arraygen:
-			// // check that: 0 <= length.
+			// TODO: check that: 0 <= length.
 			// return writeArrayGenerator((Location<Bytecode.Operator>) expr);
 			//
 			// case Bytecode.OPCODE_indirectinvoke:
+			// TODO: can we generate any useful checks for this, without knowing the function?
 			// return writeIndirectInvoke((Location<Bytecode.IndirectInvoke>) expr);
 
 
@@ -148,25 +158,29 @@ public class AssertionGenerator {
 				Type.Callable type = funCall.getDeclaration().getType();
 				// properties do not have preconditions.
 				if (type instanceof Type.Function || type instanceof Type.Method) {
-					String funName = wy2b.mangledFunctionMethodName(name, type);
+					String funName = wy2b.getMangledFunctionMethodName(name, type);
 					Tuple<Expr> operands = funCall.getOperands();
-					BoogieExpr funPre = new BoogieExpr(BOOL, funName + Wyil2Boogie.METHOD_PRE + "(");
+					StringBuilder str = new StringBuilder();
+					str.append("(");
 					for (int i = 0; i != operands.size(); ++i) {
 						if (i != 0) {
-							funPre.append(", ");
+							str.append(", ");
 						}
-						funPre.addExpr(expr(operands.get(i)).asWVal());
+						str.append(expr(operands.get(i)).asWVal().toString());
 					}
-					funPre.append(")");
+					str.append(")");
+					BoogieExpr funPre = new BoogieExpr(BOOL, funName + Wyil2Boogie.METHOD_PRE + str.toString());
+					BoogieExpr funFeas = new BoogieExpr(BOOL, funName + Wyil2Boogie.METHOD_FEASIBLE + str.toString());
 					generateCheck(funPre);
+					// assume the functions postcondition, unless we are part of a recursive cycle with it.
+					if (!wy2b.canRecurseBackTo(funName, getCurrentFunctionMethodName())) {
+						generateAssume(funFeas);
+					}
 				}
 				// Continue checking all subexpression
 				super.visitInvoke(funCall);
 			}
 
-			// case Bytecode.OPCODE_lambda:
-			// return writeLambda((Location<Bytecode.Lambda>) expr);
-			//
 			// case Bytecode.OPCODE_record:
 			// BoogieExpr[] rvals =
 			// Arrays.stream(expr.getOperands()).map(this::expr).toArray(BoogieExpr[]::new);
@@ -269,4 +283,11 @@ public class AssertionGenerator {
         visitor.visitExpression(expr);
     }
 
+	public void setCurrentFunctionMethodName(String currentFunctionMethodName) {
+		this.currentFunctionMethodName = currentFunctionMethodName;
+	}
+
+	public String getCurrentFunctionMethodName() {
+		return currentFunctionMethodName;
+	}
 }

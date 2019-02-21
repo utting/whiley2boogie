@@ -71,6 +71,21 @@ import wyil.util.AbstractVisitor;
  *       Since these are guaranteed by the Whiley Compiler, but only for verified programs.
  *       So we really still need to prove non-structural typing conditions, so they should not be 'free'.
  *
+ * TODO: change static vars from Boogie const to var declarations?
+ *       If not final, they are mutable.
+ *       Their initial value should be used in proofs only if they are final.
+ *       See RFC0008: https://github.com/Whiley/RFCs/blob/master/text/0008-global-variables.md
+ *       Currently, most of the tests/valid programs are missing the 'final' modifier, even though they are final.
+ *       One possible translation:
+ *       * if final, generate a Boogie constant (const var : Type;) plus a guarded axiom about its value
+ *         (axiom const__init() ==> var == value;)
+ *       * for every function and method, assume const__init at the beginning of it, so that above axioms are usable.
+ *       * generate a special __init() method that assigns all the mutable static variables (thus checking that
+ *         their initial value satisifes their type) and for each final static variable proves an assertion that
+ *         the value is a member of the type.  This special method will be the only one that does not start by
+ *         assuming const__init().
+ *         (TODO: think about whether this can still be unsound if Type is empty?)
+ *
  * TODO: infer stronger frame conditions for methods that update the heap?
  *       See "This is Boogie 2" page 18 for an example of encoding frames into Boogie.
  *       See also page 22 on using 'free' postcondition (all o:Ref • old(Heap)[o,alloc] ==> Heap[o,alloc])
@@ -141,9 +156,6 @@ public final class Wyil2Boogie {
     private static final String ALLOCATED = "w__alloc";
     private static final String NEW = "new";
     private static final String NEW_REF = "ref__";
-    // max number of 'new' expressions in a single statement.
-    // TODO: calculate this on the fly within each procedure?
-    private static final int NEW_REF_MAX = 4;
 
     private static final String IMMUTABLE_INPUT = "__0";
 
@@ -152,6 +164,9 @@ public final class Wyil2Boogie {
 
     /** This is appended to each function/method name, for the precondition of that function. */
     public static final String METHOD_PRE = "__pre";
+
+	/** This is appended to each function/method name, for the feasibility condition of that function. */
+	public static final String METHOD_FEASIBLE = "__feasible";
 
     /** Where the Boogie output is written. */
 	private final PrintWriter out;
@@ -176,6 +191,12 @@ public final class Wyil2Boogie {
 
     /** Keeps track of the mangled names for every function and method. */
     private Map<QualifiedName, Map<Type.Callable, String>> functionOverloads;
+
+	/**
+	 * Keeps track of the call graph between callables (functions and methods).
+	 * This must be calculated AFTER function name mangling, but BEFORE any Boogie code generation.
+	 */
+	private final Map<String, Set<String>> callGraph = new LinkedHashMap<>();
 
     /** Input parameters of the current function/method. */
 	private Tuple<Decl.Variable> inDecls;
@@ -338,21 +359,30 @@ public final class Wyil2Boogie {
 
 		// Sort out overloading of all declared names first.
 		for(Decl.Unit unit : module.getExterns()) {
-			this.out.println("//DEBUG: resolving extern unit " + unit.getName());
+			// this.out.println("//DEBUG: resolving extern unit " + unit.getName());
 			resolveFunctionOverloading(unit.getDeclarations());
 		}
 		for(Decl.Unit unit : module.getUnits()) {
-			this.out.println("//DEBUG: resolving compilation unit " + unit.getName());
+			// this.out.println("//DEBUG: resolving compilation unit " + unit.getName());
 			resolveFunctionOverloading(unit.getDeclarations());
 		}
 
-    	// Iterate over all compilation units
+		// Next calculate the call graph.
+		for(Decl.Unit unit : module.getUnits()) {
+			for(final Decl decl : unit.getDeclarations()) {
+				if (decl instanceof Decl.FunctionOrMethod) {
+					populateCallGraph((Decl.FunctionOrMethod) decl);
+				}
+			}
+		}
+		calculateTransitiveCallGraph();
+
 		for(Decl.Unit unit : module.getExterns()) {
-			this.out.println("//DEBUG: generating extern unit " + unit.getName());
+			// this.out.println("//DEBUG: generating extern unit " + unit.getName());
 			apply(unit, false);
 		}
     	for(Decl.Unit unit : module.getUnits()) {
-			this.out.println("//DEBUG: generating compilation unit " + unit.getName());
+			// this.out.println("//DEBUG: generating compilation unit " + unit.getName());
     		apply(unit, true);
     	}
     }
@@ -374,12 +404,13 @@ public final class Wyil2Boogie {
 				this.out.println();
 				this.out.flush();
 			} else if (decl instanceof Decl.Import) {
-				// skip
+				// TODO: declare all defs from that import?
 			} else {
 				throw new NotImplementedYet("Unknown declaration " + decl.getClass(), decl);
 			}
 		}
     }
+
     /**
      * Whiley: <b>type</b> Name is (v:T) where P(v).
      * This is translated to Boogie as:
@@ -419,8 +450,9 @@ public final class Wyil2Boogie {
 		AbstractCompilationUnit.Identifier name = cd.getName();
 		this.out.printf("const %s : WVal;\n", name);
 		this.out.printf("axiom %s == %s;\n", name, boogieExpr(cd.getInitialiser()).asWVal());
-		final String typePred = typePredicate(name.get(), cd.getType());
-		this.out.printf("axiom %s;\n\n", typePred);
+		// final String typePred = typePredicate(name.get(), cd.getType());
+		// WARNING: this axiom can be inconsistent if user claims wrong type for the constant.
+		// this.out.printf("axiom %s;\n\n", typePred);
 	}
 
 	/**
@@ -450,7 +482,7 @@ public final class Wyil2Boogie {
 		// We assume that ALL methods are allowed to use the heap, and all functions do not.
 		// (otherwise, we would have to calculate the transitive closure of the call graph).
 		boolean usesHeap = true; // locals.containsKey(HEAP);
-		final String name = mangledFunctionMethodName(method.getQualifiedName(), method.getType());
+		final String name = getMangledFunctionMethodName(method.getQualifiedName(), method.getType());
 		final int inSize = ft.getParameters().size();
 		final int outSize = ft.getReturns().size();
 		this.inDecls = method.getParameters();
@@ -461,7 +493,7 @@ public final class Wyil2Boogie {
 			throw new NotImplementedYet("multiple return values:" + name, null);
 		}
 		// define a function for the precondition of this method.
-		writeMethodPre(name + METHOD_PRE, method, method.getRequires());
+		writeMethodPre(name, method);
 		String procedureName = name;
 		if (method instanceof Decl.Function) {
 			writeFunction(name, (Decl.Function) method);
@@ -488,6 +520,7 @@ public final class Wyil2Boogie {
 		// We do not generate implementation bodies for extern units.
 		// They will be proved correct elsewhere.
 		if (verifyImpl) {
+			this.vcg.setCurrentFunctionMethodName(name);
 			final Map<String, Type> mutatedInputs = findMutatedInputs(method);
 			this.out.print("implementation ");
 			writeSignature(procedureName, method, mutatedInputs);
@@ -554,26 +587,44 @@ public final class Wyil2Boogie {
 		return result;
 	}
 
-	private void writeMethodPre(String name, Decl.FunctionOrMethod method, Tuple<Expr> pre) {
+	private void writeMethodPre(String name, Decl.FunctionOrMethod method) {
 		Tuple<Decl.Variable> parameters = method.getParameters();
+		Tuple<Decl.Variable> returns = method.getReturns();
 		this.out.print("function ");
-		this.out.print(name);
+		this.out.print(name + METHOD_PRE);
 		this.out.print("(");
 		writeParameters(parameters, null);
 		this.out.print(") returns (bool)\n{\n      ");
-		for (int i=0;i!=parameters.size();++i) {
-			Decl.Variable parameter = parameters.get(i);
-			if (i != 0) {
-				this.out.print(AND_OUTER);
-			}
+		Tuple<Expr> pre = method.getRequires();
+		writeTypesAndPredicates(parameters, pre);
+		this.out.println("\n}");
+
+		// Now define the feasibility function: function f__feasible(a) == f__pre(a) && (exists b :: Post)
+		this.out.print("function ");
+		this.out.print(name + METHOD_FEASIBLE);
+		this.out.print("(");
+		writeParameters(parameters, null);
+		this.out.printf(") returns (bool)\n{\n    %s(%s) &&\n    ", name + METHOD_PRE, getNames(this.inDecls));
+		if (returns.size() > 0) {
+			this.out.printf("(exists ");
+			writeParameters(returns, null);
+			this.out.printf(" :: ");
+			Tuple<Expr> post = method.getEnsures();
+			writeTypesAndPredicates(returns, post);
+			this.out.print(")");
+		} else {
+			writeConjunction(method.getEnsures());
+		}
+		this.out.println("\n}");
+	}
+
+	private void writeTypesAndPredicates(Tuple<Decl.Variable> parameters, Tuple<Expr> pred) {
+		for (Decl.Variable parameter : parameters) {
 			final String inName = parameter.getName().get();
 			this.out.print(typePredicate(inName, parameter.getType()));
-		}
-		if (parameters.size() > 0) {
 			this.out.print(AND_OUTER);
 		}
-		writeConjunction(pre);
-		this.out.println("\n}");
+		writeConjunction(pred);
 	}
 
 	/**
@@ -582,7 +633,7 @@ public final class Wyil2Boogie {
 	 * @param prop Whiley property
 	 */
 	private void writeProperty(Decl.Property prop) {
-		final String name = mangledFunctionMethodName(prop.getQualifiedName(), prop.getType());
+		final String name = getMangledFunctionMethodName(prop.getQualifiedName(), prop.getType());
 		this.inDecls = prop.getParameters();
 		this.outDecls = prop.getReturns();
 		this.out.printf("function %s(", name);
@@ -636,7 +687,7 @@ public final class Wyil2Boogie {
 				// trigger is f(in)
 				this.out.printf(" :: {%s(%s)}\n    ", name, getNames(this.inDecls));
 			}
-			this.out.printf("%s(%s)\n",  name + METHOD_PRE, getNames(this.inDecls));
+			this.out.printf("%s(%s)\n",  name + METHOD_FEASIBLE, getNames(this.inDecls));
 			this.out.print("    ==> (exists ");
 			writeParameters(returns, null);
 			this.out.printf(" ::\n        %s(%s) == (%s) &&\n        ", name, inVars, outVars);
@@ -947,20 +998,21 @@ public final class Wyil2Boogie {
 	}
 
 	/**
-	 * Generates a Boogie assertion to check the given conjecture.
+	 * Generates a Boogie assertion (or assumption) to check the given conjecture.
 	 *
 	 * This is a helper function for AssertionGenerator.
 	 *
 	 * @param indent
+	 * @param keyword must be "assert" or "assume"
 	 * @param bndVars
 	 * @param assumps
 	 *            a list of predicates we can assume to prove the conjecture.
 	 * @param conj
 	 *            a Boolean Boogie expression.
 	 */
-	protected void generateAssertion(int indent, List<String> bndVars, List<BoogieExpr> assumps, BoogieExpr conj) {
+	protected void generateAssertion(int indent, String keyword, List<String> bndVars, List<BoogieExpr> assumps, BoogieExpr conj) {
 		String close = ";";
-		this.out.print("assert ");
+		this.out.print(keyword + " ");
 		if (!bndVars.isEmpty()) {
 			this.out.print("(forall ");
 			close = ");";
@@ -1357,7 +1409,7 @@ public final class Wyil2Boogie {
 
 	private void writeInvoke(int indent, Expr.Invoke stmt) {
 		final Tuple<Expr> arguments = stmt.getOperands();
-		String func = mangledFunctionMethodName(stmt.getDeclaration().getQualifiedName(), stmt.getDeclaration().getType());
+		String func = getMangledFunctionMethodName(stmt.getDeclaration().getQualifiedName(), stmt.getDeclaration().getType());
 		writeInvokeArgs(indent, func, arguments);
 	}
 
@@ -1818,7 +1870,7 @@ public final class Wyil2Boogie {
 	private BoogieExpr boogieInvoke(Expr.Invoke expr) {
 		BoogieType outType = WVAL;
 		final Type.Callable type = expr.getDeclaration().getType();
-		final String name = mangledFunctionMethodName(expr.getDeclaration().getQualifiedName(), type);
+		final String name = getMangledFunctionMethodName(expr.getDeclaration().getQualifiedName(), type);
 		if (type instanceof Type.Method) {
 			if (expr != this.outerMethodCall) {
 				// The Whiley language spec 0.3.38, Section 3.5.5, says that because they are
@@ -2157,7 +2209,11 @@ public final class Wyil2Boogie {
 	private String typePredicate(String var, Type type) {
 		final String typeStr = type.toString();
 		if (type instanceof Type.Nominal) {
-			final String typeName = ((Type.Nominal) type).getName().toString();
+			Type.Nominal nomType = (Type.Nominal) type;
+			final String typeName = nomType.getName().toString();
+			// Note: if we wanted to generate a base-type predicate, we could unfold
+			// each nominal type first: Type type2 = nomType.getDeclaration().getType();
+			// (and ignore 'where' constraints).
 			return typePredicateName(typeName) + "(" + var + ")";
 		}
 		if (typeStr.equals("int")) { // WAS type instanceof Type.Int) {
@@ -2475,17 +2531,13 @@ public final class Wyil2Boogie {
 	 * Mangles a function/method name, so that simple overloaded functions are
 	 * possible.
 	 *
-	 * Note that we currently ignore module names here, as it is not obvious how to
-	 * get the DeclID or the module of a function or method declaration. This may
-	 * become an issue if we start verifying multi-module programs.
-	 *
 	 * @param qname
 	 *            the original fully qualified name of the function or method.
 	 * @param type
 	 *            the type of the function or method.
 	 * @return a human-readable name for the function/method.
 	 */
-	String mangledFunctionMethodName(QualifiedName qname, Type.Callable type) {
+	String getMangledFunctionMethodName(QualifiedName qname, Type.Callable type) {
 		String name = mangleName(qname);
 		final Map<Type.Callable, String> map = this.functionOverloads.get(qname);
 		if (map == null) {
@@ -2503,8 +2555,6 @@ public final class Wyil2Boogie {
 	/**
 	 * Encodes a fully qualified name into an allowable Boogie name.
 	 *
-	 * For the moment this ignores package names.
-	 *
 	 * @param name
 	 * @return starts with "func__" so these are in a separate namespace.
 	 */
@@ -2514,8 +2564,6 @@ public final class Wyil2Boogie {
 
 	/**
 	 * Encodes a fully qualified name into an allowable Boogie name.
-	 *
-	 * For the moment this ignores package names.
 	 *
 	 * @param name
 	 * @return starts with "func__" so these are in a separate namespace.
@@ -2576,6 +2624,71 @@ public final class Wyil2Boogie {
 		} else {
 			throw new IllegalArgumentException("unknown type encountered: " + type);
 		}
+	}
+
+	private class CallGraphVisitor extends AbstractVisitor {
+		/*NonNull*/ private Set<String> callees;
+
+		public CallGraphVisitor(String caller) {
+			callees = callGraph.get(caller);
+			if (callees == null) {
+				callees = new HashSet<>();
+				callGraph.put(caller, callees);
+			}
+		}
+
+		@Override
+		public void visitInvoke(Expr.Invoke expr) {
+			String callee = getMangledFunctionMethodName(expr.getDeclaration().getQualifiedName(), expr.getDeclaration().getType());
+			callees.add(callee);
+			super.visitInvoke(expr);
+		}
+	};
+
+	/**
+	 * Records direct code calls from the given method/function to other methods/functions.
+	 *
+	 * @param method
+	 */
+	private void populateCallGraph(Decl.FunctionOrMethod method) {
+		String name = getMangledFunctionMethodName(method.getQualifiedName(), method.getType());
+		new CallGraphVisitor(name).visitBlock(method.getBody());
+		// System.out.println("initially: " + name + " calls " + callGraph.get(name));
+	}
+
+	private void calculateTransitiveCallGraph() {
+		// System.out.println("calculating transitive closure...");
+		int oldSize;
+		int newSize = 0;
+		do {
+			oldSize = newSize;
+			newSize = 0;
+			for (String caller : callGraph.keySet()) {
+				Set<String> oldCallees = callGraph.get(caller);
+				Set<String> newCallees = new HashSet<>(oldCallees);
+				for (String c : oldCallees) {
+					Set<String> cSet = callGraph.get(c);
+					if (cSet != null) {
+						newCallees.addAll(cSet);
+					}
+				}
+				callGraph.put(caller, newCallees);
+				// System.out.println("  " + caller + " calls " + newCallees.toString());
+				newSize += newCallees.size();
+			}
+			// System.out.println("Transitive call graph size is " + newSize);
+		} while (newSize > oldSize);
+	}
+
+	/**
+	 * True if a call to the callee function (from within caller) might recurse back to caller.
+	 *
+	 * @param callee
+	 * @param caller
+	 * @return
+	 */
+	public boolean canRecurseBackTo(String callee, String caller) {
+		return callGraph.containsKey(callee) && callGraph.get(callee).contains(caller);
 	}
 
 	private final AbstractVisitor recordVisitor = new AbstractVisitor() {
