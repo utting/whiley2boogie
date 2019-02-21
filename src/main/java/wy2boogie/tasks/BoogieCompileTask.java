@@ -63,7 +63,7 @@ public class BoogieCompileTask implements Build.Task {
 			final Path.Entry<BoogieFile> target = dst.create(source.id(), BoogieFile.ContentType);
 			generatedFiles.add(target);
 			// Construct the file
-			final BoogieFile contents = build(source, target);
+			final BoogieFile contents = build(false, source, target);
 			// Write class file into its destination
 			target.write(contents);
 			// Flush any changes to disk
@@ -83,11 +83,11 @@ public class BoogieCompileTask implements Build.Task {
 		return generatedFiles;
 	}
 
-	public static BoogieFile build(Path.Entry<WyilFile> source, Path.Entry<BoogieFile> target) throws IOException {
+	public static BoogieFile build(boolean verbose, Path.Entry<WyilFile> source, Path.Entry<BoogieFile> target) throws IOException {
 		final ByteArrayOutputStream out = new ByteArrayOutputStream();
         final PrintWriter writer = new PrintWriter(out);
         final Wyil2Boogie translator = new Wyil2Boogie(writer);
-		translator.setVerbose(false);
+		translator.setVerbose(verbose);
 		translator.apply(source.read());
 		writer.close();
 		return new BoogieFile(target,out.toByteArray());

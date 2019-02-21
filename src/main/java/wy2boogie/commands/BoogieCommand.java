@@ -204,7 +204,7 @@ public class BoogieCommand implements Command {
 				// Create target file
 				Path.Entry<BoogieFile> target = projectRoot.create(source.id(), BoogieFile.ContentType);
 				// Construct the file
-				final BoogieFile contents = BoogieCompileTask.build(source, target);
+				final BoogieFile contents = BoogieCompileTask.build(verbose, source, target);
 				// Write class file into its destination
 				target.write(contents);
 				// Flush any changes to disk

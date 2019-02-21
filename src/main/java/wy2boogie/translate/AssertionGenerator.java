@@ -13,6 +13,10 @@ import static wyil.lang.WyilFile.*;
 /**
  * Generate assertions to ensure that a given expression is well-defined.
  *
+ * Note that checks are generated in bottom-up order so that sub-expressions are checked
+ * before the outer expressions.  This allows assumptions about the sub-expression results
+ * to help with the proofs of the whole expression.
+ *
  * @author Mark Utting
  *
  */
@@ -125,6 +129,9 @@ public class AssertionGenerator {
 
 			@Override
 			public void visitArrayAccess(Expr.ArrayAccess expr) {
+				// first check all subexpressions, to ensure they are valid.
+				super.visitArrayAccess(expr);
+
 				// check that 0 <= index < arraylen(array).
 				BoogieExpr indexInBounds = new BoogieExpr(BOOL);
 				BoogieExpr array = expr(expr.getFirstOperand()).asWVal();
@@ -134,8 +141,6 @@ public class AssertionGenerator {
 				indexInBounds.addOp(" && ", new BoogieExpr(BOOL, index, " < ", arraylen));
 				assert indexInBounds.getOp().equals(" && ");
 				generateCheck(indexInBounds);
-				// Continue checking all subexpression
-				super.visitArrayAccess(expr);
 			}
 
 			// case Bytecode.OPCODE_arraygen:
@@ -154,10 +159,14 @@ public class AssertionGenerator {
 
 			@Override
 			public void visitInvoke(Expr.Invoke funCall) {
+				// First check all subexpressions
+				super.visitInvoke(funCall);
+
 				QualifiedName name = funCall.getDeclaration().getQualifiedName();
 				Type.Callable type = funCall.getDeclaration().getType();
 				// properties do not have preconditions.
 				if (type instanceof Type.Function || type instanceof Type.Method) {
+					// Now check the precondition of this function/method.
 					String funName = wy2b.getMangledFunctionMethodName(name, type);
 					Tuple<Expr> operands = funCall.getOperands();
 					StringBuilder str = new StringBuilder();
@@ -177,8 +186,6 @@ public class AssertionGenerator {
 						generateAssume(funFeas);
 					}
 				}
-				// Continue checking all subexpression
-				super.visitInvoke(funCall);
 			}
 
 			// case Bytecode.OPCODE_record:
@@ -223,28 +230,31 @@ public class AssertionGenerator {
 
 			@Override
 			public void visitExistentialQuantifier(Expr.ExistentialQuantifier expr) {
-				// do not go inside because correctness checks isType there usually depend upon the existential vars.
+				// do not go inside because correctness checks inside it usually depend upon the existential vars.
 			}
 
 			@Override
 			public void visitIntegerDivision(Expr.IntegerDivision expr) {
+				// First check subexpressions
+				super.visitIntegerDivision(expr);
+
 				// check constraint: rhs != 0
 				BoogieExpr rhs = expr(expr.getSecondOperand()).as(INT).withBrackets(" != ");
 				BoogieExpr rhsNonZero = new BoogieExpr(BOOL, rhs.toString() + " != 0");
 				generateCheck(rhsNonZero);
-				//
-				super.visitIntegerDivision(expr);
 			}
 
 			@Override
 			public void visitIntegerRemainder(Expr.IntegerRemainder expr) {
+				// First check subexpressions
+				super.visitIntegerRemainder(expr);
+
 				// check constraint: rhs != 0
 				BoogieExpr rhs = expr(expr.getSecondOperand()).as(INT).withBrackets(" != ");
 				BoogieExpr rhsNonZero = new BoogieExpr(BOOL, rhs.toString() + " != 0");
 				generateCheck(rhsNonZero);
-				//
-				super.visitIntegerRemainder(expr);
 			}
+
 			// case Bytecode.OPCODE_logicalnot:
 			// TODO: does this upset our context calculations?
 			// return prefixOp(BOOL, expr, "! ", BOOL);
@@ -275,7 +285,6 @@ public class AssertionGenerator {
 				check(expr.getFirstOperand());
 				// assume the LHS while checking the RHS.
 				BoogieExpr lhsOr = expr(expr.getFirstOperand()).as(BOOL);
-				System.out.println("assuming lhs of ==> " + lhsOr);
 				assumeAndCheck(Collections.singletonList(lhsOr), expr.getSecondOperand());
 			}
 		};

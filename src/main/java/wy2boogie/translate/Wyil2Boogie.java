@@ -2653,14 +2653,20 @@ public final class Wyil2Boogie {
 	private void populateCallGraph(Decl.FunctionOrMethod method) {
 		String name = getMangledFunctionMethodName(method.getQualifiedName(), method.getType());
 		new CallGraphVisitor(name).visitBlock(method.getBody());
-		// System.out.println("initially: " + name + " calls " + callGraph.get(name));
+		if (verbose) {
+			System.out.println("  call graph: " + name + " calls " + callGraph.get(name));
+		}
 	}
 
 	private void calculateTransitiveCallGraph() {
-		// System.out.println("calculating transitive closure...");
+		int pass = 0;
 		int oldSize;
 		int newSize = 0;
 		do {
+			pass++;
+			if (verbose) {
+				System.out.println("calculating transitive call graph, pass " + pass);
+			}
 			oldSize = newSize;
 			newSize = 0;
 			for (String caller : callGraph.keySet()) {
@@ -2673,10 +2679,11 @@ public final class Wyil2Boogie {
 					}
 				}
 				callGraph.put(caller, newCallees);
-				// System.out.println("  " + caller + " calls " + newCallees.toString());
+				if (verbose) {
+					System.out.println("  " + caller + " calls " + newCallees.toString());
+				}
 				newSize += newCallees.size();
 			}
-			// System.out.println("Transitive call graph size is " + newSize);
 		} while (newSize > oldSize);
 	}
 
