@@ -71,6 +71,10 @@ import wyil.util.AbstractVisitor;
  *       Since these are guaranteed by the Whiley Compiler, but only for verified programs.
  *       So we really still need to prove non-structural typing conditions, so they should not be 'free'.
  *
+ * TODO: allow m__pre(...) to reference m__heap, so that method preconditions can do dereferences.
+ *       See examples/heap3.whiley.
+ *       Perhaps add m__heap as a parameter to m__pre?
+ *
  * TODO: change static vars from Boogie const to var declarations?
  *       If not final, they are mutable.
  *       Their initial value should be used in proofs only if they are final.
@@ -165,8 +169,8 @@ public final class Wyil2Boogie {
     /** This is appended to each function/method name, for the precondition of that function. */
     public static final String METHOD_PRE = "__pre";
 
-	/** This is appended to each function/method name, for the feasibility condition of that function. */
-	public static final String METHOD_FEASIBLE = "__feasible";
+	/** This is appended to each function/method name, for the postcondition of that function. */
+	public static final String METHOD_POST = "__post";
 
     /** Where the Boogie output is written. */
 	private final PrintWriter out;
@@ -599,23 +603,27 @@ public final class Wyil2Boogie {
 		writeTypesAndPredicates(parameters, pre);
 		this.out.println("\n}");
 
-		// Now define the feasibility function: function f__feasible(a) == f__pre(a) && (exists b :: Post)
-		this.out.print("function ");
-		this.out.print(name + METHOD_FEASIBLE);
-		this.out.print("(");
-		writeParameters(parameters, null);
-		this.out.printf(") returns (bool)\n{\n    %s(%s) &&\n    ", name + METHOD_PRE, getNames(this.inDecls));
-		if (returns.size() > 0) {
-			this.out.printf("(exists ");
+		if (method instanceof Decl.Function) {
+			// Now define the pre-post function: function f__post(a,b) == f__pre(a) && b:T && Post
+			// NOTE: we only need this for functions, not for methods.
+			this.out.print("function ");
+			this.out.print(name + METHOD_POST);
+			this.out.print("(");
+			String paramStr = getNames(this.inDecls);
+			String returnStr = getNames(this.outDecls);
+			String optComma = (paramStr.isEmpty() || returnStr.isEmpty()) ? "" : ", ";
+			writeParameters(parameters, null);
+			this.out.print(optComma);
 			writeParameters(returns, null);
-			this.out.printf(" :: ");
-			Tuple<Expr> post = method.getEnsures();
-			writeTypesAndPredicates(returns, post);
-			this.out.print(")");
-		} else {
-			writeConjunction(method.getEnsures());
+			this.out.printf(") returns (bool)\n{\n    %s(%s) &&\n    ", name + METHOD_PRE, paramStr);
+			if (returns.size() > 0) {
+				Tuple<Expr> post = method.getEnsures();
+				writeTypesAndPredicates(returns, post);
+			} else {
+				writeConjunction(method.getEnsures());
+			}
+			this.out.println("\n}");
 		}
-		this.out.println("\n}");
 	}
 
 	private void writeTypesAndPredicates(Tuple<Decl.Variable> parameters, Tuple<Expr> pred) {
@@ -674,6 +682,7 @@ public final class Wyil2Boogie {
 			writeParameters(returns, null);
 			this.out.println(");");
 
+			/*
 			// OLD: write axiom: (forall in,out :: f(in)==out && f_pre(in) ==> types(out) && post)
 			// NEW: write axiom: (forall in :: {f(in)} f_pre(in) ==> (exists out :: types(out) && post))
 			//    so that this axiom is triggered properly, each time we see f(...).
@@ -687,7 +696,7 @@ public final class Wyil2Boogie {
 				// trigger is f(in)
 				this.out.printf(" :: {%s(%s)}\n    ", name, getNames(this.inDecls));
 			}
-			this.out.printf("%s(%s)\n",  name + METHOD_FEASIBLE, getNames(this.inDecls));
+			this.out.printf("%s(%s)\n",  name + METHOD_POST, getNames(this.inDecls));
 			this.out.print("    ==> (exists ");
 			writeParameters(returns, null);
 			this.out.printf(" ::\n        %s(%s) == (%s) &&\n        ", name, inVars, outVars);
@@ -707,6 +716,7 @@ public final class Wyil2Boogie {
 			} else {
 				this.out.println("));");
 			}
+			*/
 		}
 		this.out.println();
 	}

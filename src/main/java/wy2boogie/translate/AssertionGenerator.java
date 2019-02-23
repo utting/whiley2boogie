@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import wybs.util.AbstractCompilationUnit;
+import wyil.lang.WyilFile;
 import wyil.util.AbstractVisitor;
 
 import static wyil.lang.WyilFile.*;
@@ -169,23 +171,32 @@ public class AssertionGenerator {
 					// Now check the precondition of this function/method.
 					String funName = wy2b.getMangledFunctionMethodName(name, type);
 					Tuple<Expr> operands = funCall.getOperands();
-					StringBuilder str = new StringBuilder();
-					str.append("(");
-					for (int i = 0; i != operands.size(); ++i) {
-						if (i != 0) {
-							str.append(", ");
-						}
-						str.append(expr(operands.get(i)).asWVal().toString());
-					}
-					str.append(")");
-					BoogieExpr funPre = new BoogieExpr(BOOL, funName + Wyil2Boogie.METHOD_PRE + str.toString());
-					BoogieExpr funFeas = new BoogieExpr(BOOL, funName + Wyil2Boogie.METHOD_FEASIBLE + str.toString());
+					String args = getArgs(operands);
+					String call = funName + "(" + args + ")";
+					String pre = funName + Wyil2Boogie.METHOD_PRE + "(" + args + ")";
+					String optComma = args.isEmpty() ? "" : ", ";
+					String post = funName + Wyil2Boogie.METHOD_POST + "(" + args + optComma + call + ")";
+					BoogieExpr funPre = new BoogieExpr(BOOL, pre);
+					BoogieExpr funPost = new BoogieExpr(BOOL, post);
 					generateCheck(funPre);
 					// assume the functions postcondition, unless we are part of a recursive cycle with it.
-					if (!wy2b.canRecurseBackTo(funName, getCurrentFunctionMethodName())) {
-						generateAssume(funFeas);
+					if (type instanceof Type.Function &&
+							type.getReturns().size() == 1 &&
+							!wy2b.canRecurseBackTo(funName, getCurrentFunctionMethodName())) {
+						generateAssume(funPost);
 					}
 				}
+			}
+
+			private String getArgs(Tuple<Expr> operands) {
+				StringBuilder buf = new StringBuilder();
+				for (int i = 0; i != operands.size(); ++i) {
+					if (i != 0) {
+						buf.append(", ");
+					}
+					buf.append(expr(operands.get(i)).asWVal().toString());
+				}
+				return buf.toString();
 			}
 
 			// case Bytecode.OPCODE_record:

@@ -1,0 +1,56 @@
+var w__heap:[WRef]WVal;
+var w__alloc:[WRef]bool;
+
+function is_nat(n:WVal) returns (bool) {
+    isInt(n) && toInt(n) >= 0 }
+
+function indexOf__indexOf__pre(items:WVal, item:WVal) returns (bool)
+{
+      isArray(items) && (forall i__1:int ::
+         0 <= i__1 && i__1 < arraylen(items) ==> isInt(toArray(items)[i__1])) &&
+      isInt(item) && true
+}
+function indexOf__indexOf__post(items:WVal, item:WVal, r:WVal) returns (bool)
+{
+    indexOf__indexOf__pre(items, item) &&
+    ((isInt(r)) || (isNull(r))) &&
+      (! (isInt(r)) || toArray(items)[toInt(r)] == item) &&
+      (! (isNull(r)) || ((forall i:WVal ::
+          isInt(i) && 0 <= toInt(i) && toInt(i) < arraylen(items)
+          ==> ! (toArray(items)[toInt(i)] == item))))
+}
+function indexOf__indexOf(items:WVal, item:WVal) returns (r:WVal);
+
+procedure indexOf__indexOf__impl(items:WVal, item:WVal) returns (r:WVal);
+    requires indexOf__indexOf__pre(items, item);
+    ensures ((isInt(r)) || (isNull(r)));
+    ensures ! (isInt(r)) || toArray(items)[toInt(r)] == item;
+    ensures ! (isNull(r)) || ((forall i:WVal ::
+        isInt(i) && 0 <= toInt(i) && toInt(i) < arraylen(items)
+        ==> ! (toArray(items)[toInt(i)] == item)));
+implementation indexOf__indexOf__impl(items:WVal, item:WVal) returns (r:WVal)
+{
+    var i : WVal where is_nat(i);
+    i := fromInt(0);
+    assert (forall k:WVal :: isInt(k)
+        && 0 <= toInt(k)
+        && toInt(k) < toInt(i)
+        ==> 0 <= toInt(k) && toInt(k) < arraylen(items));
+    CONTINUE__WHILE__1:
+    while (toInt(i) < arraylen(items))
+        invariant (forall k:WVal ::
+            isInt(k) && 0 <= toInt(k) && toInt(k) < toInt(i)
+            ==> ! (toArray(items)[toInt(k)] == item));
+    {
+        assert 0 <= toInt(i) && toInt(i) < arraylen(items);
+        if (toArray(items)[toInt(i)] == item) {
+            r := i;
+            return;
+        }
+        i := fromInt(toInt(i) + 1);
+    }
+    BREAK__WHILE__1:
+    r := null;
+    return;
+}
+
