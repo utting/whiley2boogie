@@ -30,19 +30,19 @@ public class BoogieExampleFileTest {
     /** Basic variables and function. */
     @Test
     public void testFunctionValid6() throws IOException {
-        checkCounterExample(new File("tests/Function_Valid_6.beg"));
+        checkCounterExample(new File("tests/counter_example/Function_Valid_6.beg"));
     }
 
     /** A series of simple records. */
     @Test
     public void testLength() throws IOException {
-        checkCounterExample(new File("tests/length.beg"));
+        checkCounterExample(new File("tests/counter_example/length.beg"));
     }
 
     /** A series of array values. */
     @Test
     public void testConstrainedList8() throws IOException {
-        checkCounterExample(new File("tests/ConstrainedList_Valid_8.beg"));
+        checkCounterExample(new File("tests/counter_example/ConstrainedList_Valid_8.beg"));
     }
 
 }
