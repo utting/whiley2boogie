@@ -251,6 +251,9 @@ public final class Wyil2Boogie {
 	/** Records type synonyms, so we can unfold them during when generating equality tests. */
 	private Map<String, Type> typeDefs = new HashMap<>();
 
+	/** Records any static variables (or constants, if final). */
+	private List<Decl.StaticVariable> staticVariableList = new ArrayList<>();
+
 	/**
 	 * Responsible for extract concrete types (i.e. Type instances) from abstract
 	 * types (i.e. SemanticType instances).
@@ -357,6 +360,7 @@ public final class Wyil2Boogie {
     public void apply(WyilFile wf) {
     	Decl.Module module = wf.getModule();
     	// Declare globals
+		this.out.printf("const ContextHeight:int;\n");
 		this.out.printf("var %s:[WRef]WVal;\n", HEAP);
 		this.out.printf("var %s:[WRef]bool;\n", ALLOCATED);
 		this.out.println();
@@ -389,6 +393,16 @@ public final class Wyil2Boogie {
 			// this.out.println("//DEBUG: generating compilation unit " + unit.getName());
     		apply(unit, true);
     	}
+
+    	if (!staticVariableList.isEmpty()) {
+    		// generate feasibility checks for all static var initialisations.
+			this.out.printf("\nprocedure StaticVar__Check()\nfree requires ContextHeight == 1;\n{\n");
+			for (final Decl.StaticVariable svar : staticVariableList) {
+				final String typePred = typePredicate(svar.getName().get(), svar.getType());
+				this.out.printf("    assert %s;\n", typePred);
+			}
+			this.out.printf("}\n");
+		}
     }
 
     private void apply(Decl.Unit unit, boolean verifyImpl) {
@@ -449,14 +463,14 @@ public final class Wyil2Boogie {
 	}
 
 	private void writeConstant(Decl.StaticVariable cd) {
+		staticVariableList.add(cd);
 		declareFields(cd.getType(), new HashSet<>());
 		declareFuncConstants(cd.getInitialiser());
 		AbstractCompilationUnit.Identifier name = cd.getName();
 		this.out.printf("const %s : WVal;\n", name);
 		this.out.printf("axiom %s == %s;\n", name, boogieExpr(cd.getInitialiser()).asWVal());
-		// final String typePred = typePredicate(name.get(), cd.getType());
-		// WARNING: this axiom can be inconsistent if user claims wrong type for the constant.
-		// this.out.printf("axiom %s;\n\n", typePred);
+		final String typePred = typePredicate(name.get(), cd.getType());
+		this.out.printf("axiom ContextHeight > 1 ==> %s;\n\n", typePred);
 	}
 
 	/**
@@ -507,13 +521,12 @@ public final class Wyil2Boogie {
 		this.out.print("procedure ");
 		writeSignature(procedureName, method, null);
 		this.out.println(";");
+		this.out.printf("    free requires ContextHeight > 1;\n");
+		this.out.printf("    requires %s(%s);\n", name + METHOD_PRE, getNames(this.inDecls));
 		if (usesHeap) {
 			this.out.printf("    modifies %s, %s;\n", HEAP, ALLOCATED);
 		}
-		this.out.printf("    requires %s(%s);\n", name + METHOD_PRE, getNames(this.inDecls));
-		// Part of the postcondition is the type and type constraints of each output
-		// variable.
-		//final Type[] outputs = method.type().returns();
+		// Part of the postcondition is the type constraints of each output variable.
 		for (Decl.Variable locn : method.getReturns()) {
 			final String inName = locn.getName().get();
 			this.out.printf("    ensures %s;\n", typePredicate(inName, locn.getType()));
