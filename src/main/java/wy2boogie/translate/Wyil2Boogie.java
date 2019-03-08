@@ -2381,14 +2381,8 @@ public final class Wyil2Boogie {
 	 */
 	private BoogieExpr createArrayInitialiser(BoogieExpr[] values) {
 		final BoogieExpr out = new BoogieExpr(WVAL);
-		out.append("fromArray(arrayconst(");
-		if (values.length == 0) {
-			out.append("null"); // the type of values should be irrelevant
-		} else {
-			out.addExpr(values[0].asWVal());
-		}
-		out.append(")");
-		for (int i = 1; i < values.length; ++i) {
+		out.append("fromArray(arrayconst(null)");
+		for (int i = 0; i < values.length; ++i) {
 			out.append("[" + i + " := ");
 			out.addExpr(values[i].asWVal()); // no brackets needed
 			out.append("]");
