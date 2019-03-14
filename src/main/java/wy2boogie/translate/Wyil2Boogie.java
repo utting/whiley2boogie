@@ -80,15 +80,6 @@ import wyil.util.AbstractVisitor;
  *       Their initial value should be used in proofs only if they are final.
  *       See RFC0008: https://github.com/Whiley/RFCs/blob/master/text/0008-global-variables.md
  *       Currently, most of the tests/valid programs are missing the 'final' modifier, even though they are final.
- *       One possible translation:
- *       * if final, generate a Boogie constant (const var : Type;) plus a guarded axiom about its value
- *         (axiom const__init() ==> var == value;)
- *       * for every function and method, assume const__init at the beginning of it, so that above axioms are usable.
- *       * generate a special __init() method that assigns all the mutable static variables (thus checking that
- *         their initial value satisifes their type) and for each final static variable proves an assertion that
- *         the value is a member of the type.  This special method will be the only one that does not start by
- *         assuming const__init().
- *         (TODO: think about whether this can still be unsound if Type is empty?)
  *
  * TODO: infer stronger frame conditions for methods that update the heap?
  *       See "This is Boogie 2" page 18 for an example of encoding frames into Boogie.
@@ -96,7 +87,7 @@ import wyil.util.AbstractVisitor;
  *
  * TODO: add type invariants to loops.  See While_Valid_62.whiley.
  *
- * TODO: refactor so that statements are returned as strings?
+ * TODO: refactor write*(...) methods in this class so they return statements as strings?
  *       This would allow us to use side-effects to declare local variables, refs, etc.
  *
  * TODO: add implicit conditions to each conjunct.  See Assert_Valid_1.whiley.
@@ -110,6 +101,7 @@ import wyil.util.AbstractVisitor;
  *       2. [DONE] pass w__heap as a parameter to methods that use the heap. (functions are not allowed to access heap!)
  *       3. add typing constraints for dereferenced values.
  *       4. [DONE] strengthen the theory of heap updating and dereferencing.
+ *       5. extend Whiley to support some kind of framing syntax for references / heap.
  *
  * TODO: move ALL method calls out of expressions?  (5 tests do this!)
  *       See MethodCall_Valid_4.whiley for a complex example.
@@ -628,7 +620,7 @@ public final class Wyil2Boogie {
 			writeParameters(parameters, null);
 			this.out.print(optComma);
 			writeParameters(returns, null);
-			this.out.printf(") returns (bool)\n{\n    %s(%s) &&\n    ", name + METHOD_PRE, paramStr);
+			this.out.printf(") returns (bool)\n{\n    "); // was also: "%s(%s) &&\n    ", name + METHOD_PRE, paramStr);
 			if (returns.size() > 0) {
 				Tuple<Expr> post = method.getEnsures();
 				writeTypesAndPredicates(returns, post);
