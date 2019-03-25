@@ -352,7 +352,7 @@ public final class Wyil2Boogie {
     public void apply(WyilFile wf) {
     	Decl.Module module = wf.getModule();
     	// Declare globals
-		this.out.printf("const ContextHeight:int;\n");
+		this.out.printf("const Context__Height:int;\n");
 		this.out.printf("var %s:[WRef]WVal;\n", HEAP);
 		this.out.printf("var %s:[WRef]bool;\n", ALLOCATED);
 		this.out.println();
@@ -388,7 +388,7 @@ public final class Wyil2Boogie {
 
     	if (!staticVariableList.isEmpty()) {
     		// generate feasibility checks for all static var initialisations.
-			this.out.printf("\nprocedure StaticVar__Check()\nfree requires ContextHeight == 1;\n{\n");
+			this.out.printf("\nprocedure StaticVar__Check()\nfree requires Context__Height == 1;\n{\n");
 			for (final Decl.StaticVariable svar : staticVariableList) {
 				final String typePred = typePredicate(svar.getName().get(), svar.getType());
 				this.out.printf("    assert %s;\n", typePred);
@@ -462,7 +462,7 @@ public final class Wyil2Boogie {
 		this.out.printf("const %s : WVal;\n", name);
 		this.out.printf("axiom %s == %s;\n", name, boogieExpr(cd.getInitialiser()).asWVal());
 		final String typePred = typePredicate(name.get(), cd.getType());
-		this.out.printf("axiom ContextHeight > 1 ==> %s;\n\n", typePred);
+		this.out.printf("axiom Context__Height > 1 ==> %s;\n\n", typePred);
 	}
 
 	/**
@@ -506,6 +506,7 @@ public final class Wyil2Boogie {
 		writeMethodPre(name, method);
 		String procedureName = name;
 		if (method instanceof Decl.Function) {
+			writeMethodPost(name, method);
 			writeFunction(name, (Decl.Function) method);
 			procedureName = name + "__impl";
 			usesHeap = false;
@@ -513,7 +514,7 @@ public final class Wyil2Boogie {
 		this.out.print("procedure ");
 		writeSignature(procedureName, method, null);
 		this.out.println(";");
-		this.out.printf("    free requires ContextHeight > 1;\n");
+		this.out.printf("    free requires Context__Height > 1;\n");
 		this.out.printf("    requires %s(%s);\n", name + METHOD_PRE, getNames(this.inDecls));
 		if (usesHeap) {
 			this.out.printf("    modifies %s, %s;\n", HEAP, ALLOCATED);
@@ -607,28 +608,27 @@ public final class Wyil2Boogie {
 		Tuple<Expr> pre = method.getRequires();
 		writeTypesAndPredicates(parameters, pre);
 		this.out.println("\n}");
+	}
 
-		if (method instanceof Decl.Function) {
-			// Now define the pre-post function: function f__post(a,b) == f__pre(a) && b:T && Post
-			// NOTE: we only need this for functions, not for methods.
-			this.out.print("function ");
-			this.out.print(name + METHOD_POST);
-			this.out.print("(");
-			String paramStr = getNames(this.inDecls);
-			String returnStr = getNames(this.outDecls);
-			String optComma = (paramStr.isEmpty() || returnStr.isEmpty()) ? "" : ", ";
-			writeParameters(parameters, null);
-			this.out.print(optComma);
-			writeParameters(returns, null);
-			this.out.printf(") returns (bool)\n{\n    "); // was also: "%s(%s) &&\n    ", name + METHOD_PRE, paramStr);
-			if (returns.size() > 0) {
-				Tuple<Expr> post = method.getEnsures();
-				writeTypesAndPredicates(returns, post);
-			} else {
-				writeConjunction(method.getEnsures());
-			}
-			this.out.println("\n}");
+	private void writeMethodPost(String name, Decl.FunctionOrMethod method) {
+		Tuple<Decl.Variable> parameters = method.getParameters();
+		Tuple<Decl.Variable> returns = method.getReturns();
+		// Now define the pre-post function: function f__post(a,b) == b:T && Post
+		this.out.printf("function %s(", name + METHOD_POST);
+		writeParameters(parameters, null);
+		String paramStr = getNames(this.inDecls);
+		String returnStr = getNames(this.outDecls);
+		String optComma = (paramStr.isEmpty() || returnStr.isEmpty()) ? "" : ", ";
+		this.out.print(optComma);
+		writeParameters(returns, null);
+		this.out.printf(") returns (bool)\n{\n    "); // was also: "%s(%s) &&\n    ", name + METHOD_PRE, paramStr);
+		if (returns.size() > 0) {
+			Tuple<Expr> post = method.getEnsures();
+			writeTypesAndPredicates(returns, post);
+		} else {
+			writeConjunction(method.getEnsures());
 		}
+		this.out.println("\n}");
 	}
 
 	private void writeTypesAndPredicates(Tuple<Decl.Variable> parameters, Tuple<Expr> pred) {
