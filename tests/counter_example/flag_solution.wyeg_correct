@@ -1,0 +1,69 @@
+*** Model 1
+                            BLUE  := 2
+                        |cols@@1| == 623
+                         |cols@0| == 0
+                         |cols@1| == -1
+                         |cols@3| == -1
+                        |cols__0| == 797
+        flag_solution__main__pre  := true
+                              hi  := (- 8483)
+                            hi@0  := 796
+                            hi@1  := (- 1)
+                              lo  := (- 950)
+                            lo@0  := 0
+                            lo@1  := 0
+                             mid  := (- 946)
+                           mid@0  := 0
+                           mid@1  := 0
+                            |r@0| == 0
+                             RED  := 0
+                             tmp  := (- 9161)
+                           tmp@0  := (- 7701)
+                           tmp@1  := T@WVal!val!17
+                           tmp@2  := T@WVal!val!19
+                           WHITE  := 1
+
+*** Model 2
+                            BLUE  := 2
+                        |cols@@1| == 640
+                         |cols@0| == 797
+                          cols@0[183]   := 1
+                          cols@0[0]     := 2
+                          cols@0[144]   := 1
+                          cols@0[1]     := 2
+                          cols@0[2]     := 2
+                          cols@0[796]   := 2
+                          cols@0[658]   := 2
+                         |cols@1| == -1
+                         |cols@3| == -1
+                        |cols__0| == 797
+                         cols__0[144]   := 2
+                         cols__0[658]   := 2
+                         cols__0[659]   := 1
+                         cols__0[183]   := 2
+        flag_solution__main__pre  := true
+                              hi  := (- 8483)
+                            hi@0  := 796
+                            hi@1  := (- 1)
+                     i@@15!53!11  := 658
+                              lo  := (- 950)
+                            lo@0  := 0
+                            lo@1  := 0
+                             mid  := (- 946)
+                           mid@0  := 0
+                           mid@1  := 0
+                            |r@0| == 797
+                             r@0[183]   := 1
+                             r@0[0]     := 2
+                             r@0[144]   := 1
+                             r@0[1]     := 2
+                             r@0[2]     := 2
+                             r@0[796]   := 2
+                             r@0[658]   := 2
+                             RED  := 0
+                             tmp  := (- 9161)
+                           tmp@0  := (- 7701)
+                           tmp@1  := T@WVal!val!17
+                           tmp@2  := T@WVal!val!19
+                           WHITE  := 1
+

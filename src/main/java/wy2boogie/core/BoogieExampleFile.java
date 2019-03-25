@@ -1,5 +1,6 @@
 package wy2boogie.core;
 
+import wybs.io.Token;
 import wybs.lang.CompilationUnit;
 import wybs.util.AbstractCompilationUnit;
 import wyfs.lang.Content;
@@ -75,6 +76,7 @@ public class BoogieExampleFile extends AbstractCompilationUnit {
 			ignoredGlobals.add("null");
 			ignoredGlobals.add("empty__record");
 			ignoredGlobals.add("undef__field");
+			ignoredGlobals.add("Context__Height");
 
 			maps = new LinkedHashMap<>();
 			currentMap = new LinkedHashMap<>(); // we preserve name order
@@ -140,7 +142,16 @@ public class BoogieExampleFile extends AbstractCompilationUnit {
 				if (truth != null && "true".equals(truth)) {
 					return true;
 				}
-				// TODO: check "else" ...
+				// check "else" ...
+				truth = typed.get("else");
+				if ("true".equals(truth)) {
+					return true;
+				}
+				// Strangely, isArray is sometimes false, even though toArray maps it to an array.
+				// So we check for this case.
+				if ("Array".equals(map) && maps.get("toArray") != null && maps.get("toArray").containsKey(value)) {
+					return true;
+				}
 			}
 			return false;
 		}
@@ -191,11 +202,30 @@ public class BoogieExampleFile extends AbstractCompilationUnit {
 			return result.toString();
 		}
 
+		/**
+		 * Get the length of an array.
+		 *
+		 * @param array the Boogie name of a known array.
+		 * @return the length, or -1 if unknown.
+		 */
+		private int getArrayLen(String array) {
+			String lenStr = getValue("arraylen", array);
+			String lenStr2 = concretise(lenStr);
+			int len;
+			try {
+				len = Integer.parseInt(lenStr2);
+			} catch (NumberFormatException ex) {
+				len = -1;
+			}
+			return len;
+		}
+
 		private void stringifyArray(StringBuilder result, String g, String value) {
-			String len = getValue("arraylen", value);
+			int len = getArrayLen(value);
+			result.append(String.format("  %31s == %d\n", "|" + g + "|", len));
 			String array = getValue( "toArray", value);
-			result.append(String.format("  %31s == %s\n", "|" + g + "|", concretise(len)));
-			if (array != null) {
+			// System.out.printf("DEBUG: %s toArray[%s] gives %s\n", g, value, array);
+			if (array != null && maps.get("Select_[$int]WVal") != null) {
                 Map<String, String> aMap = maps.get("Select_[$int]WVal");
                 for (String k : aMap.keySet()) {
                     if (k.startsWith(array + " ")) {
@@ -205,7 +235,29 @@ public class BoogieExampleFile extends AbstractCompilationUnit {
                         result.append(String.format("  %30s[%s]  := %s\n", g, index, concretise(indexVal)));
                     }
                 }
-            }
+            } else if (array != null && array.startsWith("(_ (as-array) ")) {
+				String arrayName = array.split(" ")[2].replaceAll("[()]", "");
+				Map<String, String> aMap = maps.get(arrayName);
+				for (String index : aMap.keySet()) {
+					int k;
+					try {
+						k = Integer.parseInt(index.replaceAll("[ ()]", ""));
+					} catch (NumberFormatException ex) {
+						k = -1; // ignore this index
+					}
+					if (0 <= k && k < len) {
+						String indexVal = aMap.get(index);
+						String val = concretise(indexVal);
+						result.append(String.format("  %30s%-7s := %s\n", g, "[" + index + "]", val));
+					} else if ("else".equals(index)) {
+						String val = concretise(aMap.get(index));
+						if (!val.contains("WVal")) {
+							result.append(String.format("  %30s%-7s := %s\n", g, "[...]", val));
+						}
+						// System.out.printf("    ignoring %s[%s]\n", g, index);
+					}
+				}
+			}
 		}
 
 		/**

@@ -1,0 +1,792 @@
+*** MODEL
+%lbl%@2 -> false
+%lbl%+0 -> true
+%lbl%+32 -> true
+%lbl%+33 -> true
+%lbl%+4 -> true
+%lbl%+41 -> true
+BLUE -> T@WVal!val!4
+cols@@1 -> T@WVal!val!9
+cols@0 -> T@WVal!val!13
+cols@1 -> T@WVal!val!18
+cols@3 -> T@WVal!val!20
+cols__0 -> T@WVal!val!10
+Context__Height -> 719
+flag_solution__main__pre -> true
+hi -> T@WVal!val!7
+hi@0 -> T@WVal!val!11
+hi@1 -> T@WVal!val!14
+lo -> T@WVal!val!5
+lo@0 -> T@WVal!val!2
+lo@1 -> T@WVal!val!2
+mid -> T@WVal!val!6
+mid@0 -> T@WVal!val!2
+mid@1 -> T@WVal!val!2
+null -> T@WVal!val!0
+r@0 -> T@WVal!val!13
+RED -> T@WVal!val!2
+tmp -> T@WVal!val!8
+tmp@0 -> T@WVal!val!12
+tmp@1 -> T@WVal!val!17
+tmp@2 -> T@WVal!val!19
+undef__field -> T@WVal!val!1
+WHITE -> T@WVal!val!3
+k!23 -> {
+  (- 646) -> T@WVal!val!25
+  32 -> T@WVal!val!59
+  29 -> T@WVal!val!50
+  0 -> T@WVal!val!46
+  (- 468) -> T@WVal!val!53
+  (- 749) -> T@WVal!val!39
+  30 -> T@WVal!val!51
+  31 -> T@WVal!val!58
+  (- 8870) -> T@WVal!val!62
+  (- 2237) -> T@WVal!val!27
+  (- 8221) -> T@WVal!val!47
+  (- 160) -> T@WVal!val!55
+  (- 525) -> T@WVal!val!37
+  else -> T@WVal!val!76
+}
+arraylen -> {
+  T@WVal!val!10 -> 797
+  T@WVal!val!13 -> 0
+  T@WVal!val!9 -> 623
+  else -> 797
+}
+k!28 -> {
+  (- 522) -> T@WVal!val!71
+  (- 5450) -> T@WVal!val!72
+  (- 874) -> T@WVal!val!45
+  (- 474) -> T@WVal!val!35
+  (- 468) -> T@WVal!val!54
+  (- 8870) -> T@WVal!val!61
+  (- 1101) -> T@WVal!val!67
+  else -> T@WVal!val!78
+}
+isRecord -> {
+  T@WVal!val!2 -> false
+  T@WVal!val!3 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!8 -> false
+  T@WVal!val!9 -> false
+  T@WVal!val!10 -> false
+  T@WVal!val!11 -> false
+  T@WVal!val!14 -> false
+  T@WVal!val!12 -> false
+  T@WVal!val!13 -> false
+  T@WVal!val!15 -> false
+  T@WVal!val!18 -> false
+  T@WVal!val!20 -> false
+  else -> false
+}
+k!22 -> {
+  (- 525) -> T@WVal!val!36
+  (- 749) -> T@WVal!val!38
+  (- 1) -> T@WVal!val!21
+  (- 874) -> T@WVal!val!44
+  (- 1203) -> T@WVal!val!40
+  (- 299) -> T@WVal!val!66
+  0 -> T@WVal!val!16
+  (- 2) -> T@WVal!val!42
+  (- 1101) -> T@WVal!val!68
+  (- 2001) -> T@WVal!val!64
+  (- 4077) -> T@WVal!val!29
+  (- 160) -> T@WVal!val!56
+  (- 104) -> T@WVal!val!22
+  (- 8221) -> T@WVal!val!48
+  else -> T@WVal!val!75
+}
+isFunction -> {
+  T@WVal!val!2 -> false
+  T@WVal!val!3 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!8 -> false
+  T@WVal!val!9 -> false
+  T@WVal!val!10 -> false
+  T@WVal!val!11 -> false
+  T@WVal!val!14 -> false
+  T@WVal!val!12 -> false
+  T@WVal!val!13 -> false
+  T@WVal!val!15 -> false
+  T@WVal!val!18 -> false
+  T@WVal!val!20 -> false
+  else -> false
+}
+k!27 -> {
+  (- 617) -> T@WVal!val!33
+  (- 299) -> T@WVal!val!65
+  (- 5450) -> T@WVal!val!73
+  29 -> T@WVal!val!49
+  31 -> T@WVal!val!57
+  (- 2) -> T@WVal!val!43
+  30 -> T@WVal!val!52
+  (- 1) -> T@WVal!val!19
+  (- 2001) -> T@WVal!val!63
+  (- 522) -> T@WVal!val!70
+  (- 1203) -> T@WVal!val!41
+  (- 4621) -> T@WVal!val!31
+  32 -> T@WVal!val!60
+  else -> T@WVal!val!77
+}
+isObject -> {
+  T@WVal!val!2 -> false
+  T@WVal!val!3 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!8 -> false
+  T@WVal!val!9 -> false
+  T@WVal!val!10 -> false
+  T@WVal!val!11 -> false
+  T@WVal!val!14 -> false
+  T@WVal!val!12 -> false
+  T@WVal!val!13 -> false
+  T@WVal!val!15 -> false
+  T@WVal!val!18 -> false
+  T@WVal!val!20 -> false
+  else -> false
+}
+toArray -> {
+  T@WVal!val!10 -> (_ (as-array) (k!21))
+  T@WVal!val!13 -> (_ (as-array) (k!22))
+  T@WVal!val!18 -> (_ (as-array) (k!23))
+  T@WVal!val!20 -> (_ (as-array) (k!26))
+  T@WVal!val!9 -> (_ (as-array) (k!28))
+  else -> (_ (as-array) (k!21))
+}
+k!21 -> {
+  (- 617) -> T@WVal!val!32
+  (- 474) -> T@WVal!val!34
+  (- 4077) -> T@WVal!val!28
+  (- 2237) -> T@WVal!val!26
+  (- 104) -> T@WVal!val!23
+  (- 4621) -> T@WVal!val!30
+  (- 646) -> T@WVal!val!24
+  else -> T@WVal!val!74
+}
+tickleBool -> {
+  true -> true
+  false -> true
+  else -> true
+}
+k!26 -> {
+  (- 617) -> T@WVal!val!33
+  (- 299) -> T@WVal!val!65
+  (- 5450) -> T@WVal!val!73
+  29 -> T@WVal!val!49
+  31 -> T@WVal!val!57
+  (- 2) -> T@WVal!val!43
+  30 -> T@WVal!val!52
+  (- 1) -> T@WVal!val!69
+  (- 2001) -> T@WVal!val!63
+  (- 522) -> T@WVal!val!70
+  (- 1203) -> T@WVal!val!41
+  (- 4621) -> T@WVal!val!31
+  32 -> T@WVal!val!60
+  else -> T@WVal!val!77
+}
+isNull -> {
+  T@WVal!val!2 -> false
+  T@WVal!val!3 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!8 -> false
+  T@WVal!val!9 -> false
+  T@WVal!val!10 -> false
+  T@WVal!val!11 -> false
+  T@WVal!val!14 -> false
+  T@WVal!val!12 -> false
+  T@WVal!val!13 -> false
+  T@WVal!val!15 -> false
+  T@WVal!val!18 -> false
+  T@WVal!val!20 -> false
+  else -> false
+}
+fromInt -> {
+  0 -> T@WVal!val!2
+  1 -> T@WVal!val!3
+  2 -> T@WVal!val!4
+  797 -> T@WVal!val!15
+  (- 950) -> T@WVal!val!5
+  (- 946) -> T@WVal!val!6
+  (- 8483) -> T@WVal!val!7
+  (- 9161) -> T@WVal!val!8
+  (- 1) -> T@WVal!val!14
+  796 -> T@WVal!val!11
+  (- 7701) -> T@WVal!val!12
+  else -> T@WVal!val!2
+}
+toInt -> {
+  T@WVal!val!2 -> 0
+  T@WVal!val!3 -> 1
+  T@WVal!val!4 -> 2
+  T@WVal!val!11 -> 796
+  T@WVal!val!14 -> (- 1)
+  T@WVal!val!5 -> (- 950)
+  T@WVal!val!6 -> (- 946)
+  T@WVal!val!7 -> (- 8483)
+  T@WVal!val!8 -> (- 9161)
+  T@WVal!val!12 -> (- 7701)
+  T@WVal!val!15 -> 797
+  else -> 0
+}
+isArray -> {
+  T@WVal!val!2 -> false
+  T@WVal!val!3 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!9 -> true
+  T@WVal!val!13 -> true
+  T@WVal!val!5 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!8 -> false
+  T@WVal!val!10 -> true
+  T@WVal!val!18 -> false
+  T@WVal!val!20 -> false
+  T@WVal!val!11 -> false
+  T@WVal!val!14 -> false
+  T@WVal!val!12 -> false
+  T@WVal!val!15 -> false
+  else -> false
+}
+isRef -> {
+  T@WVal!val!2 -> false
+  T@WVal!val!3 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!8 -> false
+  T@WVal!val!9 -> false
+  T@WVal!val!10 -> false
+  T@WVal!val!11 -> false
+  T@WVal!val!14 -> false
+  T@WVal!val!12 -> false
+  T@WVal!val!13 -> false
+  T@WVal!val!15 -> false
+  T@WVal!val!18 -> false
+  T@WVal!val!20 -> false
+  else -> false
+}
+k!25 -> {
+  (- 104) -> T@WVal!val!22
+  (- 749) -> T@WVal!val!38
+  (- 1) -> T@WVal!val!21
+  (- 874) -> T@WVal!val!44
+  (- 1203) -> T@WVal!val!40
+  (- 299) -> T@WVal!val!66
+  0 -> T@WVal!val!21
+  (- 1101) -> T@WVal!val!68
+  (- 2) -> T@WVal!val!42
+  (- 2001) -> T@WVal!val!64
+  (- 4077) -> T@WVal!val!29
+  (- 8221) -> T@WVal!val!48
+  (- 160) -> T@WVal!val!56
+  (- 525) -> T@WVal!val!36
+  else -> T@WVal!val!75
+}
+flag_solution__partition__pre -> {
+  T@WVal!val!10 -> true
+  else -> true
+}
+fromArray -> {
+  (_ (as-array) (k!28)) 623 -> T@WVal!val!9
+  (_ (as-array) (k!21)) 797 -> T@WVal!val!10
+  (_ (as-array) (k!22)) 0 -> T@WVal!val!13
+  else -> T@WVal!val!9
+}
+isInt -> {
+  T@WVal!val!2 -> true
+  T@WVal!val!3 -> true
+  T@WVal!val!4 -> true
+  T@WVal!val!5 -> true
+  T@WVal!val!6 -> true
+  T@WVal!val!7 -> true
+  T@WVal!val!8 -> true
+  T@WVal!val!12 -> true
+  T@WVal!val!14 -> true
+  T@WVal!val!9 -> false
+  T@WVal!val!11 -> true
+  T@WVal!val!10 -> false
+  T@WVal!val!13 -> false
+  T@WVal!val!15 -> true
+  else -> true
+}
+k!24 -> {
+  (- 646) -> T@WVal!val!25
+  (- 525) -> T@WVal!val!37
+  29 -> T@WVal!val!50
+  31 -> T@WVal!val!58
+  0 -> T@WVal!val!17
+  (- 8870) -> T@WVal!val!62
+  (- 749) -> T@WVal!val!39
+  (- 468) -> T@WVal!val!53
+  30 -> T@WVal!val!51
+  (- 2237) -> T@WVal!val!27
+  (- 160) -> T@WVal!val!55
+  (- 8221) -> T@WVal!val!47
+  32 -> T@WVal!val!59
+  else -> T@WVal!val!76
+}
+isMethod -> {
+  T@WVal!val!2 -> false
+  T@WVal!val!3 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!8 -> false
+  T@WVal!val!9 -> false
+  T@WVal!val!10 -> false
+  T@WVal!val!11 -> false
+  T@WVal!val!14 -> false
+  T@WVal!val!12 -> false
+  T@WVal!val!13 -> false
+  T@WVal!val!15 -> false
+  T@WVal!val!18 -> false
+  T@WVal!val!20 -> false
+  else -> false
+}
+isBool -> {
+  T@WVal!val!2 -> false
+  T@WVal!val!3 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!8 -> false
+  T@WVal!val!9 -> false
+  T@WVal!val!10 -> false
+  T@WVal!val!11 -> false
+  T@WVal!val!14 -> false
+  T@WVal!val!12 -> false
+  T@WVal!val!13 -> false
+  T@WVal!val!15 -> false
+  T@WVal!val!18 -> false
+  T@WVal!val!20 -> false
+  else -> false
+}
+*** END_MODEL
+*** MODEL
+%lbl%@2 -> true
+%lbl%@3 -> false
+%lbl%+0 -> true
+%lbl%+32 -> true
+%lbl%+33 -> true
+%lbl%+4 -> true
+%lbl%+41 -> true
+BLUE -> T@WVal!val!4
+cols@@1 -> T@WVal!val!9
+cols@0 -> T@WVal!val!13
+cols@1 -> T@WVal!val!18
+cols@3 -> T@WVal!val!20
+cols__0 -> T@WVal!val!10
+Context__Height -> 719
+flag_solution__main__pre -> true
+hi -> T@WVal!val!7
+hi@0 -> T@WVal!val!11
+hi@1 -> T@WVal!val!14
+i@@15!53!11 -> T@WVal!val!16
+lo -> T@WVal!val!5
+lo@0 -> T@WVal!val!2
+lo@1 -> T@WVal!val!2
+mid -> T@WVal!val!6
+mid@0 -> T@WVal!val!2
+mid@1 -> T@WVal!val!2
+null -> T@WVal!val!0
+r@0 -> T@WVal!val!13
+RED -> T@WVal!val!2
+tmp -> T@WVal!val!8
+tmp@0 -> T@WVal!val!12
+tmp@1 -> T@WVal!val!17
+tmp@2 -> T@WVal!val!19
+undef__field -> T@WVal!val!1
+WHITE -> T@WVal!val!3
+k!33 -> {
+  (- 5722) -> T@WVal!val!35
+  144 -> T@WVal!val!3
+  (- 8730) -> T@WVal!val!36
+  (- 1) -> T@WVal!val!21
+  658 -> T@WVal!val!4
+  183 -> T@WVal!val!3
+  1 -> T@WVal!val!4
+  (- 7805) -> T@WVal!val!38
+  (- 9343) -> T@WVal!val!42
+  8138 -> T@WVal!val!63
+  0 -> T@WVal!val!21
+  (- 341) -> T@WVal!val!66
+  5555 -> T@WVal!val!40
+  2 -> T@WVal!val!4
+  (- 618) -> T@WVal!val!62
+  (- 5036) -> T@WVal!val!27
+  (- 982) -> T@WVal!val!45
+  (- 140) -> T@WVal!val!54
+  796 -> T@WVal!val!4
+  else -> T@WVal!val!73
+}
+isRecord -> {
+  T@WVal!val!2 -> false
+  T@WVal!val!3 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!8 -> false
+  T@WVal!val!9 -> false
+  T@WVal!val!10 -> false
+  T@WVal!val!11 -> false
+  T@WVal!val!14 -> false
+  T@WVal!val!12 -> false
+  T@WVal!val!13 -> false
+  T@WVal!val!16 -> false
+  T@WVal!val!15 -> false
+  T@WVal!val!18 -> false
+  T@WVal!val!20 -> false
+  else -> false
+}
+isObject -> {
+  T@WVal!val!2 -> false
+  T@WVal!val!3 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!8 -> false
+  T@WVal!val!9 -> false
+  T@WVal!val!10 -> false
+  T@WVal!val!11 -> false
+  T@WVal!val!14 -> false
+  T@WVal!val!12 -> false
+  T@WVal!val!13 -> false
+  T@WVal!val!16 -> false
+  T@WVal!val!15 -> false
+  T@WVal!val!18 -> false
+  T@WVal!val!20 -> false
+  else -> false
+}
+k!32 -> {
+  (- 8857) -> T@WVal!val!23
+  (- 5722) -> T@WVal!val!34
+  45 -> T@WVal!val!48
+  47 -> T@WVal!val!56
+  0 -> T@WVal!val!17
+  (- 705) -> T@WVal!val!60
+  (- 8730) -> T@WVal!val!37
+  (- 958) -> T@WVal!val!52
+  46 -> T@WVal!val!49
+  (- 608) -> T@WVal!val!25
+  (- 140) -> T@WVal!val!53
+  (- 982) -> T@WVal!val!46
+  48 -> T@WVal!val!57
+  else -> T@WVal!val!74
+}
+toArray -> {
+  T@WVal!val!10 -> (_ (as-array) (k!29))
+  T@WVal!val!13 -> (_ (as-array) (k!30))
+  T@WVal!val!18 -> (_ (as-array) (k!31))
+  T@WVal!val!20 -> (_ (as-array) (k!34))
+  T@WVal!val!9 -> (_ (as-array) (k!36))
+  else -> (_ (as-array) (k!29))
+}
+tickleBool -> {
+  true -> true
+  false -> true
+  else -> true
+}
+isArray -> {
+  T@WVal!val!2 -> false
+  T@WVal!val!3 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!9 -> true
+  T@WVal!val!13 -> true
+  T@WVal!val!5 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!8 -> false
+  T@WVal!val!10 -> true
+  T@WVal!val!18 -> false
+  T@WVal!val!20 -> false
+  T@WVal!val!11 -> false
+  T@WVal!val!14 -> false
+  T@WVal!val!12 -> false
+  T@WVal!val!16 -> false
+  T@WVal!val!15 -> false
+  else -> false
+}
+i@@4!24!0 -> {
+  T@WVal!val!13 T@WVal!val!10 -> 144
+  T@WVal!val!10 T@WVal!val!13 -> 183
+  else -> 144
+}
+isNull -> {
+  T@WVal!val!2 -> false
+  T@WVal!val!3 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!8 -> false
+  T@WVal!val!9 -> false
+  T@WVal!val!10 -> false
+  T@WVal!val!11 -> false
+  T@WVal!val!14 -> false
+  T@WVal!val!12 -> false
+  T@WVal!val!13 -> false
+  T@WVal!val!16 -> false
+  T@WVal!val!15 -> false
+  T@WVal!val!18 -> false
+  T@WVal!val!20 -> false
+  else -> false
+}
+k!31 -> {
+  (- 8857) -> T@WVal!val!23
+  48 -> T@WVal!val!57
+  45 -> T@WVal!val!48
+  0 -> T@WVal!val!44
+  (- 958) -> T@WVal!val!52
+  (- 8730) -> T@WVal!val!37
+  46 -> T@WVal!val!49
+  47 -> T@WVal!val!56
+  (- 705) -> T@WVal!val!60
+  (- 608) -> T@WVal!val!25
+  (- 982) -> T@WVal!val!46
+  (- 140) -> T@WVal!val!53
+  (- 5722) -> T@WVal!val!34
+  else -> T@WVal!val!74
+}
+fromInt -> {
+  0 -> T@WVal!val!2
+  1 -> T@WVal!val!3
+  2 -> T@WVal!val!4
+  797 -> T@WVal!val!15
+  (- 950) -> T@WVal!val!5
+  (- 946) -> T@WVal!val!6
+  (- 8483) -> T@WVal!val!7
+  (- 9161) -> T@WVal!val!8
+  (- 1) -> T@WVal!val!14
+  796 -> T@WVal!val!11
+  (- 7701) -> T@WVal!val!12
+  658 -> T@WVal!val!16
+  else -> T@WVal!val!2
+}
+toInt -> {
+  T@WVal!val!2 -> 0
+  T@WVal!val!3 -> 1
+  T@WVal!val!4 -> 2
+  T@WVal!val!11 -> 796
+  T@WVal!val!14 -> (- 1)
+  T@WVal!val!16 -> 658
+  T@WVal!val!5 -> (- 950)
+  T@WVal!val!6 -> (- 946)
+  T@WVal!val!7 -> (- 8483)
+  T@WVal!val!8 -> (- 9161)
+  T@WVal!val!12 -> (- 7701)
+  T@WVal!val!15 -> 797
+  else -> 0
+}
+is_COLOR -> {
+  T@WVal!val!3 -> true
+  T@WVal!val!4 -> true
+  else -> true
+}
+k!30 -> {
+  (- 140) -> T@WVal!val!54
+  144 -> T@WVal!val!3
+  (- 8730) -> T@WVal!val!36
+  (- 1) -> T@WVal!val!21
+  183 -> T@WVal!val!3
+  658 -> T@WVal!val!4
+  1 -> T@WVal!val!4
+  (- 7805) -> T@WVal!val!38
+  (- 9343) -> T@WVal!val!42
+  8138 -> T@WVal!val!63
+  0 -> T@WVal!val!4
+  5555 -> T@WVal!val!40
+  (- 341) -> T@WVal!val!66
+  2 -> T@WVal!val!4
+  (- 618) -> T@WVal!val!62
+  (- 5036) -> T@WVal!val!27
+  796 -> T@WVal!val!4
+  (- 982) -> T@WVal!val!45
+  (- 5722) -> T@WVal!val!35
+  else -> T@WVal!val!73
+}
+fromArray -> {
+  (_ (as-array) (k!36)) 640 -> T@WVal!val!9
+  (_ (as-array) (k!29)) 797 -> T@WVal!val!10
+  (_ (as-array) (k!30)) 797 -> T@WVal!val!13
+  else -> T@WVal!val!9
+}
+k!29 -> {
+  5823 -> T@WVal!val!30
+  659 -> T@WVal!val!3
+  144 -> T@WVal!val!4
+  183 -> T@WVal!val!4
+  658 -> T@WVal!val!4
+  (- 5036) -> T@WVal!val!26
+  (- 608) -> T@WVal!val!24
+  (- 2355) -> T@WVal!val!28
+  (- 435) -> T@WVal!val!32
+  (- 8857) -> T@WVal!val!22
+  else -> T@WVal!val!72
+}
+isMethod -> {
+  T@WVal!val!2 -> false
+  T@WVal!val!3 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!8 -> false
+  T@WVal!val!9 -> false
+  T@WVal!val!10 -> false
+  T@WVal!val!11 -> false
+  T@WVal!val!14 -> false
+  T@WVal!val!12 -> false
+  T@WVal!val!13 -> false
+  T@WVal!val!16 -> false
+  T@WVal!val!15 -> false
+  T@WVal!val!18 -> false
+  T@WVal!val!20 -> false
+  else -> false
+}
+arraylen -> {
+  T@WVal!val!10 -> 797
+  T@WVal!val!13 -> 797
+  T@WVal!val!9 -> 640
+  else -> 797
+}
+isFunction -> {
+  T@WVal!val!2 -> false
+  T@WVal!val!3 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!8 -> false
+  T@WVal!val!9 -> false
+  T@WVal!val!10 -> false
+  T@WVal!val!11 -> false
+  T@WVal!val!14 -> false
+  T@WVal!val!12 -> false
+  T@WVal!val!13 -> false
+  T@WVal!val!16 -> false
+  T@WVal!val!15 -> false
+  T@WVal!val!18 -> false
+  T@WVal!val!20 -> false
+  else -> false
+}
+flag_solution__partition__pre -> {
+  T@WVal!val!10 -> true
+  else -> true
+}
+isRef -> {
+  T@WVal!val!2 -> false
+  T@WVal!val!3 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!8 -> false
+  T@WVal!val!9 -> false
+  T@WVal!val!10 -> false
+  T@WVal!val!11 -> false
+  T@WVal!val!14 -> false
+  T@WVal!val!12 -> false
+  T@WVal!val!13 -> false
+  T@WVal!val!16 -> false
+  T@WVal!val!15 -> false
+  T@WVal!val!18 -> false
+  T@WVal!val!20 -> false
+  else -> false
+}
+k!36 -> {
+  (- 386) -> T@WVal!val!69
+  9247 -> T@WVal!val!70
+  (- 9343) -> T@WVal!val!43
+  (- 435) -> T@WVal!val!33
+  (- 958) -> T@WVal!val!51
+  (- 705) -> T@WVal!val!59
+  (- 341) -> T@WVal!val!65
+  else -> T@WVal!val!76
+}
+isInt -> {
+  T@WVal!val!2 -> true
+  T@WVal!val!3 -> true
+  T@WVal!val!4 -> true
+  T@WVal!val!5 -> true
+  T@WVal!val!6 -> true
+  T@WVal!val!7 -> true
+  T@WVal!val!8 -> true
+  T@WVal!val!12 -> true
+  T@WVal!val!14 -> true
+  T@WVal!val!16 -> true
+  T@WVal!val!9 -> false
+  T@WVal!val!11 -> true
+  T@WVal!val!10 -> false
+  T@WVal!val!13 -> false
+  T@WVal!val!15 -> true
+  else -> true
+}
+k!35 -> {
+  5823 -> T@WVal!val!31
+  8138 -> T@WVal!val!64
+  9247 -> T@WVal!val!71
+  45 -> T@WVal!val!47
+  47 -> T@WVal!val!55
+  5555 -> T@WVal!val!41
+  46 -> T@WVal!val!50
+  (- 1) -> T@WVal!val!19
+  (- 618) -> T@WVal!val!61
+  (- 386) -> T@WVal!val!68
+  (- 7805) -> T@WVal!val!39
+  (- 2355) -> T@WVal!val!29
+  48 -> T@WVal!val!58
+  else -> T@WVal!val!75
+}
+k!34 -> {
+  5823 -> T@WVal!val!31
+  8138 -> T@WVal!val!64
+  9247 -> T@WVal!val!71
+  45 -> T@WVal!val!47
+  47 -> T@WVal!val!55
+  5555 -> T@WVal!val!41
+  46 -> T@WVal!val!50
+  (- 1) -> T@WVal!val!67
+  (- 618) -> T@WVal!val!61
+  (- 386) -> T@WVal!val!68
+  (- 7805) -> T@WVal!val!39
+  (- 2355) -> T@WVal!val!29
+  48 -> T@WVal!val!58
+  else -> T@WVal!val!75
+}
+isBool -> {
+  T@WVal!val!2 -> false
+  T@WVal!val!3 -> false
+  T@WVal!val!4 -> false
+  T@WVal!val!5 -> false
+  T@WVal!val!6 -> false
+  T@WVal!val!7 -> false
+  T@WVal!val!8 -> false
+  T@WVal!val!9 -> false
+  T@WVal!val!10 -> false
+  T@WVal!val!11 -> false
+  T@WVal!val!14 -> false
+  T@WVal!val!12 -> false
+  T@WVal!val!13 -> false
+  T@WVal!val!16 -> false
+  T@WVal!val!15 -> false
+  T@WVal!val!18 -> false
+  T@WVal!val!20 -> false
+  else -> false
+}
+*** END_MODEL

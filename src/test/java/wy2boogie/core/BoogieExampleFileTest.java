@@ -44,5 +44,10 @@ public class BoogieExampleFileTest {
     public void testConstrainedList8() throws IOException {
         checkCounterExample(new File("tests/counter_example/ConstrainedList_Valid_8.beg"));
     }
-
+    
+    /** Larger arrays, where the .beg file maps each array separately. */
+    @Test
+    public void testFlagSolution() throws IOException {
+        checkCounterExample(new File("tests/counter_example/flag_solution.beg"));
+    }
 }
