@@ -1,37 +1,26 @@
 package wy2boogie.commands;
 
+import wyc.task.CompileTask;
 import wycc.WyProject;
 import wycc.cfg.Configuration;
 import wycc.cfg.Configuration.Schema;
 import wycc.lang.Command;
-import wycc.util.Logger;
-import wycc.util.Pair;
 import wyfs.lang.Path;
-import wyfs.lang.Path.Entry;
-import wyfs.lang.Path.Root;
-import wyfs.util.DirectoryRoot;
 import wyfs.util.Trie;
 import wyil.lang.WyilFile;
 import wy2boogie.core.*;
 import wy2boogie.tasks.BoogieCompileTask;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
-import wybs.lang.Build;
-import wybs.lang.Build.Graph;
-import wybs.lang.Build.Project;
-import wybs.util.StdProject;
 import wybs.util.AbstractCompilationUnit.Name;
 import wybs.util.AbstractCompilationUnit.Tuple;
 import wyc.lang.WhileyFile;
@@ -93,6 +82,16 @@ public class BoogieCommand implements Command {
 	 */
 	private final WyProject project;
 
+	/**
+	 * Creates a 'boogie' command for the given project.
+	 *
+	 * TODO: change project from wycc.WyProject to wybs.lang.Build.Project?
+	 *
+	 * @param project
+	 * @param configuration unused, so can be null.
+	 * @param sysout
+	 * @param syserr
+	 */
 	public BoogieCommand(WyProject project, Configuration configuration, OutputStream sysout,
 			OutputStream syserr) {
 		this.project = project;
@@ -123,6 +122,7 @@ public class BoogieCommand implements Command {
 		String output = template.getOptions().get("output", String.class);
 		//
 		if(counterexample) {
+			System.out.println("DEBUG: verbose=" + verbose);
 			return translateCounterexample(verbose,template.getArguments());
 		} else {
 			List<String> files = translateAnyWhileyFiles(verbose,output,template.getArguments());
@@ -130,8 +130,20 @@ public class BoogieCommand implements Command {
 		}
 	}
 
-	public List<String> translateAnyWhileyFiles(boolean verbose, String output, List<String> args) {
+	/**
+	 * Tries to ensure that every *.whiley file has been compiled into a corresponding *.wyil file.
+	 *
+	 * @param verbose
+	 * @param output
+	 * @param args
+	 * @return
+	 * @throws Exception
+	 */
+	public List<String> translateAnyWhileyFiles(boolean verbose, String output, List<String> args) throws Exception {
 		try {
+			if (verbose) {
+				System.out.println("DEBUG: translateAnyWhileyFiles: " + args + " output=" + output);
+			}
 			Path.Root projectRoot = project.getBuildProject().getRoot();
 			List<String> files = new ArrayList<>();
 			List<Path.Entry<WhileyFile>> sources = new ArrayList<>();
@@ -155,10 +167,12 @@ public class BoogieCommand implements Command {
 			// Create target for run
 			Trie id = Trie.fromString(output.replace(".wyil", ""));
 			files.add(output);
+
+			// TODO: should we create a separate compile task for each *.whiley file?
 			Path.Entry<WyilFile> target = createWyilFile(id);
-			// System.out.println("GOT: " + target);
-			// Reuse code from the compile task for this purpose
-			wyc.task.CompileTask.build(Logger.NULL, project.getBuildProject(), target, sources);
+			CompileTask task = new CompileTask(project.getBuildProject(), projectRoot, target, sources);
+			task.initialise().call();
+
 			// Done
 			return files;
 		} catch(RuntimeException e) {
@@ -181,14 +195,16 @@ public class BoogieCommand implements Command {
 			// Doesn't exist, so create with default value
 			target = projectRoot.create(id, WyilFile.ContentType);
 			WyilFile wf = new WyilFile(target);
-			target.write(wf);
 			// Create initially empty WyIL module.
-			wf.setRootItem(new WyilFile.Decl.Module(new Name(id), new Tuple<>(), new Tuple<>()));
+			Name name = new Name(id);
+			WyilFile.Decl.Module module = new WyilFile.Decl.Module(name, new Tuple<>(), new Tuple<>(), new Tuple<>());
+			wf.setRootItem(module);
+			target.write(wf);
 		}
 		return target;
 	}
 
-	public boolean translateWyilFile(boolean verbose, List<String> args) {
+	public boolean translateWyilFile(boolean verbose, List<String> args) throws Exception {
 		try {
 			Path.Root projectRoot = project.getBuildProject().getRoot();
 			// Convert command-line arguments to project files
@@ -199,18 +215,19 @@ public class BoogieCommand implements Command {
 				//
 				delta.add(projectRoot.get(Trie.fromString(arg), WyilFile.ContentType));
 			}
-			// Go through all listed beg files and translate them
-			for (Path.Entry<WyilFile> source : delta) {
-				// Create target file
-				Path.Entry<BoogieFile> target = projectRoot.create(source.id(), BoogieFile.ContentType);
-				// Construct the file
-				final BoogieFile contents = BoogieCompileTask.build(verbose, source, target);
-				// Write class file into its destination
-				target.write(contents);
-				// Flush any changes to disk
-				target.flush();
+			if (verbose) {
+				System.out.println("DEBUG: translateWyilFiles: " + args);
+				System.out.println("DEBUG: projectRoot: " + projectRoot);
+				System.out.println("DEBUG: delta: " + delta);
 			}
-			// Execute the build over the set of files requested
+			// Go through all listed *.wyil files and translate each one to Boogie.
+			for (Path.Entry<WyilFile> source : delta) {
+				Path.Entry<BoogieFile> target = projectRoot.create(source.id(), BoogieFile.ContentType);
+				BoogieCompileTask task = new BoogieCompileTask(project.getBuildProject(), target,
+						Collections.singleton(source));
+				task.setVerbose(verbose);
+				task.initialise().call();
+			}
 			return true;
 		} catch(RuntimeException e) {
 			throw e;
@@ -240,8 +257,12 @@ public class BoogieCommand implements Command {
 			for (String arg : args) {
 				// strip extension
 				String base = arg.replace(".beg", "");
+				Trie trie = Trie.fromString(base);
 				//
-				Path.Entry<BoogieExampleFile> entry = projectRoot.get(Trie.fromString(base), BoogieExampleFile.ContentType);
+				if (verbose) {
+					System.out.println("DEBUG: base=" + base + " root=" + projectRoot + " trie=" + trie);
+				}
+				Path.Entry<BoogieExampleFile> entry = projectRoot.get(trie, BoogieExampleFile.ContentType);
 				if (entry == null) {
 					throw new RuntimeException("Cannot create Path.Entry for " + arg + ".  Try .beg?");
 				}

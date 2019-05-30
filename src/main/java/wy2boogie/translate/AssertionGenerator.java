@@ -164,8 +164,8 @@ public class AssertionGenerator {
 				// First check all subexpressions
 				super.visitInvoke(funCall);
 
-				QualifiedName name = funCall.getDeclaration().getQualifiedName();
-				Type.Callable type = funCall.getDeclaration().getType();
+				QualifiedName name = funCall.getBinding().getDeclaration().getQualifiedName();
+				Type.Callable type = funCall.getBinding().getDeclaration().getType();
 				// properties do not have preconditions.
 				if (type instanceof Type.Function || type instanceof Type.Method) {
 					// Now check the precondition of this function/method.

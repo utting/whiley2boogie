@@ -1,8 +1,17 @@
+// Copyright 2011 The Whiley Project Developers
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 package wy2boogie;
-
-import wycc.cfg.Configuration;
-
-import java.io.IOException;
 
 import wy2boogie.commands.BoogieCommand;
 import wy2boogie.core.BoogieExampleFile;
@@ -10,8 +19,11 @@ import wy2boogie.core.BoogieFile;
 import wy2boogie.core.WhileyExampleFile;
 import wy2boogie.tasks.BoogieCompileTask;
 import wybs.lang.Build;
-import wybs.lang.Build.Graph;
+import wybs.util.AbstractBuildRule;
+import wybs.util.AbstractCompilationUnit.Tuple;
 import wybs.util.AbstractCompilationUnit.Value;
+import wyc.lang.WhileyFile;
+import wycc.cfg.Configuration;
 import wycc.lang.Command;
 import wycc.lang.Module;
 import wyfs.lang.Content;
@@ -19,26 +31,29 @@ import wyfs.lang.Path;
 import wyfs.util.Trie;
 import wyil.lang.WyilFile;
 
+import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
+
+import static wyil.lang.WyilFile.Name;
+
+
 /**
  * Plugin for the Whiley to Boogie translator.
  *
- * Adapted from the Whiley2JavaScript backend.
- *
- * @author Mark Utting
+ * Adapted from the wyc Activator class.
  */
 public class Activator implements Module.Activator {
+
 	public static Trie PKGNAME_CONFIG_OPTION = Trie.fromString("package/name");
-	public static Trie SOURCE_CONFIG_OPTION = Trie.fromString("build/whiley/target");
+	public static Trie SOURCE_CONFIG_OPTION = Trie.fromString("build/whiley/source");
 	public static Trie TARGET_CONFIG_OPTION = Trie.fromString("build/boogie/target");
+	public static Trie VERIFY_CONFIG_OPTION = Trie.fromString("build/boogie/verify");
+	public static Trie COUNTEREXAMPLE_CONFIG_OPTION = Trie.fromString("build/boogie/counterexamples");
 	private static Value.UTF8 SOURCE_DEFAULT = new Value.UTF8("src".getBytes());
 	private static Value.UTF8 TARGET_DEFAULT = new Value.UTF8("bin".getBytes());
 
-	public static Build.Platform BOOGIE_PLATFORM = new Build.Platform() {
-		private Trie pkg;
-		//
-		private Trie source;
-		// Specify directory where generated WyIL files are dumped.
-		private Trie target;
+	public static Build.Platform WHILEY_PLATFORM = new Build.Platform() {
 		//
 		@Override
 		public String getName() {
@@ -48,165 +63,82 @@ public class Activator implements Module.Activator {
 		@Override
 		public Configuration.Schema getConfigurationSchema() {
 			return Configuration.fromArray(
-					Configuration.UNBOUND_STRING(SOURCE_CONFIG_OPTION, "Specify location for wyil binary files", SOURCE_DEFAULT),
-					Configuration.UNBOUND_STRING(TARGET_CONFIG_OPTION, "Specify location for generated boogie files", TARGET_DEFAULT));
+					Configuration.UNBOUND_STRING(SOURCE_CONFIG_OPTION, "Specify location for Whiley source files", SOURCE_DEFAULT),
+					Configuration.UNBOUND_STRING(TARGET_CONFIG_OPTION, "Specify location for generated Boogie .bpl files", TARGET_DEFAULT),
+					Configuration.UNBOUND_BOOLEAN(VERIFY_CONFIG_OPTION, "Enable verification of Whiley files using Boogie", new Value.Bool(false)),
+					Configuration.UNBOUND_BOOLEAN(COUNTEREXAMPLE_CONFIG_OPTION, "Enable counterexample generation during verification", new Value.Bool(false)));
 		}
 
 		@Override
-		public void apply(Configuration configuration) {
-			// Extract source path
-			this.pkg = Trie.fromString(configuration.get(Value.UTF8.class, PKGNAME_CONFIG_OPTION).unwrap());
-			this.source = Trie.fromString(configuration.get(Value.UTF8.class, SOURCE_CONFIG_OPTION).unwrap());
-			this.target = Trie.fromString(configuration.get(Value.UTF8.class, TARGET_CONFIG_OPTION).unwrap());
-		}
+		public void initialise(Configuration configuration, Build.Project project) throws IOException {
+			Trie pkg = Trie.fromString(configuration.get(Value.UTF8.class, PKGNAME_CONFIG_OPTION).unwrap());
+			//
+			Trie source = Trie.fromString(configuration.get(Value.UTF8.class, SOURCE_CONFIG_OPTION).unwrap());
+			// Specify directory where generated WyIL files are dumped.
+			Trie target = Trie.fromString(configuration.get(Value.UTF8.class, TARGET_CONFIG_OPTION).unwrap());
+			// Specify set of files included
+			Content.Filter<WyilFile> includes = Content.filter("**", WyilFile.ContentType);
+			// Determine whether verification enabled or not
+			boolean verification = configuration.get(Value.Bool.class, VERIFY_CONFIG_OPTION).unwrap();
+			// Determine whether to try and find counterexamples or not
+			boolean counterexamples = configuration.get(Value.Bool.class, COUNTEREXAMPLE_CONFIG_OPTION).unwrap();
+			// Construct the source root
+			Path.Root sourceRoot = project.getRoot().createRelativeRoot(source);
+			// Construct the binary root
+			Path.Root binaryRoot = project.getRoot().createRelativeRoot(target);
+			// Initialise the target file being built
+			Path.Entry<BoogieFile> binary = initialiseBinaryTarget(binaryRoot,pkg);
+			// Add build rule to project.
+			project.getRules().add(new AbstractBuildRule<WyilFile, BoogieFile>(sourceRoot, includes, null) {
+				@Override
+				protected void apply(List<Path.Entry<WyilFile>> matches, Collection<Build.Task> tasks)
+						throws IOException {
+					// Construct a new build task
+					BoogieCompileTask task = new BoogieCompileTask(project, binary, matches);
 
-		@Override
-		public Build.Task initialise(Build.Project project) {
-			return new BoogieCompileTask(project);
+					// task.setVerbose();
+					task.setVerification(verification);
+				    task.setCounterExamples(counterexamples);
+
+					// Submit the task for execution
+					tasks.add(task);
+				}
+			});
 		}
 
 		@Override
 		public Content.Type<?> getSourceType() {
+			return WhileyFile.ContentType;
+		}
+
+		@Override
+		public Content.Type<?> getTargetType() {
 			return WyilFile.ContentType;
 		}
 
 		@Override
-		public Content.Type<?> getTargetType() {
-			return BoogieFile.ContentType;
-		}
-
-		@Override
-		public Content.Filter<?> getSourceFilter() {
-			return Content.filter("**", WyilFile.ContentType);
-		}
-
-		@Override
-		public Content.Filter<?> getTargetFilter() {
-			return Content.filter("**", BoogieFile.ContentType);
-		}
-
-		@Override
-		public Path.Root getSourceRoot(Path.Root root) throws IOException {
-			return root.createRelativeRoot(source);
-		}
-
-		@Override
-		public Path.Root getTargetRoot(Path.Root root) throws IOException {
-			return root.createRelativeRoot(target);
-		}
-
-		@Override
-		public void refresh(Graph graph, Path.Root src, Path.Root bin) throws IOException {
-			//
-			Path.Entry<BoogieFile> binary = bin.get(pkg, BoogieFile.ContentType);
-			// Check whether target binary exists or not
-			if (binary == null) {
-				// Doesn't exist, so create with default value
-				binary = bin.create(pkg, BoogieFile.ContentType);
-				BoogieFile wf = new BoogieFile(binary, new byte[0]);
-				binary.write(wf);
-			}
-			//
-			for (Path.Entry<?> source : src.get(getSourceFilter())) {
-				// Register this derivation
-				graph.connect(source, binary);
-			}
-			//
-		}
-
-		@Override
 		public void execute(Build.Project project, Path.ID id, String method, Value... args) throws IOException {
-			// FIXME: what to do here?
+			throw new UnsupportedOperationException("Execute not supported");
+		}
+
+		private Path.Entry<BoogieFile> initialiseBinaryTarget(Path.Root binroot, Path.ID id) throws IOException {
+			if(binroot.exists(id, WyilFile.ContentType)) {
+				// Yes, it does so reuse it.
+				return binroot.get(id, BoogieFile.ContentType);
+			} else {
+				// No, it doesn't so create and initialise it
+				Path.Entry<BoogieFile> target = binroot.create(id, BoogieFile.ContentType);
+				//
+				// Initialise with empty file
+				BoogieFile wf = new BoogieFile(target, new byte[0]);
+				target.write(wf);
+				// Create initially empty WyIL module.
+				wf.setRootItem(new WyilFile.Decl.Module(new Name(id), new Tuple<>(), new Tuple<>(), new Tuple<>()));
+				// Done
+				return target;
+			}
 		}
 	};
-
-	public static Build.Platform BOOGIE_EXAMPLE_PLATFORM = new Build.Platform() {
-		private Trie pkg;
-		//
-		private Trie source;
-		// Specify directory where generated WyIL files are dumped.
-		private Trie target;
-		//
-		@Override
-		public String getName() {
-			return "boogie-counterexample";
-		}
-
-		@Override
-		public Configuration.Schema getConfigurationSchema() {
-			return Configuration.fromArray(
-					Configuration.UNBOUND_STRING(SOURCE_CONFIG_OPTION, "Specify location for wyil binary files", SOURCE_DEFAULT),
-					Configuration.UNBOUND_STRING(TARGET_CONFIG_OPTION, "Specify location for generated boogie files", TARGET_DEFAULT));
-		}
-
-		@Override
-		public void apply(Configuration configuration) {
-			// Extract source path
-			this.pkg = Trie.fromString(configuration.get(Value.UTF8.class, PKGNAME_CONFIG_OPTION).unwrap());
-			this.source = Trie.fromString(configuration.get(Value.UTF8.class, SOURCE_CONFIG_OPTION).unwrap());
-			this.target = Trie.fromString(configuration.get(Value.UTF8.class, TARGET_CONFIG_OPTION).unwrap());
-		}
-
-		@Override
-		public Build.Task initialise(Build.Project project) {
-			return new BoogieCompileTask(project);
-		}
-
-		@Override
-		public Content.Type<?> getSourceType() {
-			return BoogieExampleFile.ContentType;
-		}
-
-		@Override
-		public Content.Type<?> getTargetType() {
-			return WhileyExampleFile.ContentType;
-		}
-
-		@Override
-		public Content.Filter<?> getSourceFilter() {
-			return Content.filter("**", BoogieExampleFile.ContentType);
-		}
-
-		@Override
-		public Content.Filter<?> getTargetFilter() {
-			return Content.filter("**", WhileyExampleFile.ContentType);
-		}
-
-		@Override
-		public Path.Root getSourceRoot(Path.Root root) throws IOException {
-			return root.createRelativeRoot(source);
-		}
-
-		@Override
-		public Path.Root getTargetRoot(Path.Root root) throws IOException {
-			return root.createRelativeRoot(target);
-		}
-
-		@Override
-		public void refresh(Graph graph, Path.Root src, Path.Root bin) throws IOException {
-			//
-			Path.Entry<WhileyExampleFile> binary = bin.get(pkg, WhileyExampleFile.ContentType);
-			// Check whether target binary exists or not
-			if (binary == null) {
-				// Doesn't exist, so create with default value
-				binary = bin.create(pkg, WhileyExampleFile.ContentType);
-				WhileyExampleFile wf = new WhileyExampleFile(binary, new byte[0]);
-				binary.write(wf);
-			}
-			//
-			for (Path.Entry<?> source : src.get(getSourceFilter())) {
-				// Register this derivation
-				graph.connect(source, binary);
-			}
-			//
-		}
-
-		@Override
-		public void execute(Build.Project project, Path.ID id, String method, Value... args) throws IOException {
-			// FIXME: what to do here?
-		}
-	};
-
 
 	// =======================================================================
 	// Start
@@ -214,12 +146,13 @@ public class Activator implements Module.Activator {
 
 	@Override
 	public Module start(Module.Context context) {
-		// List of platforms to make available
-		context.register(Build.Platform.class, BOOGIE_PLATFORM);
-		context.register(Build.Platform.class, BOOGIE_EXAMPLE_PLATFORM);
-		// List of commands to make available
+		// Register platform
+		context.register(Build.Platform.class, WHILEY_PLATFORM);
+		// List of commands to register
 		context.register(Command.Descriptor.class, BoogieCommand.DESCRIPTOR);
 		// List of content types
+		context.register(Content.Type.class, WhileyFile.ContentType);
+		context.register(Content.Type.class, WyilFile.ContentType);
 		context.register(Content.Type.class, BoogieFile.ContentType);
 		context.register(Content.Type.class, BoogieExampleFile.ContentType);
 		context.register(Content.Type.class, WhileyExampleFile.ContentType);

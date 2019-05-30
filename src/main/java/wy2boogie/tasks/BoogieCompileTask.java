@@ -3,93 +3,107 @@ package wy2boogie.tasks;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.Callable;
 
 import wy2boogie.core.BoogieFile;
+import wy2boogie.translate.NotImplementedYet;
 import wy2boogie.translate.Wyil2Boogie;
 import wybs.lang.Build;
-import wybs.lang.Build.Graph;
+import wybs.util.AbstractBuildTask;
+import wyc.io.WhileyFileParser;
+import wyc.task.CompileTask;
 import wycc.util.Logger;
 import wycc.util.Pair;
 import wyfs.lang.Path;
 import wyfs.lang.Path.Entry;
 import wyfs.lang.Path.Root;
 import wyc.lang.WhileyFile;
+import wyfs.util.DirectoryRoot;
+import wyil.check.*;
+import wyil.lang.Compiler;
 import wyil.lang.WyilFile;
+import wyil.transform.MoveAnalysis;
+import wyil.transform.NameResolution;
+import wyil.transform.RecursiveTypeAnalysis;
 
-public class BoogieCompileTask implements Build.Task {
-	/**
-	 * The master project for identifying all resources available to the
-	 * builder. This includes all modules declared isType the project being verified
-	 * and/or defined isType external resources (e.g. jar files).
-	 */
-	private final Build.Project project;
+public class BoogieCompileTask extends AbstractBuildTask<WyilFile, BoogieFile> {
+
 
 	/**
-	 * For logging information.
+	 * Specify whether to print verbose progress messages or not
 	 */
-	private Logger logger = Logger.NULL;
+	private boolean verbose;
 
-	public BoogieCompileTask(Build.Project project) {
-		this.project = project;
+	/**
+	 * Specify whether verification enabled or not
+	 */
+	private boolean verification;
+
+	/**
+	 * Specify whether counterexample generation is enabled or not
+	 */
+	private boolean counterexamples;
+
+
+	public BoogieCompileTask(Build.Project project, Path.Entry<BoogieFile> target,
+							 Collection<Path.Entry<WyilFile>> sources) {
+		super(project, target, sources);
 	}
 
-	public void setLogger(Logger logger) {
-		this.logger = logger;
+	public BoogieCompileTask setVerbose(boolean flag) {
+		this.verbose = flag;
+		return this;
+	}
+
+	public BoogieCompileTask setVerification(boolean flag) {
+		this.verification = flag;
+		return this;
+	}
+
+	public BoogieCompileTask setCounterExamples(boolean flag) {
+		this.counterexamples = flag;
+		return this;
 	}
 
 	@Override
-	public Build.Project project() {
-		return this.project;
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public Set<Entry<?>> build(Collection<Pair<Entry<?>, Root>> delta, Graph graph) throws IOException {
-		final Runtime runtime = Runtime.getRuntime();
-		final long start = System.currentTimeMillis();
-		final long memory = runtime.freeMemory();
-
-		// ========================================================================
-		// Translate files
-		// ========================================================================
-		final HashSet<Path.Entry<?>> generatedFiles = new HashSet<>();
-
-		for (final Pair<Path.Entry<?>, Path.Root> p : delta) {
-			final Path.Root dst = p.second();
-			final Path.Entry<WyilFile> source = (Entry<WyilFile>) p.first();
-			final Path.Entry<BoogieFile> target = dst.create(source.id(), BoogieFile.ContentType);
-			generatedFiles.add(target);
-			// Construct the file
-			final BoogieFile contents = build(false, source, target);
-			// Write class file into its destination
-			target.write(contents);
-			// Flush any changes to disk
-			target.flush();
+	public Callable<Boolean> initialise() throws IOException {
+		// Extract target and source files for compilation. This is the component which
+		// requires I/O.
+		WyilFile[] whileys = new WyilFile[sources.size()];
+		for (int i = 0; i != whileys.length; ++i) {
+			whileys[i] = sources.get(i).read();
 		}
-
-		// ========================================================================
-		// Done
-		// ========================================================================
-
-
-		final long endTime = System.currentTimeMillis();
-		this.logger.logTimedMessage("WyIL => Boogie: compiled " + delta.size() + " file(s)",
-				endTime - start,
-				memory - runtime.freeMemory());
-
-		return generatedFiles;
+		// Construct the lambda for subsequent execution. This will eventually make its
+		// way into some kind of execution pool, possibly for concurrent execution with
+		// other tasks.
+		return () -> execute(target, whileys);
 	}
 
-	public static BoogieFile build(boolean verbose, Path.Entry<WyilFile> source, Path.Entry<BoogieFile> target) throws IOException {
+	/**
+	 * The business end of a compilation task. The intention is that this
+	 * computation can proceed without performing any blocking I/O. This means it
+	 * can be used in e.g. a forkjoin task safely.
+	 *
+	 * @param target  --- The Boogie being written.
+	 * @param sources --- The WyilFile(s) being translated.
+	 * @return
+	 */
+	public boolean execute(Path.Entry<BoogieFile> target, WyilFile... sources) throws IOException {
+		// Parse source files into target
+		if (sources.length != 1) {
+			throw new NotImplementedYet("Cannot compile multiple wyil files yet.", null);
+		}
+		WyilFile source = sources[0];
+
 		final ByteArrayOutputStream out = new ByteArrayOutputStream();
         final PrintWriter writer = new PrintWriter(out);
         final Wyil2Boogie translator = new Wyil2Boogie(writer);
-		translator.setVerbose(verbose);
-		translator.apply(source.read());
+		// translator.setVerbose(verbose);
+		translator.apply(source);
 		writer.close();
-		return new BoogieFile(target,out.toByteArray());
+		target.write(new BoogieFile(target,out.toByteArray()));
+		return true;
 	}
+
 }

@@ -566,7 +566,8 @@ public final class Wyil2Boogie {
 				for (Expr e : stmt.getLeftHandSide()) {
 					boolean mayMutate = true; // guilty until proven innocent.
 					while (!(e instanceof Expr.VariableAccess)) {
-						if (e instanceof Expr.Dereference) {
+						if (e instanceof Expr.Dereference ||
+						    e instanceof Expr.StaticVariableAccess) {
 							mayMutate = false;
 							break;
 						}
@@ -576,7 +577,10 @@ public final class Wyil2Boogie {
 						} else if (e instanceof Expr.ArrayAccess) {
 							e = ((Expr.ArrayAccess) e).getFirstOperand();
 						} else {
-							System.err.printf("WARNING: unknown assignment LHS: %s\n", e.toString());
+							System.err.printf("WARNING: unknown assignment LHS: %s %s\n",
+									e.toString(), e.getClass().toString());
+							mayMutate = false;
+							break;
 						}
 					}
 					if (mayMutate) {
@@ -1235,10 +1239,12 @@ public final class Wyil2Boogie {
 	}
 
 	/**
-	 * Extracts base variable that is being assigned to. Builds a list of all
-	 * indexes into the 'indexes' list.
+	 * Extracts the name of the base variable that is being assigned to.
 	 *
-	 * indexes contain 'new' expressions!
+	 * As a side effect, this method also builds a list of all the
+	 * indexes into that base variable and returns this in the 'indexes' list.
+	 *
+	 * Note that indexes may contain 'new' expressions!
 	 *
 	 * @param loc
 	 *            the LHS expression AST.
@@ -1262,7 +1268,8 @@ public final class Wyil2Boogie {
 			final String ref = writeAllocations(0, e.getOperand()).as(WREF).toString();
 			indexes.add(0, new DerefIndex(ref));
 			return HEAP;
-		} else if (loc instanceof Expr.VariableAccess) {
+		} else if (loc instanceof Expr.VariableAccess ||
+				loc instanceof Expr.StaticVariableAccess) {
 			return boogieExpr(loc).asWVal().toString();
 		}
 		throw new NotImplementedYet("complex assignment left-hand side", loc);
@@ -1315,7 +1322,7 @@ public final class Wyil2Boogie {
 	}
 
 	private boolean isMethod(Expr loc) {
-		return (loc instanceof Expr.Invoke && ((Expr.Invoke) loc).getDeclaration() instanceof Decl.Method);
+		return (loc instanceof Expr.Invoke && ((Expr.Invoke) loc).getBinding().getDeclaration() instanceof Decl.Method);
 	}
 
 	@SuppressWarnings("unused")
@@ -1424,7 +1431,8 @@ public final class Wyil2Boogie {
 
 	private void writeInvoke(int indent, Expr.Invoke stmt) {
 		final Tuple<Expr> arguments = stmt.getOperands();
-		String func = getMangledFunctionMethodName(stmt.getDeclaration().getQualifiedName(), stmt.getDeclaration().getType());
+		Decl.Callable decl = stmt.getBinding().getDeclaration();
+		String func = getMangledFunctionMethodName(decl.getQualifiedName(), decl.getType());
 		writeInvokeArgs(indent, func, arguments);
 	}
 
@@ -1773,7 +1781,7 @@ public final class Wyil2Boogie {
 		case EXPR_staticvariable:
 			Expr.StaticVariableAccess svar = (Expr.StaticVariableAccess) expr;
 			// TODO? Decl.StaticVariable decl = typeSystem.resolveExactly(svar.getName(), Decl.StaticVariable.class);
-			return new BoogieExpr(WVAL, svar.getName().getLast().toString());
+			return new BoogieExpr(WVAL, svar.getLink().getName().getLast().toString());
 
 		default:
 			throw new IllegalArgumentException("unknown bytecode " + expr.getOpcode() + " encountered: " + expr);
@@ -1884,8 +1892,8 @@ public final class Wyil2Boogie {
 
 	private BoogieExpr boogieInvoke(Expr.Invoke expr) {
 		BoogieType outType = WVAL;
-		final Type.Callable type = expr.getDeclaration().getType();
-		final String name = getMangledFunctionMethodName(expr.getDeclaration().getQualifiedName(), type);
+		final Type.Callable type = expr.getBinding().getDeclaration().getType();
+		final String name = getMangledFunctionMethodName(expr.getBinding().getDeclaration().getQualifiedName(), type);
 		if (type instanceof Type.Method) {
 			if (expr != this.outerMethodCall) {
 				// The Whiley language spec 0.3.38, Section 3.5.5, says that because they are
@@ -1965,12 +1973,12 @@ public final class Wyil2Boogie {
 	private BoogieExpr boogieLambda(Expr.LambdaAccess lambda) {
 		// FIXME: encoding will be required for package declarations, such as
 		// "std::integer::u8"
-		QualifiedName name = lambda.getDeclaration().getQualifiedName();
+		QualifiedName name = lambda.getBinding().getDeclaration().getQualifiedName();
 		final String func_const = mangleFuncName(name);
 		System.out.println("DEBUG: Expr.LambdaAccess:"
-				+ "\n  name     : " + lambda.getName()
+				+ "\n  name     : " + lambda.getBinding().getDeclaration().getName()
 				+ "\n  paraTypes: " + lambda.getParameterTypes()
-				+ "\n  signature: " + lambda.getDeclaration().getType()
+				+ "\n  signature: " + lambda.getBinding().getDeclaration().getType()
 				+ "\n  type     : " + lambda.getType()
 				+ "\n  types    : " + lambda.getTypes()
 				+ "\n  data    : " + Arrays.toString(lambda.getData())
@@ -2078,7 +2086,7 @@ public final class Wyil2Boogie {
 			return findUsableEqualityType(aType.getLeftHandSide());
 		} else if (type instanceof Type.Nominal) {
 			Type.Nominal aType = (Type.Nominal) type;
-			Type result = this.typeDefs.getOrDefault(aType.getName().get(0).get(), null);
+			Type result = this.typeDefs.getOrDefault(aType.getLink().getName().get(0).get(), null);
 			// System.out.println("DEBUG: unfold eq type: " + type + " -> " + result);
 			return findUsableEqualityType(result);
 		} else {
@@ -2225,7 +2233,7 @@ public final class Wyil2Boogie {
 		final String typeStr = type.toString();
 		if (type instanceof Type.Nominal) {
 			Type.Nominal nomType = (Type.Nominal) type;
-			final String typeName = nomType.getName().toString();
+			final String typeName = nomType.getLink().getName().toString();
 			// Note: if we wanted to generate a base-type predicate, we could unfold
 			// each nominal type first: Type type2 = nomType.getDeclaration().getType();
 			// (and ignore 'where' constraints).
@@ -2648,7 +2656,8 @@ public final class Wyil2Boogie {
 
 		@Override
 		public void visitInvoke(Expr.Invoke expr) {
-			String callee = getMangledFunctionMethodName(expr.getDeclaration().getQualifiedName(), expr.getDeclaration().getType());
+			Decl.Callable decl = expr.getBinding().getDeclaration();
+			String callee = getMangledFunctionMethodName(decl.getQualifiedName(), decl.getType());
 			callees.add(callee);
 			super.visitInvoke(expr);
 		}
@@ -2795,7 +2804,8 @@ public final class Wyil2Boogie {
 	private final AbstractVisitor funcConstantVisitor = new AbstractVisitor() {
 		@Override
 		public void visitLambdaAccess(Expr.LambdaAccess l) {
-			declareHigherOrderFunction(l.getDeclaration().getQualifiedName(), l.getDeclaration().getType());
+			Decl.Callable decl = l.getBinding().getDeclaration();
+			declareHigherOrderFunction(decl.getQualifiedName(), decl.getType());
 		}
 
 		@Override

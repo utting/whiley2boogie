@@ -1,5 +1,6 @@
 package wy2boogie.core;
 
+import wy2boogie.translate.NotImplementedYet;
 import wybs.io.Token;
 import wybs.lang.CompilationUnit;
 import wybs.util.AbstractCompilationUnit;
@@ -294,7 +295,12 @@ public class BoogieExampleFile extends AbstractCompilationUnit {
 	 * Responsible for identifying and writing Whiley counter-example models.
 	 * The normal extension is ".wyeg" for Whiley counter-examples.
 	 */
-	public static final Content.Type<BoogieExampleFile> ContentType = new Content.Type<BoogieExampleFile>() {
+	public static final Content.Type<BoogieExampleFile> ContentType = new Content.Printable<BoogieExampleFile>() {
+		@Override
+		public void print(PrintStream output, BoogieExampleFile content) throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
 		public Path.Entry<BoogieExampleFile> accept(Path.Entry<?> e) {
 			if (e.contentType() == this) {
 				return (Path.Entry<BoogieExampleFile>) e;
@@ -355,7 +361,8 @@ public class BoogieExampleFile extends AbstractCompilationUnit {
 
 		@Override
 		public String toString() {
-			return "Content-Type: Boogie counter-examples";
+			// return "Content-Type: Boogie counter-examples";
+			return "Content-Type: beg";
 		}
 
 		@Override

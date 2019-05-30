@@ -35,6 +35,7 @@ public class BoogieFile extends AbstractCompilationUnit<BoogieFile> {
 		@Override
 		public void write(OutputStream output, BoogieFile jf) throws IOException {
 			output.write(jf.bytes);
+			output.flush();
 		}
 
 		@Override
