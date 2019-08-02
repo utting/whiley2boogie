@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# This greps the source code of the WhileyCompiler tests and
+# generates the WHILEY/ALL.results file that is used by wydiff.
+
+if [ -r "WHILEY" ]
+then
+    UNITTESTS=../../src/test/java/wyc/testing
+    echo "Analysing wyc unit tests in $UNITTESTS"
+    grep "IGNORED.put(" $UNITTESTS/AllValidTest.java | sort | \
+       awk '-F"' '{print $2}' >WHILEY/ignore_compile.txt
+    grep "IGNORED.put(" $UNITTESTS/AllValidVerificationTest.java | sort | \
+       awk '-F"' '{print $2}' >WHILEY/ignore_prover.txt
+    ls *.whiley | awk '-F.' '{print $1}' >WHILEY/all.txt
+    wc WHILEY/*
+    # now use Python to combine these results into ALL.results
+    python - <<EOF
+ic = {f.strip() for f in open("WHILEY/ignore_compile.txt")}
+ip = {f.strip() for f in open("WHILEY/ignore_prover.txt")}
+ws = {f.strip() for f in open("WHILEY/all.txt")}
+def lines(progs,out): return [f"{p+'.whiley':<40s} {out}\n" for p in progs]
+all = sorted(lines(ic,"CompileError") +
+        lines(ip-ic, "PartVerified") +
+        lines(ws-ic-ip,"FullyVerified"))
+out=open("WHILEY/ALL.results","w")
+out.writelines(all)
+out.close()
+EOF
+    ## now combine these results to create ALL.results
+    #cat WHILEY/ignore_compile.txt | \
+    #    awk '{printf "%-40s %s\n",$1,"CompileError"}' >WHILEY/tmp.results
+    ## (ignore_prover - ignore_compile) -> PartVerified
+    #cat WHILEY/ignore_prover.txt | \
+    #    grep -vx -f WHILEY/ignore_compile.txt | \
+    #    awk '{printf "%-40s %s\n",$1,"PartVerified"}' >>WHILEY/tmp.results
+    ## (all - ignore_prover - ignore_compile) -> FullyVerified
+    #cat WHILEY/all.txt | \
+    #    grep -vx -f WHILEY/ignore_compile.txt | \
+    #    grep -vx -f WHILEY/ignore_prover.txt | \
+    #    awk '{printf "%-40s %s\n",$1,"FullyVerified"}' >>WHILEY/tmp.results
+    ## check results
+    #echo "Missing files in IGNORED for compile errors (should be none):"
+    #cat WHILEY/ignore_compile.txt | \
+    #    grep -vx -f WHILEY/all.txt
+    #echo "Missing files in IGNORED for prover errors (should be none):"
+    #cat WHILEY/ignore_prover.txt | \
+    #    grep -vx -f WHILEY/all.txt
+    #sort WHILEY/tmp.results >WHILEY/ALL.results
+    echo "Counts of each category:"
+    awk '{print $2}' WHILEY/ALL.results | sort | uniq -c
+else
+    echo "You must run this in WhileyCompiler/tests/valid."
+    echo "And you must create the destination WHILEY subdirectory first."
+fi
