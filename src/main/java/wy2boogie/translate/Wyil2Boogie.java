@@ -2713,7 +2713,9 @@ public final class Wyil2Boogie {
 	 * @return
 	 */
 	public boolean canRecurseBackTo(String callee, String caller) {
-		return callGraph.containsKey(callee) && callGraph.get(callee).contains(caller);
+		// we allow all recursive calls for now, since we are only proving partial correctness.
+		return false;
+		// return callGraph.containsKey(callee) && callGraph.get(callee).contains(caller);
 	}
 
 	private final AbstractVisitor recordVisitor = new AbstractVisitor() {
