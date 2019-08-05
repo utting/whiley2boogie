@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-import wy2boogie.translate.BoogieExpr;
-import wy2boogie.translate.BoogieType;
 
 public class BoogieExprTest {
 

@@ -7,12 +7,8 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 
-import wybs.util.StdProject;
-import wyil.check.FlowTypeCheck;
-import wyil.lang.WyilFile.Type;
 
 public class Wyil2BoogieTest {
-
 
     @Test
     public void testIndents() {
