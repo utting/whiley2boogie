@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import wybs.lang.SyntacticItem;
 import wybs.util.AbstractCompilationUnit;
 import wyil.lang.WyilFile;
 import wyil.util.AbstractVisitor;
@@ -165,17 +166,17 @@ public class AssertionGenerator {
 				super.visitInvoke(funCall);
 
 				QualifiedName name = funCall.getBinding().getDeclaration().getQualifiedName();
-				Type.Callable type = funCall.getBinding().getDeclaration().getType();
+				Type.Callable type = funCall.getBinding().getConcreteType();
+				Tuple<SyntacticItem> typeParamsActual = funCall.getBinding().getArguments();
 				// properties do not have preconditions.
 				if (type instanceof Type.Function || type instanceof Type.Method) {
 					// Now check the precondition of this function/method.
 					String funName = wy2b.getMangledFunctionMethodName(name, type);
 					Tuple<Expr> operands = funCall.getOperands();
-					String args = getArgs(operands);
+					String args = wy2b.commaSep(wy2b.typeParamsActual(typeParamsActual), getArgs(operands));
 					String call = funName + "(" + args + ")";
 					String pre = funName + Wyil2Boogie.METHOD_PRE + "(" + args + ")";
-					String optComma = args.isEmpty() ? "" : ", ";
-					String post = funName + Wyil2Boogie.METHOD_POST + "(" + args + optComma + call + ")";
+					String post = funName + Wyil2Boogie.METHOD_POST + "(" + args + ", " + call + ")";
 					BoogieExpr funPre = new BoogieExpr(BOOL, pre);
 					BoogieExpr funPost = new BoogieExpr(BOOL, post);
 					generateCheck(funPre);

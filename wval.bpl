@@ -220,3 +220,20 @@ function apply__3(FunctionClosure, WVal, WVal, WVal) returns (WVal);
 // 3. we generate an apply axiom for that function:
 //    axiom (forall v1:WVal, v2:WVal ::
 //      apply__1(closure__1(func__f, v1), v2) == f(v1, v2));
+
+
+
+// TYPE TEMPLATES SUPPORT
+
+type WProp;       // typing properties
+function apply__prop(p:WProp, v:WVal) returns (bool);
+
+// properties for primitive types
+const unique type__int:WProp;
+const unique type__byte:WProp;
+const unique type__bool:WProp;
+
+axiom (forall val:WVal :: apply__prop(type__int, val) <==> isInt(val));
+axiom (forall val:WVal :: apply__prop(type__byte, val) <==> isByte(val));
+axiom (forall val:WVal :: apply__prop(type__bool, val) <==> isBool(val));
+
