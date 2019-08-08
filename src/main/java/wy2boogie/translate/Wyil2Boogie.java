@@ -31,7 +31,9 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static wyil.lang.WyilFile.*;
 
@@ -442,7 +444,6 @@ public final class Wyil2Boogie {
 		// writeModifiers(td.modifiers());
 		String param = vd.getName().get();
 		// NOTE: an unnamed parameter will be called '$', which works fine.
-		StringBuilder sb = new StringBuilder();
 		this.out.printf("function %s(%s%s:WVal) returns (bool) {\n    ",
 				typePredicateName(td.getName().get()),
 				typeParams1(td.getTemplate()),
@@ -492,8 +493,6 @@ public final class Wyil2Boogie {
 		this.loopCounter = 0;
 		final Tuple<Template.Variable> templateTypes = method.getTemplate();
 		final Type.Callable ft = method.getType();
-		System.out.println("DEBUG: method template=" + method.getTemplate());
-		System.out.println("DEBUG: method type=" + ft);
 		declareFields(method.getBody());
 		declareFuncConstants(method.getBody());
 		Map<String, String> locals = findLocalVarDecls(method.getBody());
@@ -551,14 +550,14 @@ public final class Wyil2Boogie {
 				writeLocalVarDecls(locals);
 				// now create a local copy of each mutated input!
 				for (final String naughty : mutatedInputs.keySet()) {
-					tabIndent(1);
+					writeIndent(1);
 					this.out.printf("var %s : WVal where ", naughty);
 					this.out.print(typePredicate(naughty, mutatedInputs.get(naughty)));
 					this.out.println(";");
 				}
 				// now assign the original inputs to the copies.
 				for (final String naughty : mutatedInputs.keySet()) {
-					tabIndent(1);
+					writeIndent(1);
 					this.out.printf("%s := %s;\n", naughty, naughty + IMMUTABLE_INPUT);
 				}
 				writeBlock(0, method.getBody());
@@ -744,15 +743,7 @@ public final class Wyil2Boogie {
 	 * @return a comma-separated string of just the names being declared.
 	 */
 	private String getNames(Tuple<Decl.Variable> decls) {
-		final StringBuilder result = new StringBuilder();
-		for (int i = 0; i != decls.size(); ++i) {
-			if (i != 0) {
-				result.append(", ");
-			}
-			final Decl.Variable locn = decls.get(i);
-			result.append(locn.getName());
-		}
-		return result.toString();
+		return commaSepMap(decls, v -> v.getName().toString());
 	}
 
 	/**
@@ -813,8 +804,6 @@ public final class Wyil2Boogie {
 		visitor.visitBlock(body);
 		// reset to zero so that we generate same switch labels as we generate code.
 		this.switchCount = 0;
-
-		// System.err.println("DEBUG: localVarDecls = " + visitor.locals);
 		return visitor.locals;
 	}
 
@@ -822,7 +811,7 @@ public final class Wyil2Boogie {
 		for (String name : locals.keySet()) {
 			String boogieType = locals.get(name);
 			if (boogieType != null) {
-				tabIndent(1);
+				writeIndent(1);
 				out.printf("var %s : %s;\n", name, boogieType);
 			}
 		}
@@ -926,7 +915,7 @@ public final class Wyil2Boogie {
 	}
 
 	private void writeStatement(int indent, Stmt c) {
-		tabIndent(indent + 1);
+		writeIndent(indent + 1);
 		switch (c.getOpcode()) {
 		case STMT_assert: {
 			Stmt.Assert s = (Stmt.Assert) c;
@@ -1064,7 +1053,7 @@ public final class Wyil2Boogie {
 				this.out.print("&& ");
 			}
 			this.out.println(assumps.get(i).as(BOOL).withBrackets(" && ").toString());
-			tabIndent(indent + 2);
+			writeIndent(indent + 2);
 		}
 		if (assumps.size() > 0) {
 			this.out.print("==> ");
@@ -1072,7 +1061,7 @@ public final class Wyil2Boogie {
 		// finally, print the main assertion.
 		this.out.print(conj.as(BOOL).withBrackets(" ==> ").toString());
 		this.out.println(close);
-		tabIndent(indent + 1); // get ready for next statement.
+		writeIndent(indent + 1); // get ready for next statement.
 	}
 
 	private void writeAssert(Stmt.Assert c) {
@@ -1177,6 +1166,20 @@ public final class Wyil2Boogie {
 			}
 		}
 		return sb.toString();
+	}
+
+	/**
+	 * Converts a set of objects to strings and concatenates them, comma-separated.
+	 *
+	 * Unlike commaSep(String...), this does not skip over empty strings.
+	 *
+	 * @param objs Tuple or collection of objects.
+	 * @param func the conversion to string function
+	 * @return concatenation of the input strings, separated with commas.
+	 */
+	protected <T> String commaSepMap(Iterable<T> objs, java.util.function.Function<T, String> func) {
+		Stream<T> s =  StreamSupport.stream(objs.spliterator(), false);
+		return s.map(func).collect(Collectors.joining(", "));
 	}
 
 	/**
@@ -1399,23 +1402,23 @@ public final class Wyil2Boogie {
 		this.loopLabels.addLast("DO__WHILE__" + this.loopCounter);
 		// TODO: we could remove this if (true) {...} wrapper?
 		this.out.printf("if (true) {\n");
-		tabIndent(indent + 2);
+		writeIndent(indent + 2);
 		this.out.printf("CONTINUE__%s:\n", this.loopLabels.getLast());
 		writeBlock(indent + 1, b.getBody());
-		tabIndent(indent + 2);
+		writeIndent(indent + 2);
 		this.out.printf("// invariant:");
 		this.vcg.checkPredicates(indent + 1, loopInvariant);
 		writeLoopInvariant(indent + 2, "assert", loopInvariant);
 		this.out.println();
-		tabIndent(indent + 2);
+		writeIndent(indent + 2);
 		this.vcg.checkPredicate(indent + 1, b.getCondition());
 		this.out.printf("// while:\n");
-		tabIndent(indent + 2);
+		writeIndent(indent + 2);
 		final String cond = writeAllocations(indent, b.getCondition()).as(BOOL).toString();
 		this.out.printf("if (%s) { goto CONTINUE__%s; }\n", cond, this.loopLabels.getLast());
-		tabIndent(indent + 1);
+		writeIndent(indent + 1);
 		this.out.println("}");
-		tabIndent(indent + 1);
+		writeIndent(indent + 1);
 		this.out.printf("BREAK__%s:\n", this.loopLabels.removeLast());
 	}
 
@@ -1436,11 +1439,11 @@ public final class Wyil2Boogie {
 		this.out.printf("if (%s) {\n", cond);
 		writeBlock(indent + 1, b.getTrueBranch());
 		if (b.hasFalseBranch()) {
-			tabIndent(indent + 1);
+			writeIndent(indent + 1);
 			this.out.println("} else {");
 			writeBlock(indent + 1, b.getFalseBranch());
 		}
-		tabIndent(indent + 1);
+		writeIndent(indent + 1);
 		this.out.println("}");
 	}
 
@@ -1481,18 +1484,18 @@ public final class Wyil2Boogie {
 		this.loopCounter++;
 		this.loopLabels.addLast("WHILE__" + this.loopCounter);
 		this.out.printf("CONTINUE__%s:\n", this.loopLabels.getLast());
-		tabIndent(indent + 1);
+		writeIndent(indent + 1);
 		this.out.printf("while (%s)", cond);
 		// out.print(" modifies ");
 		// writeExpressions(modifiedOperands,out);
 		writeLoopInvariant(indent + 2, "invariant", loopInvariant);
 		this.out.println();
-		tabIndent(indent + 1);
+		writeIndent(indent + 1);
 		this.out.println("{");
 		writeBlock(indent + 1, b.getBody());
-		tabIndent(indent + 1);
+		writeIndent(indent + 1);
 		this.out.println("}");
-		tabIndent(indent + 1);
+		writeIndent(indent + 1);
 		this.out.printf("BREAK__%s:\n", this.loopLabels.removeLast());
 	}
 
@@ -1500,7 +1503,7 @@ public final class Wyil2Boogie {
 		if (loopInvariant.size() > 0) {
 			for (final Expr clause : loopInvariant) {
 				this.out.println();
-				tabIndent(indent);
+				writeIndent(indent);
 				this.out.printf("%s %s;", keyword, boogieBoolExpr(clause).toString());
 			}
 		}
@@ -1525,7 +1528,7 @@ public final class Wyil2Boogie {
 			final Decl.Variable locn = this.outDecls.get(i);
 			final String name = locn.getName().get();
 			this.out.printf("%s := %s;\n", name, args[i]);
-			tabIndent(indent + 1);
+			writeIndent(indent + 1);
 		}
 		this.out.println("return;");
 	}
@@ -1533,7 +1536,7 @@ public final class Wyil2Boogie {
 	private void writeSkip(int indent, Stmt.Skip b) {
 		// no output needed. Boogie uses {...} blocks, so empty statements are okay.
 		// But we output an assert true, just for fun.
-		tabIndent(indent + 1);
+		writeIndent(indent + 1);
 		this.out.println("assert true; // skip");
 	}
 
@@ -1564,14 +1567,14 @@ public final class Wyil2Boogie {
 			}
 			labels.append(this.loopLabels.getLast() + "__CASE" + i);
 		}
-		tabIndent(indent + 1);
+		writeIndent(indent + 1);
 		this.out.printf("goto %s;\n", labels.toString()); // non-deterministic
 		final BoogieExpr defaultCond = new BoogieExpr(BoogieType.BOOL, "true");
 		for (int i = 0; i < cases.size(); i++) {
 			Stmt.Case cAse = cases.get(i);
 			writeCase(indent + 1, var, i, cAse, defaultCond);
 		}
-		tabIndent(indent + 1);
+		writeIndent(indent + 1);
 		// We add a 'skip' statement after the BREAK label, just in case this switch is
 		// not inside a block.
 		// For example, Switch_Valid_5.whiley.
@@ -1610,13 +1613,13 @@ public final class Wyil2Boogie {
 			}
 			op = " || ";
 		}
-		tabIndent(indent + 1);
+		writeIndent(indent + 1);
 		this.out.printf(this.loopLabels.getLast() + "__CASE%d:\n", count);
-		tabIndent(indent + 2);
+		writeIndent(indent + 2);
 		final BoogieExpr assume = c.getConditions().size() == 0 ? defaultCond : match;
 		this.out.printf("assume %s;\n", assume.as(BOOL).toString());
 		writeBlock(indent + 1, c.getBlock());
-		tabIndent(indent + 2);
+		writeIndent(indent + 2);
 		this.out.printf("goto BREAK__%s;\n", this.loopLabels.getLast());
 	}
 
@@ -1916,12 +1919,12 @@ public final class Wyil2Boogie {
 		BoogieType outType = WVAL;
 		final Tuple<Template.Variable> typeVars = expr.getBinding().getDeclaration().getTemplate();
 		final Tuple<SyntacticItem> typeInstances = expr.getBinding().getArguments();
-		System.out.println("DEBUG: type =" + expr.getType());
-		System.out.println(".....: ctype=" + expr.getBinding().getConcreteType());
-		System.out.println(".....: bind =" + expr.getBinding());
-		System.out.println(".....: templ=" + typeVars);
-		System.out.println(".....: args =" + typeInstances
-				+ " class=" + (typeInstances.size()>0? typeInstances.get(0).getClass() : ""));
+//		System.out.println("DEBUG: type =" + expr.getType());
+//		System.out.println(".....: ctype=" + expr.getBinding().getConcreteType());
+//		System.out.println(".....: bind =" + expr.getBinding());
+//		System.out.println(".....: templ=" + typeVars);
+//		System.out.println(".....: args =" + typeInstances
+//				+ " class=" + (typeInstances.size()>0? typeInstances.get(0).getClass() : ""));
 		assert typeVars.size() == typeInstances.size();
 		final Type.Callable type = expr.getBinding().getConcreteType();
 		final String name = getMangledFunctionMethodName(expr.getBinding().getDeclaration().getQualifiedName(), type);
@@ -2271,7 +2274,7 @@ public final class Wyil2Boogie {
 	 *
 	 * @param indent
 	 */
-	private void tabIndent(int indent) {
+	private void writeIndent(int indent) {
 		indent = indent * 4;
 		for (int i = 0; i < indent; ++i) {
 			this.out.print(" ");
@@ -2302,17 +2305,9 @@ public final class Wyil2Boogie {
 			// each nominal type first: Type type2 = nomType.getDeclaration().getType();
 			// (and ignore 'where' constraints).
 			Tuple<Type> params = nomType.getParameters();
-			StringBuilder sb = new StringBuilder();
-			sb.append(typePredicateName(typeName));
-			sb.append("(");
-			for (Type t : params) {
-				String tName = typeParamName(t.toCanonicalString());
-				sb.append(tName);
-				sb.append(", ");
-			}
-			sb.append(var);
-			sb.append(")");
-			return sb.toString();
+			final String name = typePredicateName(typeName);
+			final String tParams = commaSepMap(params, t -> typeParamName(t.toCanonicalString()));
+			return String.format("%s(%s)", name, commaSep(tParams, var));
 		}
 		if (type instanceof Type.Variable) {
 			Type.Variable tv = (Type.Variable) type;
@@ -2885,37 +2880,28 @@ public final class Wyil2Boogie {
 		this.out.printf("const unique %s:WFuncName;\n", lambdaName);
 
 		// add axiom apply_n(closure_m(lambdaName, captured...), args...) = decl.getBody();
-		StringBuilder decls = new StringBuilder();
-		StringBuilder captureNames = new StringBuilder();
-		String declSep = "";
-		for (Decl.Variable c: decl.getCapturedVariables()) {
-			decls.append(declSep + c.getName().get() + ":WVal");
-			captureNames.append(", " + c.getName().get());
-			declSep = ", ";
-		}
-		StringBuilder paramNames = new StringBuilder();
-		for (Decl.Variable p: decl.getParameters()) {
-			decls.append(declSep + p.getName().get() + ":WVal");
-			paramNames.append(", " + p.getName().get());
-			declSep = ", ";
-		}
+		String captureNames = commaSepMap(decl.getCapturedVariables(), v -> v.getName().get());
+		String paramNames = commaSepMap(decl.getParameters(), v -> v.getName().get());
+
 		// An example trigger of this axiom is: apply__2(closure__1(funcName,cap1),in1,in2).
 		// TODO: check if we need to also handle type template parameters within lambda expressions???
-		final String call = String.format("apply__%d(closure__%d(%s%s)%s)",
+		final String call = String.format("apply__%d(closure__%d(%s)%s)",
 				decl.getParameters().size(),
 				decl.getCapturedVariables().size(),
-				lambdaName,
-				captureNames.toString(),
-				paramNames.toString()
+				commaSep(lambdaName, captureNames),
+				(paramNames.isEmpty() ? "" : ", " + paramNames)
 				);
 		BoogieExpr body = writeAllocations(0, decl.getBody()).asWVal();
-		if (decls.length() == 0) {
+		if (captureNames.isEmpty() && paramNames.isEmpty()) {
 			this.out.printf("axiom %s == %s;\n\n",
 					call,
 					body.toString());
 		} else {
+			String decls1 = commaSepMap(decl.getCapturedVariables(), v -> v.getName().get() + ":WVal");
+			String decls2 = commaSepMap(decl.getParameters(), v -> v.getName().get() + ":WVal");
+			String decls = commaSep(decls1, decls2);
 			this.out.printf("axiom (forall %s :: {%s} %s == %s);\n\n",
-					decls.toString(),
+					decls,
 					call,
 					call,
 					body.toString());

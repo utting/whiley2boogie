@@ -176,7 +176,7 @@ public class AssertionGenerator {
 					String args = wy2b.commaSep(wy2b.typeParamsActual(typeParamsActual), getArgs(operands));
 					String call = funName + "(" + args + ")";
 					String pre = funName + Wyil2Boogie.METHOD_PRE + "(" + args + ")";
-					String post = funName + Wyil2Boogie.METHOD_POST + "(" + args + ", " + call + ")";
+					String post = funName + Wyil2Boogie.METHOD_POST + "(" + wy2b.commaSep(args, call) + ")";
 					BoogieExpr funPre = new BoogieExpr(BOOL, pre);
 					BoogieExpr funPost = new BoogieExpr(BOOL, post);
 					generateCheck(funPre);
@@ -190,14 +190,7 @@ public class AssertionGenerator {
 			}
 
 			private String getArgs(Tuple<Expr> operands) {
-				StringBuilder buf = new StringBuilder();
-				for (int i = 0; i != operands.size(); ++i) {
-					if (i != 0) {
-						buf.append(", ");
-					}
-					buf.append(expr(operands.get(i)).asWVal().toString());
-				}
-				return buf.toString();
+				return wy2b.commaSepMap(operands, e -> expr(e).asWVal().toString());
 			}
 
 			// case Bytecode.OPCODE_record:
