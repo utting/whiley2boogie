@@ -446,7 +446,7 @@ public final class Wyil2Boogie {
 		// NOTE: an unnamed parameter will be called '$', which works fine.
 		this.out.printf("function %s(%s%s:WVal) returns (bool) {\n    ",
 				typePredicateName(td.getName().get()),
-				typeParams1(td.getTemplate()),
+				typeParamDecls(td.getTemplate()),
 				param);
 		this.out.print(typePredicate(param, t));
 		if (td.getInvariant().size() > 0) {
@@ -491,7 +491,7 @@ public final class Wyil2Boogie {
 	 */
 	private void writeProcedure(Decl.FunctionOrMethod method, boolean verifyImpl) {
 		this.loopCounter = 0;
-		final Tuple<Template.Variable> templateTypes = method.getTemplate();
+		final Tuple<Template.Variable> templateTypes = methodTypeParamVars(method);
 		final Type.Callable ft = method.getType();
 		declareFields(method.getBody());
 		declareFuncConstants(method.getBody());
@@ -520,15 +520,14 @@ public final class Wyil2Boogie {
 		}
 		this.out.print("procedure ");
 		writeSignature(procedureName, method, null);
+		String inputs = commaSep(commaSepMap(templateTypes, v -> v.getName().toString()), getNames(this.inDecls));
 		this.out.println(";");
 		this.out.printf("    free requires Context__Height > 1;\n");
-		this.out.printf("    requires %s(%s%s);\n",
-				name + METHOD_PRE,
-				typeParams1(templateTypes),
-				getNames(this.inDecls));
+		this.out.printf("    requires %s(%s);\n", name + METHOD_PRE, inputs);
 		if (usesHeap) {
 			this.out.printf("    modifies %s, %s;\n", HEAP, ALLOCATED);
 		}
+		// TODO: replace all this by a call to METHOD_POST?
 		// Part of the postcondition is the type constraints of each output variable.
 		for (Decl.Variable locn : method.getReturns()) {
 			final String inName = locn.getName().get();
@@ -613,11 +612,9 @@ public final class Wyil2Boogie {
 
 	private void writeMethodPre(Tuple<Template.Variable> typeVars, String name, Decl.FunctionOrMethod method) {
 		Tuple<Decl.Variable> parameters = method.getParameters();
-		this.out.printf("function %s(", name + METHOD_PRE);
-		writeParameters(typeVars, parameters, null);
-		this.out.print(") returns (bool)\n{\n      ");
-		Tuple<Expr> pre = method.getRequires();
-		writeTypesAndPredicates(parameters, pre);
+		String inputs = createParameters(typeVars, parameters, null);
+		this.out.printf("function %s(%s) returns (bool)\n{\n      ", name + METHOD_PRE, inputs);
+		writeTypesAndPredicates(parameters, method.getRequires());
 		this.out.println("\n}");
 	}
 
@@ -625,14 +622,9 @@ public final class Wyil2Boogie {
 		Tuple<Decl.Variable> parameters = method.getParameters();
 		Tuple<Decl.Variable> returns = method.getReturns();
 		// Now define the pre-post function: function f__post(a,b) == b:T && Post
-		this.out.printf("function %s(", name + METHOD_POST);
-		writeParameters(typeVars, parameters, null);
-		String paramStr = getNames(this.inDecls);
-		String returnStr = getNames(this.outDecls);
-		String optComma = (paramStr.isEmpty() || returnStr.isEmpty()) ? "" : ", ";
-		this.out.print(optComma);
-		writeParameters(null, returns, null);
-		this.out.printf(") returns (bool)\n{\n    "); // was also: "%s(%s) &&\n    ", name + METHOD_PRE, paramStr);
+		String inputs = createParameters(typeVars, parameters, null);
+		String outputs = createParameters(null, returns, null);
+		this.out.printf("function %s(%s) returns (bool)\n{\n    ", name + METHOD_POST, commaSep(inputs, outputs));
 		if (returns.size() > 0) {
 			Tuple<Expr> post = method.getEnsures();
 			writeTypesAndPredicates(returns, post);
@@ -660,15 +652,12 @@ public final class Wyil2Boogie {
 		final String name = getMangledFunctionMethodName(prop.getQualifiedName(), prop.getType());
 		this.inDecls = prop.getParameters();
 		this.outDecls = prop.getReturns();
-		this.out.printf("function %s(", name);
-		writeParameters(prop.getTemplate(), this.inDecls, null);
-		this.out.println(") returns (bool);");
+		String inputs = createParameters(prop.getTemplate(), this.inDecls, null);
+		this.out.printf("function %s(%s) returns (bool);\n", name, inputs);
 
 		// write axiom: (forall in :: f(in) <==> body);
-		final String call = String.format("%s(%s%s)", name, typeParams1(prop.getTemplate()), getNames(this.inDecls));
-		this.out.print("axiom (forall ");
-		writeParameters(prop.getTemplate(), this.inDecls, null);
-		this.out.printf(" :: {%s} %s <==> ", call, call);
+		final String call = String.format("%s(%s%s)", name, typeParamDecls(prop.getTemplate()), getNames(this.inDecls));
+		this.out.printf("axiom (forall %s :: {%s} %s <==> ", inputs, call, call);
 		writeConjunction(prop.getInvariant());
 		this.out.println(");");
 		this.inDecls = null;
@@ -684,53 +673,50 @@ public final class Wyil2Boogie {
 	 *            all other details of the function
 	 */
 	private void writeFunction(String name, Decl.Function method) {
-		Tuple<Decl.Variable> parameters = method.getParameters();
-		Tuple<Decl.Variable> returns = method.getReturns();
-		this.out.printf("function %s(", name);
-		writeParameters(method.getTemplate(), parameters, null);
-		if (returns.size() == 0) {
+		if (method.getReturns().size() == 0) {
 			throw new IllegalArgumentException("function with no return values: " + method);
-		} else {
-			this.out.print(") returns (");
-			writeParameters(null, returns, null);
-			this.out.println(");");
-
-			/*
-			// OLD: write axiom: (forall in,out :: f(in)==out && f_pre(in) ==> types(out) && post)
-			// NEW: write axiom: (forall in :: {f(in)} f_pre(in) ==> (exists out :: types(out) && post))
-			//    so that this axiom is triggered properly, each time we see f(...).
-			final String inVars = getNames(this.inDecls);
-			final String outVars = getNames(this.outDecls);
-			if (parameters.size() == 0) {
-				this.out.print("axiom ");
-			} else {
-				this.out.print("axiom (forall ");
-				writeParameters(parameters, null);
-				// trigger is f(in)
-				this.out.printf(" :: {%s(%s)}\n    ", name, getNames(this.inDecls));
-			}
-			this.out.printf("%s(%s)\n",  name + METHOD_POST, getNames(this.inDecls));
-			this.out.print("    ==> (exists ");
-			writeParameters(returns, null);
-			this.out.printf(" ::\n        %s(%s) == (%s) &&\n        ", name, inVars, outVars);
-			// Now write the type and type constraints of each output variable.
-			for (int i = 0; i != returns.size(); ++i) {
-				if (i != 0) {
-					this.out.print(AND_OUTER);
-				}
-				final Decl.Variable outvar = returns.get(i);
-				final String inName = outvar.getName().get();
-				this.out.print(typePredicate(inName, outvar.getType()));
-			}
-			this.out.print(AND_OUTER);
-			writeConjunction(method.getEnsures());
-			if (parameters.size() == 0) {
-				this.out.println(");");
-			} else {
-				this.out.println("));");
-			}
-			*/
 		}
+		this.out.printf("function %s(%s) returns (%s);\n",
+				name,
+				createParameters(method.getTemplate(), method.getParameters(), null),
+				createParameters(null, method.getReturns(), null)
+		);
+
+		/*
+		// OLD: write axiom: (forall in,out :: f(in)==out && f_pre(in) ==> types(out) && post)
+		// NEW: write axiom: (forall in :: {f(in)} f_pre(in) ==> (exists out :: types(out) && post))
+		//    so that this axiom is triggered properly, each time we see f(...).
+		final String inVars = getNames(this.inDecls);
+		final String outVars = getNames(this.outDecls);
+		if (parameters.size() == 0) {
+			this.out.print("axiom ");
+		} else {
+			this.out.print("axiom (forall ");
+			createParameters(parameters, null);
+			// trigger is f(in)
+			this.out.printf(" :: {%s(%s)}\n    ", name, getNames(this.inDecls));
+		}
+		this.out.printf("%s(%s)\n",  name + METHOD_POST, getNames(this.inDecls));
+		this.out.print("    ==> (exists ");
+		createParameters(returns, null);
+		this.out.printf(" ::\n        %s(%s) == (%s) &&\n        ", name, inVars, outVars);
+		// Now write the type and type constraints of each output variable.
+		for (int i = 0; i != returns.size(); ++i) {
+			if (i != 0) {
+				this.out.print(AND_OUTER);
+			}
+			final Decl.Variable outvar = returns.get(i);
+			final String inName = outvar.getName().get();
+			this.out.print(typePredicate(inName, outvar.getType()));
+		}
+		this.out.print(AND_OUTER);
+		writeConjunction(method.getEnsures());
+		if (parameters.size() == 0) {
+			this.out.println(");");
+		} else {
+			this.out.println("));");
+		}
+		*/
 		this.out.println();
 	}
 
@@ -765,14 +751,13 @@ public final class Wyil2Boogie {
 	}
 
 	private void writeSignature(String name, Decl.FunctionOrMethod method, Map<String, Type> mutatedInputs) {
-		this.out.print(name);
-		this.out.print("(");
-		writeParameters(method.getTemplate(), method.getParameters(), mutatedInputs);
-		if (method.getReturns().size() > 0) {
-			this.out.print(") returns (");
-			writeParameters(null, method.getReturns(), null);
+		String inputs = createParameters(method.getTemplate(), method.getParameters(), mutatedInputs);
+		if (method.getReturns().size() == 0) {
+			this.out.printf("%s(%s)", name, inputs);
+		} else {
+			String outputs = createParameters(null, method.getReturns(), null);
+			this.out.printf("%s(%s) returns (%s)", name, inputs, outputs);
 		}
-		this.out.print(")");
 	}
 
 	/**
@@ -884,28 +869,23 @@ public final class Wyil2Boogie {
 	}
 
 	/**
-	 * Write the declarations of input or output parameters of a function/method/property.
+	 * Returns the declarations of input or output parameters of a function/method/property.
 	 *
 	 * @param typeVars optional type parameters.  (pass null if not needed).
 	 * @param decls the variables to declare.
 	 * @param rename optional renaming of the variables (pass null if no renaming needed).
+	 * @return a single string of comma-separated parameter declarations.
 	 */
-	private void writeParameters(Tuple<Template.Variable> typeVars, Tuple<Decl.Variable> decls, Map<String, Type> rename) {
-		if (typeVars != null) {
-			this.out.print(typeParams1(typeVars));
-		}
-		// TODO: fix missing comma here???
-		for (int i = 0; i != decls.size(); ++i) {
-			if (i != 0) {
-				this.out.print(", ");
-			}
-			final Decl.Variable locn = decls.get(i);
-			String name = locn.getName().get();
+	private String createParameters(Tuple<Template.Variable> typeVars, Tuple<Decl.Variable> decls, Map<String, Type> rename) {
+		String tvars = (typeVars == null) ? "" : typeParamDecls(typeVars);
+		String dstr = commaSepMap(decls, d -> {
+			String name = d.getName().get();
 			if (rename != null && rename.containsKey(name)) {
 				name = name + IMMUTABLE_INPUT;
 			}
-			this.out.print(name + ":WVal");
-		}
+			return name + ":WVal";
+		});
+		return tvars + dstr;  // tvars has the trailing comma, if it is non-empty.
 	}
 
 	private void writeBlock(int indent, Stmt.Block block) {
@@ -1157,10 +1137,10 @@ public final class Wyil2Boogie {
 		boolean empty = true;
 		StringBuilder sb = new StringBuilder();
 		for (String s: strings) {
-			if (!empty) {
-				sb.append(", ");
-			}
 			if (! s.isEmpty()) {
+				if (!empty) {
+					sb.append(", ");
+				}
 				sb.append(s);
 				empty = false;
 			}
@@ -1449,24 +1429,20 @@ public final class Wyil2Boogie {
 
 	// TODO: decide how to encode indirect method calls
 	private void writeIndirectInvoke(int indent, Expr.IndirectInvoke stmt) {
+		// NOTE: our indirect invoke does not handle lifetimes or template type parameters yet.
 		final Tuple<Expr> arguments = stmt.getArguments();
 		String func = writeAllocations(indent, stmt.getSource()).as(METHOD).toString(); // and/or as(FUNC)??
-		writeInvokeArgs(indent, func, arguments);
+		String args = commaSepMap(arguments, e -> writeAllocations(indent, e).asWVal().toString());
+		this.out.printf("%s(%s);\n", func, args);
 	}
 
 	private void writeInvoke(int indent, Expr.Invoke stmt) {
-		final Tuple<Expr> arguments = stmt.getOperands();
+		Tuple<Type> actualTypes = typeParamValues(stmt);
+		String typeArgs = typeParamValuesString(actualTypes);
 		Decl.Callable decl = stmt.getBinding().getDeclaration();
 		String func = getMangledFunctionMethodName(decl.getQualifiedName(), decl.getType());
-		writeInvokeArgs(indent, func, arguments);
-	}
-
-	private void writeInvokeArgs(int indent, String func, Tuple<Expr> arguments) {
-		final String[] args = new String[arguments.size()];
-		for (int i = 0; i != arguments.size(); ++i) {
-			args[i] = writeAllocations(indent, arguments.get(i)).asWVal().toString();
-		}
-		this.out.printf("%s(%s);\n", func, commaSep(args));
+		String args = commaSepMap(stmt.getOperands(), e -> writeAllocations(indent, e).asWVal().toString());
+		this.out.printf("%s(%s);\n", func, commaSep(typeArgs, args));
 	}
 
 	// TODO: named block
@@ -1917,15 +1893,7 @@ public final class Wyil2Boogie {
 
 	private BoogieExpr boogieInvoke(Expr.Invoke expr) {
 		BoogieType outType = WVAL;
-		final Tuple<Template.Variable> typeVars = expr.getBinding().getDeclaration().getTemplate();
-		final Tuple<SyntacticItem> typeInstances = expr.getBinding().getArguments();
-//		System.out.println("DEBUG: type =" + expr.getType());
-//		System.out.println(".....: ctype=" + expr.getBinding().getConcreteType());
-//		System.out.println(".....: bind =" + expr.getBinding());
-//		System.out.println(".....: templ=" + typeVars);
-//		System.out.println(".....: args =" + typeInstances
-//				+ " class=" + (typeInstances.size()>0? typeInstances.get(0).getClass() : ""));
-		assert typeVars.size() == typeInstances.size();
+		final Tuple<Type> typeInstances = typeParamValues(expr);
 		final Type.Callable type = expr.getBinding().getConcreteType();
 		final String name = getMangledFunctionMethodName(expr.getBinding().getDeclaration().getQualifiedName(), type);
 		if (type instanceof Type.Method) {
@@ -1940,7 +1908,7 @@ public final class Wyil2Boogie {
 		final BoogieExpr out = new BoogieExpr(outType);
 		out.append(name);
 		out.append("(");
-		String typeParams = typeParamsActual(typeInstances);
+		String typeParams = typeParamValuesString(typeInstances);
 		String sep = "";
 		if (!typeParams.isEmpty()) {
 			out.append(typeParams);
@@ -1953,20 +1921,6 @@ public final class Wyil2Boogie {
 		}
 		out.append(")");
 		return out;
-	}
-
-	protected String typeParamsActual(Tuple<SyntacticItem> types) {
-		String[] ss = new String[types.size()];
-		for (int i = 0; i < types.size(); i++) {
-			SyntacticItem item = types.get(i);
-			if (item instanceof Type) {
-				Type t = (Type) item;
-				ss[i] = typeParamName(t.toCanonicalString());
-			} else {
-				throw new NotImplementedYet("unusual actual type parameter: ", types);
-			}
-		}
-		return commaSep(ss);
 	}
 
 	private BoogieExpr boogieIndirectInvokeExpr(Expr.IndirectInvoke expr) {
@@ -2306,7 +2260,7 @@ public final class Wyil2Boogie {
 			// (and ignore 'where' constraints).
 			Tuple<Type> params = nomType.getParameters();
 			final String name = typePredicateName(typeName);
-			final String tParams = commaSepMap(params, t -> typeParamName(t.toCanonicalString()));
+			final String tParams = commaSepMap(params, t -> typeParamName(t));
 			return String.format("%s(%s)", name, commaSep(tParams, var));
 		}
 		if (type instanceof Type.Variable) {
@@ -2395,19 +2349,92 @@ public final class Wyil2Boogie {
 		throw new NotImplementedYet("type: " + type, null);
 	}
 
+
 	/**
-	 * Concatenates optional type parameter declarations into a string.
+	 * Gets the type parameters variables for a template function/method call or declaration.
+	 *
+	 * Skips over and ignores any lifetime parameters.
+	 *
+	 * @param method
+	 * @return just the type template parameters
+	 */
+	// same as the above function, but for function/method declarations.
+	protected Tuple<Template.Variable> methodTypeParamVars(Decl.FunctionOrMethod method) {
+		if (this.verbose) {
+			System.out.println("DEBUG: filtering template params for DECL " + method.getQualifiedName());
+		}
+		Tuple<Template.Variable> typeVars = new Tuple<>();
+		for (SyntacticItem item: method.getTemplate()) {
+			if (item instanceof WyilFile.Template.Type) {
+				typeVars = typeVars.append((Template.Type) item);
+				if (this.verbose) {
+					System.out.println(".....: keep Type " + item + " class " + item.getClass());
+				}
+			} else {
+				if (this.verbose) {
+					System.err.println(".....: skip .... " + item + " class " + item.getClass());
+				}
+			}
+		}
+		assert typeVars.size() == method.getTemplate().size();
+		return typeVars;
+	}
+
+	/**
+	 * Gets the instantiated type parameters for an invocation of a template function/method.
+	 *
+	 * Skips over and ignores any lifetime parameters.
+	 *
+	 * @param expr
+	 * @return the tuple of concrete types that are the parameter values for the template types.
+	 */
+	protected Tuple<Type> typeParamValues(Expr.Invoke expr) {
+		if (this.verbose) {
+			System.out.println("DEBUG: call param values " + expr.getBinding().getDeclaration().getQualifiedName());
+		}
+		// we step through the parameter variables looking for the Template.Type ones,
+		// and we save the corresponding parameter values (the actual type parameters).
+		Tuple<Template.Variable> paramVars = expr.getBinding().getDeclaration().getTemplate();
+		Tuple<SyntacticItem> paramValues = expr.getBinding().getArguments();
+		Tuple<Type> types = new Tuple<>();
+		if (paramVars.size() != paramValues.size()) {
+			throw new RuntimeException("mismatch template parameters " + paramVars.size() + " != " + paramValues.size());
+		}
+		for (int i = 0; i < paramVars.size(); i++) {
+			if (paramVars.get(i) instanceof Template.Type) {
+				Type t = (Type) paramValues.get(i);
+				types = types.append(t);
+				if (this.verbose) {
+					System.out.println(".....: keep Type " + t + " class " + t.getClass());
+				}
+			} else {
+				if (this.verbose) {
+					System.err.println(".....: skip .... " + paramValues.get(i) + " class " + paramValues.get(i).getClass());
+				}
+			}
+		}
+		return types;
+	}
+
+	/**
+	 * Concatenates all the template type parameter declarations into a string.
+	 *
+	 * TODO: we could refactor the filtering of type template vars into this method (instead of callers doing it)?
 	 *
 	 * @param params
-	 * @return e.g. "T:WProp, U:WProp, "
+	 * @return e.g. "T:WProp, U:WProp, "  (note the trailing comma)
 	 */
-	private String typeParams1(Tuple<Template.Variable> params) {
+	private String typeParamDecls(Tuple<Template.Variable> params) {
 		StringBuilder sb = new StringBuilder();
 		for (Template.Variable v : params) {
 			sb.append(v.getName());
 			sb.append(":WProp, ");
 		}
 		return sb.toString();
+	}
+
+	protected String typeParamValuesString(Tuple<Type> types) {
+		return commaSepMap(types, t -> typeParamName(t));
 	}
 
 	/**
@@ -2418,12 +2445,17 @@ public final class Wyil2Boogie {
 	 * @param type
 	 * @return a non-null string.
 	 */
-	private String typeParamName(String type) {
+	private String typeParamName(Type type) {
 		// FIXME: find a proper way of distinguishing builtin types from others?
-		if (type.length() < 3) { // if (type instanceof Type.Variable) {
-			return type; // .toCanonicalString();
-		} else {
-			return "type__" + type; // .toCanonicalString();
+		switch (type.toCanonicalString()) {
+			case "int":
+				return "type__int";
+			case "bool":
+				return "type__bool";
+			case "byte":
+				return "type__byte";
+			default:
+				return type.toCanonicalString(); // the type name, since an axiom should have been generated for this
 		}
 	}
 
@@ -2871,7 +2903,7 @@ public final class Wyil2Boogie {
 	}
 
 	private void declareLambdaFunction(Decl.Lambda decl) {
-		if (decl.getType().getParameters().size() > 0) {
+		if (decl.getTemplate().size() > 0) {
 			throw new NotImplementedYet("template lambda functions", decl);
 		}
 		// lambda function do not have useful names, so we generate a unique name and remember it.
@@ -2882,14 +2914,13 @@ public final class Wyil2Boogie {
 		// add axiom apply_n(closure_m(lambdaName, captured...), args...) = decl.getBody();
 		String captureNames = commaSepMap(decl.getCapturedVariables(), v -> v.getName().get());
 		String paramNames = commaSepMap(decl.getParameters(), v -> v.getName().get());
-
 		// An example trigger of this axiom is: apply__2(closure__1(funcName,cap1),in1,in2).
 		// TODO: check if we need to also handle type template parameters within lambda expressions???
 		final String call = String.format("apply__%d(closure__%d(%s)%s)",
 				decl.getParameters().size(),
 				decl.getCapturedVariables().size(),
 				commaSep(lambdaName, captureNames),
-				(paramNames.isEmpty() ? "" : ", " + paramNames)
+				(paramNames.isEmpty() ? "" : (", " + paramNames))
 				);
 		BoogieExpr body = writeAllocations(0, decl.getBody()).asWVal();
 		if (captureNames.isEmpty() && paramNames.isEmpty()) {

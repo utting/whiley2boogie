@@ -6,9 +6,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import wybs.lang.SyntacticItem;
-import wybs.util.AbstractCompilationUnit;
-import wyil.lang.WyilFile;
 import wyil.util.AbstractVisitor;
 
 import static wyil.lang.WyilFile.*;
@@ -167,13 +164,13 @@ public class AssertionGenerator {
 
 				QualifiedName name = funCall.getBinding().getDeclaration().getQualifiedName();
 				Type.Callable type = funCall.getBinding().getConcreteType();
-				Tuple<SyntacticItem> typeParamsActual = funCall.getBinding().getArguments();
+				Tuple<Type> typeParamValues = wy2b.typeParamValues(funCall);
 				// properties do not have preconditions.
 				if (type instanceof Type.Function || type instanceof Type.Method) {
 					// Now check the precondition of this function/method.
 					String funName = wy2b.getMangledFunctionMethodName(name, type);
 					Tuple<Expr> operands = funCall.getOperands();
-					String args = wy2b.commaSep(wy2b.typeParamsActual(typeParamsActual), getArgs(operands));
+					String args = wy2b.commaSep(wy2b.typeParamValuesString(typeParamValues), getArgs(operands));
 					String call = funName + "(" + args + ")";
 					String pre = funName + Wyil2Boogie.METHOD_PRE + "(" + args + ")";
 					String post = funName + Wyil2Boogie.METHOD_POST + "(" + wy2b.commaSep(args, call) + ")";
