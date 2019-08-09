@@ -16,7 +16,7 @@ function isBool(WVal) returns (bool);
 function isArray(WVal) returns (bool);
 function isRecord(WVal) returns (bool);
 function isObject(WVal) returns (bool);   // Not used yet.
-function isRef(WVal) returns (bool);      // TODO how to represent these?
+function isRef(WVal) returns (bool);
 function isFunction(WVal) returns (bool); // means this is a function closure
 function isMethod(WVal) returns (bool);   // means this is a method closure
 
