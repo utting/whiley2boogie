@@ -892,7 +892,7 @@ public final class Wyil2Boogie {
 			}
 			return name + ":WVal";
 		});
-		return tvars + dstr;  // tvars has the trailing comma, if it is non-empty.
+		return commaSep(tvars, dstr);
 	}
 
 	private void writeBlock(int indent, Stmt.Block block) {
@@ -2361,7 +2361,7 @@ public final class Wyil2Boogie {
 	 * NOTE: this skips over lifetime parameters.
 	 *
 	 * @param params
-	 * @return e.g. "T:WProp, U:WProp "
+	 * @return e.g. "T:WProp, U:WProp"
 	 */
 	private String typeParamDecls(Tuple<Template.Variable> params) {
 		return typeParamVars(params, ":WProp");
