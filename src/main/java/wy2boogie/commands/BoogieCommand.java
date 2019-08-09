@@ -122,7 +122,6 @@ public class BoogieCommand implements Command {
 		String output = template.getOptions().get("output", String.class);
 		//
 		if(counterexample) {
-			System.out.println("DEBUG: verbose=" + verbose);
 			return translateCounterexample(verbose,template.getArguments());
 		} else {
 			List<String> files = translateAnyWhileyFiles(verbose,output,template.getArguments());

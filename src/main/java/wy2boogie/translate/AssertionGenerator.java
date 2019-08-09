@@ -163,14 +163,13 @@ public class AssertionGenerator {
 				super.visitInvoke(funCall);
 
 				QualifiedName name = funCall.getBinding().getDeclaration().getQualifiedName();
-				Type.Callable type = funCall.getBinding().getConcreteType();
-				Tuple<Type> typeParamValues = wy2b.typeParamValues(funCall);
+				Type.Callable type = funCall.getBinding().getDeclaration().getType();
 				// properties do not have preconditions.
 				if (type instanceof Type.Function || type instanceof Type.Method) {
 					// Now check the precondition of this function/method.
 					String funName = wy2b.getMangledFunctionMethodName(name, type);
 					Tuple<Expr> operands = funCall.getOperands();
-					String args = wy2b.commaSep(wy2b.typeParamValuesString(typeParamValues), getArgs(operands));
+					String args = wy2b.commaSep(wy2b.typeParamValuesString(funCall), getArgs(operands));
 					String call = funName + "(" + args + ")";
 					String pre = funName + Wyil2Boogie.METHOD_PRE + "(" + args + ")";
 					String post = funName + Wyil2Boogie.METHOD_POST + "(" + wy2b.commaSep(args, call) + ")";

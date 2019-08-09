@@ -232,8 +232,10 @@ function apply__prop(p:WProp, v:WVal) returns (bool);
 const unique type__int:WProp;
 const unique type__byte:WProp;
 const unique type__bool:WProp;
+const unique type__null:WProp;
 
 axiom (forall val:WVal :: apply__prop(type__int, val) <==> isInt(val));
 axiom (forall val:WVal :: apply__prop(type__byte, val) <==> isByte(val));
 axiom (forall val:WVal :: apply__prop(type__bool, val) <==> isBool(val));
+axiom (forall val:WVal :: apply__prop(type__null, val) <==> isNull(val));
 
