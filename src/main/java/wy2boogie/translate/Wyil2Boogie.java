@@ -443,9 +443,11 @@ public final class Wyil2Boogie {
 		declareFuncConstants(td.getInvariant());
 		// writeModifiers(td.modifiers());
 		String param = vd.getName().get();
+		String typeName = td.getName().get();
+		String typePred = typePredicateName(typeName);
 		// NOTE: an unnamed parameter will be called '$', which works fine.
 		this.out.printf("function %s(%s) returns (bool) {\n    %s",
-				typePredicateName(td.getName().get()),
+				typePred,
 				commaSep(typeParamDecls(td.getTemplate()), param + ":WVal"),
 				typePredicate(param, t)
 		);
@@ -455,6 +457,12 @@ public final class Wyil2Boogie {
 		}
 		this.out.println(" }");
 
+		// this axiom is used when this non-generic type is used to instantiate a template type parameter.
+		if (td.getTemplate().size() == 0) {
+			this.out.printf("const unique type__%s:WType;\n", typeName);
+			this.out.printf("axiom (forall val:WVal :: is__type(type__%s, val) <==> %s(val));\n",
+					typeName, typePred);
+		}
 		// remember this type synonym for later
 		// System.out.println("DEBUG: recording type " + td.getName().get() + " := " + t + " where " + td.getInvariant());
 		this.typeDefs.put(td.getName().get(), t); // we do not need the invariants
@@ -506,16 +514,18 @@ public final class Wyil2Boogie {
 		this.outDecls = method.getReturns();
 		assert this.inDecls.size() == inSize;
 		assert this.outDecls.size() == outSize;
-		if (outSize > 1) {
-			throw new NotImplementedYet("multiple return values:" + name, null);
-		}
 		// define Boogie functions for the precondition and postconditions of this function/method.
 		writeMethodPre(templateVars, name, method);
         writeMethodPost(templateVars, name, method);
 		String procedureName = name;
 		if (method instanceof Decl.Function) {
-			writeFunction(name, (Decl.Function) method);
-			procedureName = name + "__impl";
+			if (outSize > 1) {
+				// throw new NotImplementedYet("function with multiple return values:" + name, null);
+				System.out.println("WARNING: function " + name + " has multiple return values so will be limited to procedure calls.");
+			} else {
+				writeFunction(name, (Decl.Function) method);
+				procedureName = name + "__impl";
+			}
 			usesHeap = false;
 		}
 		this.out.print("procedure ");
@@ -529,15 +539,6 @@ public final class Wyil2Boogie {
 			this.out.printf("    modifies %s, %s;\n", HEAP, ALLOCATED);
 		}
 		this.out.printf("    ensures %s(%s);\n", name + METHOD_POST, commaSep(inputs, outputs));
-//		// TODO: replace all this by a call to METHOD_POST?
-//		// Part of the postcondition is the type constraints of each output variable.
-//		for (Decl.Variable locn : method.getReturns()) {
-//			final String inName = locn.getName().get();
-//			this.out.printf("    ensures %s;\n", typePredicate(inName, locn.getType()));
-//		}
-//		for (final Expr postcondition : method.getEnsures()) {
-//			this.out.printf("    ensures %s;\n", boogieBoolExpr(postcondition).toString());
-//		}
 
 		// We do not generate implementation bodies for extern units.
 		// They will be proved correct elsewhere.
@@ -875,7 +876,7 @@ public final class Wyil2Boogie {
 	/**
 	 * Returns the declarations of input or output parameters of a function/method/property.
 	 *
-	 * This will skip over any lifetime parameters, generate T:WProp parameters for each type parameter T,
+	 * This will skip over any lifetime parameters, generate T:WType parameters for each type parameter T,
 	 * then normal parameter declarations x:WVal for each normal parameter variable.
 	 *
 	 * @param typeVars optional type and lifetime parameters.  (pass null if not needed).
@@ -1090,7 +1091,7 @@ public final class Wyil2Boogie {
 		final Tuple<LVal> lhs = stmt.getLeftHandSide();
 		final Tuple<Expr> rhs = stmt.getRightHandSide();
 		// FIXME: not sure about this --- djp
-		if (isMethod(rhs.get(0))) {
+		if (callAsProcedure(rhs.get(0))) {
 			this.outerMethodCall = rhs.get(0);
 		}
 		// first break down complex lhs terms, like a[i].f (into a base var and some indexes)
@@ -1109,7 +1110,7 @@ public final class Wyil2Boogie {
 		}
 
 		// now start printing the assignment
-		if (isMethod(rhs.get(0))) {
+		if (callAsProcedure(rhs.get(0))) {
 			// Boogie distinguishes method & function calls!
 			this.out.print("call ");
 			this.outerMethodCall = null;
@@ -1130,6 +1131,30 @@ public final class Wyil2Boogie {
 			}
 		}
 		this.out.printf("%s;\n", commaSep(rhsExprs));
+	}
+
+	/**
+	 * True when the given RHS of an assignment should be called as a Boogie procedure, using 'call p(...)'.
+	 *
+	 * @param expr RHS of the assignment
+	 * @return true when expr calls a method, or a function with multiple return values (which we encode as a Boogie procedure).
+	 */
+	private boolean callAsProcedure(Expr expr) {
+		if (expr instanceof Expr.Invoke) {
+			Expr.Invoke invoke = (Expr.Invoke) expr;
+			Decl decl = invoke.getBinding().getDeclaration();
+			if (decl instanceof Decl.Method) {
+				return true;
+			}
+			// This is a bit of a hack, so that functions with multiple returns can be used in simple ways.
+			// That is, we translate them to procedures instead of functions!
+			// This means they can have multiple return values, but can only be called as RHS of assignment.
+			// (which is the case in all the tests and programs I've seen).
+			if (decl instanceof Decl.Function && ((Decl.Function) decl).getReturns().size() > 1) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -1495,21 +1520,27 @@ public final class Wyil2Boogie {
 		// Instead, we must write to the result variables.
 		final Tuple<Expr> operands = b.getReturns();
 		final String[] args = new String[operands.size()];
-		if (operands.size() == 1 && isMethod(operands.get(0))) {
+		if (operands.size() == 1 && callAsProcedure(operands.get(0))) {
 			this.outerMethodCall = operands.get(0);
 		}
 		for (int i = 0; i != operands.size(); ++i) {
 			args[i] = writeAllocations(indent, operands.get(i)).asWVal().toString();
 		}
-		if (operands.size() == 1 && isMethod(operands.get(0))) {
+		if (operands.size() == 1 && callAsProcedure(operands.get(0))) {
+			// handles the case where RHS is one method/function call that returns multiple results
 			this.out.print("call ");
 			this.outerMethodCall = null;
-		}
-		for (int i = 0; i != operands.size(); ++i) {
-			final Decl.Variable locn = this.outDecls.get(i);
-			final String name = locn.getName().get();
-			this.out.printf("%s := %s;\n", name, args[i]);
+			String outNames = commaSepMap(this.outDecls, d -> d.getName().get());
+			this.out.printf("%s := %s;\n", outNames, args[0]);
 			writeIndent(indent + 1);
+		} else {
+			// handle the cases where each return variable has its own expression.
+			for (int i = 0; i != operands.size(); ++i) {
+				final Decl.Variable locn = this.outDecls.get(i);
+				final String name = locn.getName().get();
+				this.out.printf("%s := %s;\n", name, args[i]);
+				writeIndent(indent + 1);
+			}
 		}
 		this.out.println("return;");
 	}
@@ -1606,11 +1637,11 @@ public final class Wyil2Boogie {
 
 	private void writeVariableInit(int indent, Decl.Variable loc) {
 		if (loc.hasInitialiser()) {
-			if (isMethod(loc.getInitialiser())) {
+			if (callAsProcedure(loc.getInitialiser())) {
 				this.outerMethodCall = loc.getInitialiser();
 			}
 			final BoogieExpr rhs = writeAllocations(indent, loc.getInitialiser()).asWVal();
-			if (isMethod(loc.getInitialiser())) {
+			if (callAsProcedure(loc.getInitialiser())) {
 				this.out.printf("call ");
 				this.outerMethodCall = null;
 			}
@@ -2270,7 +2301,7 @@ public final class Wyil2Boogie {
 		}
 		if (type instanceof Type.Variable) {
 			Type.Variable tv = (Type.Variable) type;
-			return "apply__prop(" + tv.toCanonicalString() + ", " + var + ")";
+			return "is__type(" + tv.toCanonicalString() + ", " + var + ")";
 		}
 		if (typeStr.equals("int")) { // WAS type instanceof Type.Int) {
 			return "isInt(" + var + ")";
@@ -2360,10 +2391,10 @@ public final class Wyil2Boogie {
 	 * NOTE: this skips over lifetime parameters.
 	 *
 	 * @param params
-	 * @return e.g. "T:WProp, U:WProp"
+	 * @return e.g. "T:WType, U:WType"
 	 */
 	private String typeParamDecls(Tuple<Template.Variable> params) {
-		return typeParamVars(params, ":WProp");
+		return typeParamVars(params, ":WType");
 	}
 
 	/**
@@ -2444,7 +2475,7 @@ public final class Wyil2Boogie {
 	 * This should be usable for both user-defined and (non-void) primitive types.
 	 *
 	 * @param type
-	 * @return a non-null string S suitable for use in apply__prop(S, value).
+	 * @return a non-null type name T suitable for use in is__type(T, value).
 	 */
 	private String typePropertyName(Type type) {
 		// FIXME: find a proper way of distinguishing builtin types from others?
@@ -2458,8 +2489,11 @@ public final class Wyil2Boogie {
 			return "type__null";
 		} else if (type instanceof Type.Variable) {
 			return type.toCanonicalString();
+		} else if (type instanceof Type.Nominal) {
+			Type.Nominal nom = (Type.Nominal) type;
+			return "type__" + nom.toString(); // print the simple name of the type, not its definition.
 		} else {
-			throw new NotImplementedYet("template type instantiation with " + type, type);
+			throw new NotImplementedYet("template type instantiation to " + type + " " + type.getClass(), type);
 		}
 	}
 

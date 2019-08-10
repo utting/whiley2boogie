@@ -225,17 +225,17 @@ function apply__3(FunctionClosure, WVal, WVal, WVal) returns (WVal);
 
 // TYPE TEMPLATES SUPPORT
 
-type WProp;       // typing properties
-function apply__prop(p:WProp, v:WVal) returns (bool);
+type WType;       // typing properties
+function is__type(p:WType, v:WVal) returns (bool);
 
 // properties for primitive types
-const unique type__int:WProp;
-const unique type__byte:WProp;
-const unique type__bool:WProp;
-const unique type__null:WProp;
+const unique type__int:WType;
+const unique type__byte:WType;
+const unique type__bool:WType;
+const unique type__null:WType;
 
-axiom (forall val:WVal :: apply__prop(type__int, val) <==> isInt(val));
-axiom (forall val:WVal :: apply__prop(type__byte, val) <==> isByte(val));
-axiom (forall val:WVal :: apply__prop(type__bool, val) <==> isBool(val));
-axiom (forall val:WVal :: apply__prop(type__null, val) <==> isNull(val));
+axiom (forall val:WVal :: is__type(type__int, val) <==> isInt(val));
+axiom (forall val:WVal :: is__type(type__byte, val) <==> isByte(val));
+axiom (forall val:WVal :: is__type(type__bool, val) <==> isBool(val));
+axiom (forall val:WVal :: is__type(type__null, val) <==> isNull(val));
 
