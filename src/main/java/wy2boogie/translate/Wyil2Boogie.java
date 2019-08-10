@@ -1451,12 +1451,11 @@ public final class Wyil2Boogie {
 		this.out.printf("%s(%s);\n", func, commaSep(typeArgs, args));
 	}
 
-	// TODO: named block
+	// This works for simple named blocks, if same label is not used more than once.
 	private void writeNamedBlock(int indent, Stmt.NamedBlock b) {
 		this.out.print(b.getName());
 		this.out.println(":");
 		writeBlock(indent + 1, b.getBlock());
-		throw new NotImplementedYet("named block", b);
 	}
 
 	private void writeWhile(int indent, Stmt.While b) {
