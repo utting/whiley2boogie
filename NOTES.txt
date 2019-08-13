@@ -2,23 +2,45 @@ Workflow
 ========
 (See 'scripts' directory for the shell scripts.  Add them to your PATH.)
 
-1. Run all valid tests through Wyil2Boogie and Boogie:
+0. Record standard WHILEY compiler/verifier results in a WHILEY subdirectory
 
    cd ../WhileyCompiler/tests/valid
-   wyboogie *.whiley >OUTXX.txt 2>&1
+   mkdir WHILEY
+   wyc2results
+
+1. Run all valid tests through Wyil2Boogie and Boogie:
+   (Just the 'GOOD' subset that Whiley can compile and typecheck correctly).
+
+   # cd ../WhileyCompiler/tests/valid
+   VALID=$(ls *.whiley | fgrep -v -f WHILEY/ignore_compile.txt)
+   wyboogie $VALID >OUTnnn.txt 2>&1
 
 2. See how many tests passed/failed etc.
 
-   wystats OUTXX.txt
+   wystats OUTnnn.txt
 
 3. Analyse the result for each valid test program:
 
-   wyresults OUTXX.txt >OUTXX.results
+   wyresults OUTnnn.txt >OUTnnn.results
 
 4. Compare those results against the Whiley verifier:
    (It shows all those that differ, plus summary stats at the end).
 
-   wydiff OUTXX.results
+   wydiff OUTnnn.results
+   wydiff OUTnnn.results OUTmmm.results   # to compare with a previous run
+
+
+5. Repeat above steps for the WhileyCompiler/tests/invalid tests - none should pass.
+
+   cd ../WhileyCompiler/tests/valid
+   mkdir WHILEY
+   grep "IGNORED.put(" ../../src/test/java/wyc/testing/AllInvalidTest.java \
+       | sort | awk '-F"' '{print $2}' >WHILEY/ignore_compile.txt
+   INVALID=$(ls *.whiley | fgrep -v -f WHILEY/ignore_compile.txt)
+   wyboogie $VALID >OUTnnn.txt 2>&1
+   wystats OUTnnn.txt
+   wyresults OUTnnn.txt >OUTnnn.results
+   echo "Now check that none of these are FullyVerified."
 
 
 DONE:
