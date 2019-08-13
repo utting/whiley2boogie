@@ -141,7 +141,7 @@ public class BoogieCommand implements Command {
 	public List<String> translateAnyWhileyFiles(boolean verbose, String output, List<String> args) throws Exception {
 		try {
 			if (verbose) {
-				System.out.println("DEBUG: translateAnyWhileyFiles: " + args + " output=" + output);
+				sysout.println("translateAnyWhileyFiles: " + args + " output=" + output);
 			}
 			Path.Root projectRoot = project.getBuildProject().getRoot();
 			List<String> files = new ArrayList<>();
@@ -170,17 +170,25 @@ public class BoogieCommand implements Command {
 			// TODO: should we create a separate compile task for each *.whiley file?
 			Path.Entry<WyilFile> target = createWyilFile(id);
 			CompileTask task = new CompileTask(project.getBuildProject(), projectRoot, target, sources);
-			task.initialise().call();
-
+			boolean ok = task.initialise().call();
+			if (verbose) {
+				sysout.println("whiley compile " + sources + " returns " + ok);
+			}
+			if (!ok) {
+				// FIXME: need a better error reporting mechanism
+				syserr.println("Error: while compiling " + sources);
+				syserr.println("  program must be free of syntax and type errors before translation to Boogie.");
+				System.exit(1);  // abort the whole translation chain.
+			}
 			// Done
 			return files;
 		} catch(RuntimeException e) {
 			throw e;
 		} catch (IOException e) {
 			// FIXME: need a better error reporting mechanism
-			System.err.println("internal failure: " + e.getMessage());
+			syserr.println("internal failure: " + e.getMessage());
 			if (verbose) {
-				e.printStackTrace(System.err);
+				e.printStackTrace(syserr);
 			}
 			return Collections.EMPTY_LIST;
 		}
@@ -215,9 +223,9 @@ public class BoogieCommand implements Command {
 				delta.add(projectRoot.get(Trie.fromString(arg), WyilFile.ContentType));
 			}
 			if (verbose) {
-				System.out.println("DEBUG: translateWyilFiles: " + args);
-				System.out.println("DEBUG: projectRoot: " + projectRoot);
-				System.out.println("DEBUG: delta: " + delta);
+				sysout.println("DEBUG: translateWyilFiles: " + args);
+				sysout.println("DEBUG: projectRoot: " + projectRoot);
+				sysout.println("DEBUG: delta: " + delta);
 			}
 			// Go through all listed *.wyil files and translate each one to Boogie.
 			for (Path.Entry<WyilFile> source : delta) {
@@ -225,16 +233,23 @@ public class BoogieCommand implements Command {
 				BoogieCompileTask task = new BoogieCompileTask(project.getBuildProject(), target,
 						Collections.singleton(source));
 				task.setVerbose(verbose);
-				task.initialise().call();
+				boolean ok = task.initialise().call();
+				if (!ok) {
+					// FIXME: need a better error reporting mechanism
+					if (verbose) {
+						syserr.println("Error translating wyil to Boogie: " + source);
+					}
+					return false;
+				}
 			}
 			return true;
 		} catch(RuntimeException e) {
 			throw e;
 		} catch (IOException e) {
 			// FIXME: need a better error reporting mechanism
-			System.err.println("internal failure: " + e.getMessage());
+			syserr.println("internal failure: " + e.getMessage());
 			if (verbose) {
-				e.printStackTrace(System.err);
+				e.printStackTrace(syserr);
 			}
 			return false;
 		}
@@ -259,7 +274,7 @@ public class BoogieCommand implements Command {
 				Trie trie = Trie.fromString(base);
 				//
 				if (verbose) {
-					System.out.println("DEBUG: base=" + base + " root=" + projectRoot + " trie=" + trie);
+					sysout.println("DEBUG: base=" + base + " root=" + projectRoot + " trie=" + trie);
 				}
 				Path.Entry<BoogieExampleFile> entry = projectRoot.get(trie, BoogieExampleFile.ContentType);
 				if (entry == null) {
@@ -284,9 +299,9 @@ public class BoogieCommand implements Command {
 			throw e;
 		} catch (IOException e) {
 			// FIXME: need a better error reporting mechanism
-			System.err.println("internal failure: " + e.getMessage());
+			syserr.println("internal failure: " + e.getMessage());
 			if (verbose) {
-				e.printStackTrace(System.err);
+				e.printStackTrace(syserr);
 			}
 			return false;
 		}

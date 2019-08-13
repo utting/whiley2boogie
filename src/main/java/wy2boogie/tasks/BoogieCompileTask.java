@@ -97,12 +97,12 @@ public class BoogieCompileTask extends AbstractBuildTask<WyilFile, BoogieFile> {
 		WyilFile source = sources[0];
 
 		final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        final PrintWriter writer = new PrintWriter(out);
-        final Wyil2Boogie translator = new Wyil2Boogie(writer);
+		final PrintWriter writer = new PrintWriter(out);
+		final Wyil2Boogie translator = new Wyil2Boogie(writer);
 		translator.setVerbose(verbose);
 		translator.apply(source);
 		writer.close();
-		target.write(new BoogieFile(target,out.toByteArray()));
+		target.write(new BoogieFile(target, out.toByteArray()));
 		return true;
 	}
 

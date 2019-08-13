@@ -6,7 +6,8 @@ function percent {
 
 if [[ "$#" > 0 ]]
 then
-    num_compile_errors=$(grep -i '^ *^' "$@" | wc -l)
+    num_syntax_type_errors=$(grep -i '^ *^' "$@" | wc -l)  # before 18-aug-2019
+    num_compile_errors=$(grep '^Error: while compiling' "$@" | wc -l)  # after 18-aug-2019
     num_not_impl=$(grep -i 'wy2boogie.translate.NotImplementedYet:' "$@" | wc -l)
     num_exceptions=$(grep 'Exception: ' "$@" | grep -v translate.NotImplementedYet | wc -l)
     num_bpl_errors=$(grep -i '^[A-Z][A-Za-z0-9_]*.bpl(.*Error:' "$@" | sed -e 's/(.*//' | uniq | wc -l)
@@ -16,6 +17,7 @@ then
     total=$((num_compile_errors + num_not_impl + num_exceptions + num_bpl_errors +
              num_fully_verified + num_timeouts + num_partial_verified))
 
+    echo -e "Syntax/type error:  $num_syntax_type_errors \t$(percent $num_syntax_type_errors total)"
     echo -e "Error Compiling:    $num_compile_errors \t$(percent num_compile_errors total)"
     echo -e "NotImplementedYet:  $num_not_impl \t$(percent num_not_impl total)"
     echo -e "Other Exceptions:   $num_exceptions \t$(percent num_exceptions total)"

@@ -8,7 +8,7 @@ then
          {if ($1 == "=====" && test=="") {test=$2; out=""} \
           else if ($1 == "wy2boogie.translate.NotImplementedYet:") {printf fmt,test,"NotImplYet"; test=""} \
           else if ($0 ~ "Exception: " && test) {printf fmt,test,"Exception"; test=""} \
-          else if ($0 ~ "Error compiling") {printf fmt,test,"CompileError"; test=""} \
+          else if ($0 ~ "Error: while compiling") {printf fmt,test,"CompileError"; test=""} \
           else if ($0 ~ "^ *\\^+ *$") {printf fmt,test,"CompileError"; test=""} \
           else if ($0 ~ " verified, 0 errors$" && test) {printf fmt,test,"FullyVerified"; test=""} \
           else if ($0 ~ " verified, 0 errors, " && test) {printf fmt0" %s\n",test,"Timeouts",$0; test=""} \

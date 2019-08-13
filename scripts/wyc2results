@@ -18,7 +18,7 @@ ic = {f.strip() for f in open("WHILEY/ignore_compile.txt")}
 ip = {f.strip() for f in open("WHILEY/ignore_prover.txt")}
 ws = {f.strip() for f in open("WHILEY/all.txt")}
 def lines(progs,out): return [f"{p+'.whiley':<40s} {out}\n" for p in progs]
-all = sorted(lines(ic,"CompileError") +
+all = sorted( #lines(ic,"CompileError") +
         lines(ip-ic, "PartVerified") +
         lines(ws-ic-ip,"FullyVerified"))
 out=open("WHILEY/ALL.results","w")

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 verbose=""
+counter_examples=false
 if [[ "$#" > 0 ]]
 then
     SCRIPT_PATH=$(dirname `which $0`)
@@ -12,15 +13,25 @@ then
     for w in "$@"
     do
         echo "===== $w ====="
-        rm -f "${w%.whiley}.beg"
+        if [[ "$counter_examples" == "true" ]]
+        then
+            model="/printModel:4 /printModelToFile:${w%.whiley}.beg"
+        else
+            model=""
+        fi
+        rm -f "${w%.whiley}.bpl" "${w%.whiley}.beg" "${w%.whiley}.wyeg"
+
         # NOTE: this was just: wy boogie "$w" && boogie ...
         # But wy does not return exit status correctly.
         # So we flip stderr and stdout and use awk to set exit status 1 on compile errors.
         # Works, but Yuck!
-        wy boogie $verbose --output="${w%.whiley}" "$w" 3>&1 1>&2 2>&3 |awk 'BEGIN{s=0} {print $0; if ($0 ~ "^ *\\^+" || $0 ~ "NotImplementedYet:") s=1} END{exit s}' &&
-        # Note: we use Z3 array theory, because it handles large arrays much better (like Byte_Valid*.whiley).
-        boogie /useArrayTheory /timeLimit:10 /printModel:4 "/printModelToFile:${w%.whiley}.beg" $SCRIPT_PATH/../wval.bpl "${w%.whiley}.bpl"
-        if [[ -r "${w%.whiley}.beg" ]]
+        #wy boogie $verbose --output="${w%.whiley}" "$w" 3>&1 1>&2 2>&3 \
+        #  |awk 'BEGIN{s=0} {print $0; if ($0 ~ "^ *\\^+" || $0 ~ "NotImplementedYet:") s=1} END{exit s}' &&
+        wy boogie $verbose --output="${w%.whiley}" "$w" &&\
+          [[ -r "${w%.whiley}.bpl" ]] &&\
+          # Note: we use Z3 array theory, because it handles large arrays much better (like Byte_Valid*.whiley).
+          boogie /useArrayTheory /timeLimit:10 $model $SCRIPT_PATH/../wval.bpl "${w%.whiley}.bpl"
+        if [[ -r "${w%.whiley}.beg" && "$counter_examples" == "true" ]]
         then
             # translate Boogie counter example models back to Whiley-like syntax
             wy boogie $verbose --counterexample ${w%.whiley}.beg
