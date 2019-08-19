@@ -10,6 +10,11 @@ then
         verbose="--verbose"
         shift
     fi
+    if [[ "$1" == "--counterexample" ]]
+    then
+        counter_examples=true
+        shift
+    fi
     for w in "$@"
     do
         echo "===== $w ====="
