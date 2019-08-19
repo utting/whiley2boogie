@@ -1,0 +1,2931 @@
+SCRIPT=/Users/utting/git/WhileyCompiler/modules/wy2b/scripts
+===== Access_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Access_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== AddressExpression_Valid_1.whiley =====
+WARNING: assuming that all indirect function calls of arity 1 return type int
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== AddressExpression_Valid_2.whiley =====
+mangle overloaded : function(bool)->(bool) to overloaded$2
+WARNING: assuming that all indirect function calls of arity 1 return type int
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== AddressExpression_Valid_3.whiley =====
+WARNING: assuming that all indirect function calls of arity 2 return type int
+wyboogie.NotImplementedYet: indirect invoke with 2 args in 5:int:icall %2 (%3, %4)
+	at wyboogie.Wyil2Boogie.boogieIndirectInvokeExpr(Wyil2Boogie.java:1589)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1394)
+	at wyboogie.Wyil2Boogie.boogieEquality(Wyil2Boogie.java:1714)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1465)
+	at wyboogie.Wyil2Boogie.boogieBoolExpr(Wyil2Boogie.java:1359)
+	at wyboogie.Wyil2Boogie.writeAssume(Wyil2Boogie.java:841)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:712)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== AddressExpression_Valid_4.whiley =====
+mangle overloaded : function(bool,bool)->(bool) to overloaded$2
+WARNING: assuming that all indirect function calls of arity 2 return type int
+wyboogie.NotImplementedYet: indirect invoke with 2 args in 5:int:icall %2 (%3, %4)
+	at wyboogie.Wyil2Boogie.boogieIndirectInvokeExpr(Wyil2Boogie.java:1589)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1394)
+	at wyboogie.Wyil2Boogie.boogieEquality(Wyil2Boogie.java:1714)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1465)
+	at wyboogie.Wyil2Boogie.boogieBoolExpr(Wyil2Boogie.java:1359)
+	at wyboogie.Wyil2Boogie.writeAssume(Wyil2Boogie.java:841)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:712)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Assume_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Assume_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== BoolAssign_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== BoolAssign_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== BoolAssign_Valid_3.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== BoolAssign_Valid_4.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== BoolAssign_Valid_5.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== BoolAssign_Valid_6.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== BoolFun_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== BoolIfElse_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== BoolIfElse_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== BoolList_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== BoolList_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== BoolList_Valid_3.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+BoolList_Valid_3.bpl(52,9): Error BP5005: This loop invariant might not be maintained by the loop.
+Execution trace:
+    BoolList_Valid_3.bpl(39,12): anon0
+    BoolList_Valid_3.bpl(50,5): anon5_LoopHead
+    BoolList_Valid_3.bpl(54,11): anon5_LoopBody
+    BoolList_Valid_3.bpl(58,9): anon6_LoopHead
+    BoolList_Valid_3.bpl(58,9): anon6_LoopDone
+BoolList_Valid_3.bpl(173,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    BoolList_Valid_3.bpl(162,11): anon0
+    BoolList_Valid_3.bpl(163,5): anon7_Else
+    BoolList_Valid_3.bpl(169,5): anon8_Else
+
+Boogie program verifier finished with 2 verified, 2 errors
+===== BoolRecord_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== BoolRecord_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== BoolRequires_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== BoolReturn_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Byte_Valid_1.whiley =====
+MUTATED INPUT b : byte
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Byte_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== Byte_Valid_3.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== Byte_Valid_4.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== Byte_Valid_5.whiley =====
+MUTATED INPUT b : byte
+MUTATED INPUT i : int
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Byte_Valid_6.whiley =====
+MUTATED INPUT b : byte
+MUTATED INPUT i : int
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Byte_Valid_7.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== Byte_Valid_8.whiley =====
+MUTATED INPUT b : byte
+MUTATED INPUT i : int
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Byte_Valid_9.whiley =====
+MUTATED INPUT b : byte
+MUTATED INPUT i : int
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 4 verified, 0 errors
+===== Cast_Valid_5.whiley =====
+MUTATED INPUT b : byte
+MUTATED INPUT v : Cast_Valid_5:u8
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Cast_Valid_5.bpl(83,9): Error BP5005: This loop invariant might not be maintained by the loop.
+Execution trace:
+    Cast_Valid_5.bpl(74,7): anon0
+    Cast_Valid_5.bpl(80,5): anon4_LoopHead
+    Cast_Valid_5.bpl(85,9): anon4_LoopBody
+    Cast_Valid_5.bpl(86,15): anon5_Then
+    Cast_Valid_5.bpl(88,11): anon3
+
+Boogie program verifier finished with 3 verified, 1 error
+===== Coercion_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Coercion_Valid_3.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Coercion_Valid_7.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Coercion_Valid_8.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Coercion_Valid_9.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== Complex_Valid_1.whiley =====
+wyboogie.NotImplementedYet: comparison of void intersection type: Complex_Valid_1:RowCol and Complex_Valid_1:RowCol in 8:bool:neq (%5, %7)
+	at wyboogie.Wyil2Boogie.boogieEquality(Wyil2Boogie.java:1711)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1468)
+	at wyboogie.AssertionGenerator.expr(AssertionGenerator.java:71)
+	at wyboogie.AssertionGenerator.check(AssertionGenerator.java:224)
+	at wyboogie.AssertionGenerator.checkPredicate(AssertionGenerator.java:94)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:738)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Complex_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Complex_Valid_2.bpl(192,4): Error: more than one declaration of block name: CONTINUE__WHILE__0
+Complex_Valid_2.bpl(201,4): Error: more than one declaration of block name: BREAK__WHILE__0
+2 name resolution errors detected in Complex_Valid_2.bpl
+===== Complex_Valid_3.whiley =====
+Error compiling Complex_Valid_3.whiley
+./Complex_Valid_3.whiley:9: record required, got: X<null|{int item,X left,X right}>
+    (tree != null && tree.left != null ==> tree.left.item < tree.item) &&
+                                           ^^^^^^^^^^^^^^
+
+===== Complex_Valid_4.whiley =====
+MUTATED INPUT tree : Complex_Valid_4:BTree
+MUTATED INPUT tree : Complex_Valid_4:BTree
+MUTATED INPUT tree : Complex_Valid_4:BTree
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 4 verified, 0 errors
+===== Complex_Valid_5.whiley =====
+MUTATED INPUT b : Complex_Valid_5:Board
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Complex_Valid_5.bpl(112,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    Complex_Valid_5.bpl(110,5): anon0
+
+Boogie program verifier finished with 2 verified, 1 error
+===== Complex_Valid_6.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== Complex_Valid_7.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== Complex_Valid_8.whiley =====
+mangle add : function(Complex_Valid_8:Trie,int,Complex_Valid_8:string,int)->(Complex_Valid_8:Trie) to add$2
+mangle contains : function(Complex_Valid_8:Trie,int,Complex_Valid_8:string,int)->(bool) to contains$2
+wyboogie.NotImplementedYet: type: void
+	at wyboogie.Wyil2Boogie.typePredicate(Wyil2Boogie.java:1946)
+	at wyboogie.Wyil2Boogie.typePredicate(Wyil2Boogie.java:1891)
+	at wyboogie.Wyil2Boogie.typePredicate(Wyil2Boogie.java:1912)
+	at wyboogie.Wyil2Boogie.writeConstant(Wyil2Boogie.java:353)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:293)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Constant_Valid_3.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== ConstrainedInt_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ConstrainedInt_Valid_10.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== ConstrainedInt_Valid_12.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ConstrainedInt_Valid_13.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ConstrainedInt_Valid_15.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ConstrainedInt_Valid_16.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ConstrainedInt_Valid_17.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== ConstrainedInt_Valid_18.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== ConstrainedInt_Valid_19.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ConstrainedInt_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ConstrainedInt_Valid_20.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ConstrainedInt_Valid_21.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ConstrainedInt_Valid_22.whiley =====
+wyboogie.NotImplementedYet: call to method (get) from inside an expression in 2:int[]:call ConstrainedInt_Valid_22:get(%0, %1)
+	at wyboogie.Wyil2Boogie.boogieInvoke(Wyil2Boogie.java:1607)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1397)
+	at wyboogie.Wyil2Boogie.boogieEquality(Wyil2Boogie.java:1714)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1465)
+	at wyboogie.Wyil2Boogie.boogieBoolExpr(Wyil2Boogie.java:1359)
+	at wyboogie.Wyil2Boogie.writeAssume(Wyil2Boogie.java:841)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:712)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== ConstrainedInt_Valid_23.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ConstrainedInt_Valid_24.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ConstrainedInt_Valid_3.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ConstrainedInt_Valid_4.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ConstrainedInt_Valid_5.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ConstrainedInt_Valid_6.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== ConstrainedInt_Valid_8.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 4 verified, 0 errors
+===== ConstrainedIntersection_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ConstrainedList_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ConstrainedList_Valid_11.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== ConstrainedList_Valid_12.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ConstrainedList_Valid_14.whiley =====
+MUTATED INPUT xs : int[]
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ConstrainedList_Valid_14.bpl(39,5): Error BP5003: A postcondition might not hold on this return path.
+ConstrainedList_Valid_14.bpl(31,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    ConstrainedList_Valid_14.bpl(35,8): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+===== ConstrainedList_Valid_15.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ConstrainedList_Valid_16.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ConstrainedList_Valid_17.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ConstrainedList_Valid_18.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ConstrainedList_Valid_18.bpl(36,5): Error BP5003: A postcondition might not hold on this return path.
+ConstrainedList_Valid_18.bpl(32,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    ConstrainedList_Valid_18.bpl(35,8): anon0
+
+Boogie program verifier finished with 1 verified, 1 error
+===== ConstrainedList_Valid_19.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== ConstrainedList_Valid_2.whiley =====
+mangle abs : function(int[],ConstrainedList_Valid_2:nat)->(ConstrainedList_Valid_2:nat[]) to abs$2
+mangle abs : function(int)->(ConstrainedList_Valid_2:nat) to abs$3
+MUTATED INPUT items : int[]
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ConstrainedList_Valid_2.bpl(66,9): Error BP5003: A postcondition might not hold on this return path.
+ConstrainedList_Valid_2.bpl(59,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    ConstrainedList_Valid_2.bpl(63,11): anon0
+    ConstrainedList_Valid_2.bpl(65,11): anon3_Then
+ConstrainedList_Valid_2.bpl(72,9): Error BP5001: This assertion might not hold.
+Execution trace:
+    ConstrainedList_Valid_2.bpl(63,11): anon0
+    ConstrainedList_Valid_2.bpl(68,9): anon3_Else
+
+Boogie program verifier finished with 3 verified, 2 errors
+===== ConstrainedList_Valid_20.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ConstrainedList_Valid_21.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ConstrainedList_Valid_21.bpl(87,9): Timed out on BP5004: This loop invariant might not hold on entry.
+Execution trace:
+    ConstrainedList_Valid_21.bpl(78,10): anon0
+ConstrainedList_Valid_21.bpl(87,9): Timed out on BP5005: This loop invariant might not be maintained by the loop.
+Execution trace:
+    ConstrainedList_Valid_21.bpl(78,10): anon0
+    ConstrainedList_Valid_21.bpl(85,5): anon2_LoopHead
+    ConstrainedList_Valid_21.bpl(89,9): anon2_LoopBody
+ConstrainedList_Valid_21.bpl(89,9): Timed out on BP5001: This assertion might not hold.
+Execution trace:
+    ConstrainedList_Valid_21.bpl(78,10): anon0
+    ConstrainedList_Valid_21.bpl(85,5): anon2_LoopHead
+    ConstrainedList_Valid_21.bpl(89,9): anon2_LoopBody
+ConstrainedList_Valid_21.bpl(98,5): Timed out on BP5003: A postcondition might not hold on this return path.
+ConstrainedList_Valid_21.bpl(72,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    ConstrainedList_Valid_21.bpl(78,10): anon0
+    ConstrainedList_Valid_21.bpl(85,5): anon2_LoopHead
+    ConstrainedList_Valid_21.bpl(85,5): anon2_LoopDone
+
+Boogie program verifier finished with 1 verified, 0 errors, 1 time out
+===== ConstrainedList_Valid_22.whiley =====
+MUTATED INPUT xs : ConstrainedList_Valid_22:nat[]
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ConstrainedList_Valid_23.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ConstrainedList_Valid_23.bpl(68,13): Error BP5001: This assertion might not hold.
+Execution trace:
+    ConstrainedList_Valid_23.bpl(41,7): anon0
+    ConstrainedList_Valid_23.bpl(44,5): anon4_LoopHead
+    ConstrainedList_Valid_23.bpl(47,13): anon4_LoopBody
+    ConstrainedList_Valid_23.bpl(51,9): anon5_LoopHead
+    ConstrainedList_Valid_23.bpl(54,15): anon5_LoopBody
+    ConstrainedList_Valid_23.bpl(57,13): anon6_LoopHead
+    ConstrainedList_Valid_23.bpl(57,13): anon6_LoopDone
+ConstrainedList_Valid_23.bpl(73,9): Error BP5001: This assertion might not hold.
+Execution trace:
+    ConstrainedList_Valid_23.bpl(41,7): anon0
+    ConstrainedList_Valid_23.bpl(44,5): anon4_LoopHead
+    ConstrainedList_Valid_23.bpl(47,13): anon4_LoopBody
+    ConstrainedList_Valid_23.bpl(51,9): anon5_LoopHead
+    ConstrainedList_Valid_23.bpl(51,9): anon5_LoopDone
+ConstrainedList_Valid_23.bpl(79,5): Error BP5003: A postcondition might not hold on this return path.
+ConstrainedList_Valid_23.bpl(32,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    ConstrainedList_Valid_23.bpl(41,7): anon0
+    ConstrainedList_Valid_23.bpl(44,5): anon4_LoopHead
+    ConstrainedList_Valid_23.bpl(44,5): anon4_LoopDone
+
+Boogie program verifier finished with 1 verified, 3 errors
+===== ConstrainedList_Valid_25.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ConstrainedList_Valid_26.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ConstrainedList_Valid_27.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ConstrainedList_Valid_28.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ConstrainedList_Valid_28.bpl(50,13): Error BP5003: A postcondition might not hold on this return path.
+ConstrainedList_Valid_28.bpl(35,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    ConstrainedList_Valid_28.bpl(40,5): anon0
+    ConstrainedList_Valid_28.bpl(44,9): anon5_Else
+    ConstrainedList_Valid_28.bpl(49,15): anon6_Then
+ConstrainedList_Valid_28.bpl(53,13): Error BP5003: A postcondition might not hold on this return path.
+ConstrainedList_Valid_28.bpl(32,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    ConstrainedList_Valid_28.bpl(40,5): anon0
+    ConstrainedList_Valid_28.bpl(44,9): anon5_Else
+    ConstrainedList_Valid_28.bpl(52,15): anon6_Else
+ConstrainedList_Valid_28.bpl(53,13): Error BP5003: A postcondition might not hold on this return path.
+ConstrainedList_Valid_28.bpl(33,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    ConstrainedList_Valid_28.bpl(40,5): anon0
+    ConstrainedList_Valid_28.bpl(44,9): anon5_Else
+    ConstrainedList_Valid_28.bpl(52,15): anon6_Else
+ConstrainedList_Valid_28.bpl(53,13): Error BP5003: A postcondition might not hold on this return path.
+ConstrainedList_Valid_28.bpl(36,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    ConstrainedList_Valid_28.bpl(40,5): anon0
+    ConstrainedList_Valid_28.bpl(44,9): anon5_Else
+    ConstrainedList_Valid_28.bpl(52,15): anon6_Else
+
+Boogie program verifier finished with 1 verified, 4 errors
+===== ConstrainedList_Valid_3.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ConstrainedList_Valid_4.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== ConstrainedList_Valid_5.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== ConstrainedList_Valid_6.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ConstrainedList_Valid_7.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== ConstrainedList_Valid_8.whiley =====
+MUTATED INPUT list : ConstrainedList_Valid_8:nat[]
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ConstrainedList_Valid_8.bpl(61,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ConstrainedList_Valid_8.bpl(58,8): anon0
+ConstrainedList_Valid_8.bpl(63,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ConstrainedList_Valid_8.bpl(58,8): anon0
+ConstrainedList_Valid_8.bpl(65,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ConstrainedList_Valid_8.bpl(58,8): anon0
+
+Boogie program verifier finished with 1 verified, 3 errors
+===== ConstrainedList_Valid_9.whiley =====
+mangle sum : function(ConstrainedList_Valid_9:posintlist)->(int) to sum$2
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== ConstrainedNegation_Valid_1.whiley =====
+Error compiling ConstrainedNegation_Valid_1.whiley
+./ConstrainedNegation_Valid_1.whiley:7: incomparable operands: !int and int
+    if x is int:
+       ^^^^^^^^
+
+===== ConstrainedNegation_Valid_2.whiley =====
+Error compiling ConstrainedNegation_Valid_2.whiley
+./ConstrainedNegation_Valid_2.whiley:6: branch always taken
+    if v is !nat:
+       ^^^^^^^^^
+
+===== ConstrainedRecord_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ConstrainedRecord_Valid_10.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ConstrainedRecord_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ConstrainedRecord_Valid_3.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ConstrainedRecord_Valid_4.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== ConstrainedRecord_Valid_5.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== ConstrainedRecord_Valid_6.whiley =====
+MUTATED INPUT st : ConstrainedRecord_Valid_6:state
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== ConstrainedRecord_Valid_8.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ConstrainedRecord_Valid_8.bpl(80,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ConstrainedRecord_Valid_8.bpl(78,5): anon0
+ConstrainedRecord_Valid_8.bpl(81,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ConstrainedRecord_Valid_8.bpl(78,5): anon0
+ConstrainedRecord_Valid_8.bpl(82,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ConstrainedRecord_Valid_8.bpl(78,5): anon0
+ConstrainedRecord_Valid_8.bpl(83,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ConstrainedRecord_Valid_8.bpl(78,5): anon0
+ConstrainedRecord_Valid_8.bpl(84,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ConstrainedRecord_Valid_8.bpl(78,5): anon0
+
+Boogie program verifier finished with 1 verified, 5 errors
+===== ConstrainedRecord_Valid_9.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+ConstrainedRecord_Valid_9.bpl(116,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ConstrainedRecord_Valid_9.bpl(78,12): anon0
+    ConstrainedRecord_Valid_9.bpl(81,5): anon4_LoopHead
+    ConstrainedRecord_Valid_9.bpl(81,5): anon4_LoopDone
+ConstrainedRecord_Valid_9.bpl(141,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ConstrainedRecord_Valid_9.bpl(137,5): anon0
+ConstrainedRecord_Valid_9.bpl(148,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ConstrainedRecord_Valid_9.bpl(137,5): anon0
+ConstrainedRecord_Valid_9.bpl(155,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    ConstrainedRecord_Valid_9.bpl(137,5): anon0
+
+Boogie program verifier finished with 1 verified, 4 errors
+===== ConstrainedReference_Valid_1.whiley =====
+wyboogie.NotImplementedYet: call to method (f) from inside an expression in 2:int:call ConstrainedReference_Valid_1:f(%1)
+	at wyboogie.Wyil2Boogie.boogieInvoke(Wyil2Boogie.java:1607)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1397)
+	at wyboogie.Wyil2Boogie.boogieEquality(Wyil2Boogie.java:1714)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1465)
+	at wyboogie.Wyil2Boogie.boogieBoolExpr(Wyil2Boogie.java:1359)
+	at wyboogie.Wyil2Boogie.writeAssume(Wyil2Boogie.java:841)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:712)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== ConstrainedUnion_Valid_1.whiley =====
+wyboogie.NotImplementedYet: call to method (f) from inside an expression in 1:int:call ConstrainedUnion_Valid_1:f(%0)
+	at wyboogie.Wyil2Boogie.boogieInvoke(Wyil2Boogie.java:1607)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1397)
+	at wyboogie.Wyil2Boogie.boogieEquality(Wyil2Boogie.java:1714)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1465)
+	at wyboogie.Wyil2Boogie.boogieBoolExpr(Wyil2Boogie.java:1359)
+	at wyboogie.Wyil2Boogie.writeAssume(Wyil2Boogie.java:841)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:712)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Contractive_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Contractive_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 5 verified, 0 errors
+===== Define_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== Define_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== Define_Valid_3.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== Define_Valid_4.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== DoWhile_Valid_1.whiley =====
+wyboogie.NotImplementedYet: call to method (f) from inside an expression in 4:int:call DoWhile_Valid_1:f(%3)
+	at wyboogie.Wyil2Boogie.boogieInvoke(Wyil2Boogie.java:1607)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1397)
+	at wyboogie.Wyil2Boogie.boogieEquality(Wyil2Boogie.java:1714)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1465)
+	at wyboogie.Wyil2Boogie.boogieBoolExpr(Wyil2Boogie.java:1359)
+	at wyboogie.Wyil2Boogie.writeAssume(Wyil2Boogie.java:841)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:712)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== DoWhile_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== DoWhile_Valid_3.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== DoWhile_Valid_4.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== DoWhile_Valid_5.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== DoWhile_Valid_6.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+DoWhile_Valid_6.bpl(38,9): Error BP5001: This assertion might not hold.
+Execution trace:
+    DoWhile_Valid_6.bpl(33,7): anon0
+    DoWhile_Valid_6.bpl(34,5): anon2_Then
+    DoWhile_Valid_6.bpl(35,9): CONTINUE__DO__WHILE__0
+
+Boogie program verifier finished with 1 verified, 1 error
+===== DoWhile_Valid_7.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== DoWhile_Valid_8.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+DoWhile_Valid_8.bpl(40,9): Error BP5001: This assertion might not hold.
+Execution trace:
+    DoWhile_Valid_8.bpl(32,7): anon0
+    DoWhile_Valid_8.bpl(33,5): anon4_Then
+    DoWhile_Valid_8.bpl(34,9): CONTINUE__DO__WHILE__0
+    DoWhile_Valid_8.bpl(35,9): anon5_Else
+DoWhile_Valid_8.bpl(46,5): Error BP5003: A postcondition might not hold on this return path.
+DoWhile_Valid_8.bpl(28,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    DoWhile_Valid_8.bpl(32,7): anon0
+    DoWhile_Valid_8.bpl(33,5): anon4_Then
+    DoWhile_Valid_8.bpl(34,9): CONTINUE__DO__WHILE__0
+    DoWhile_Valid_8.bpl(36,13): anon5_Then
+    DoWhile_Valid_8.bpl(44,5): BREAK__DO__WHILE__0
+
+Boogie program verifier finished with 1 verified, 2 errors
+===== EffectiveList_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Ensures_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Ensures_Valid_2.whiley =====
+MUTATED INPUT x : int
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Ensures_Valid_3.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Ensures_Valid_3.bpl(60,4): Error: more than one declaration of block name: CONTINUE__WHILE__0
+Ensures_Valid_3.bpl(74,4): Error: more than one declaration of block name: BREAK__WHILE__0
+2 name resolution errors detected in Ensures_Valid_3.bpl
+===== Ensures_Valid_4.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Ensures_Valid_5.whiley =====
+MUTATED INPUT x : int
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Ensures_Valid_6.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Ensures_Valid_7.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Ensures_Valid_8.whiley =====
+MUTATED INPUT x : int
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Fail_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Fail_Valid_1.bpl(46,13): Error BP5001: This assertion might not hold.
+Execution trace:
+    Fail_Valid_1.bpl(38,5): anon0
+    Fail_Valid_1.bpl(42,9): anon5_Else
+    Fail_Valid_1.bpl(46,13): anon6_Else
+
+Boogie program verifier finished with 1 verified, 1 error
+===== Fail_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== FunctionRef_Valid_1.whiley =====
+WARNING: assuming that all indirect function calls of arity 1 return type int
+WARNING: assuming that all indirect function calls of arity 1 return type int
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 4 verified, 0 errors
+===== FunctionRef_Valid_10.whiley =====
+WARNING: assuming that all indirect function calls of arity 1 return type int
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== FunctionRef_Valid_11.whiley =====
+WARNING: assuming that all indirect function calls of arity 1 return type int
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+FunctionRef_Valid_11.bpl(123,9): Error BP5001: This assertion might not hold.
+Execution trace:
+    FunctionRef_Valid_11.bpl(118,7): anon0
+    FunctionRef_Valid_11.bpl(120,5): anon2_LoopHead
+    FunctionRef_Valid_11.bpl(122,9): anon2_LoopBody
+
+Boogie program verifier finished with 2 verified, 1 error
+===== FunctionRef_Valid_12.whiley =====
+WARNING: assuming that all indirect function calls of arity 1 return type int
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== FunctionRef_Valid_13.whiley =====
+WARNING: assuming that all indirect function calls of arity 1 return type int
+WARNING: assuming that all indirect function calls of arity 2 return type FunctionRef_Valid_13:Sized
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 4 verified, 0 errors
+===== FunctionRef_Valid_2.whiley =====
+WARNING: assuming that all indirect function calls of arity 1 return type int
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== FunctionRef_Valid_4.whiley =====
+WARNING: assuming that all indirect function calls of arity 1 return type int
+WARNING: assuming that all indirect function calls of arity 1 return type int
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+FunctionRef_Valid_4.bpl(99,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    FunctionRef_Valid_4.bpl(99,5): anon0
+
+Boogie program verifier finished with 3 verified, 1 error
+===== FunctionRef_Valid_5.whiley =====
+java.lang.IllegalArgumentException: Cannot overload exported function: test
+	at wyboogie.Wyil2Boogie.resolveFunctionOverloading(Wyil2Boogie.java:2119)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:284)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== FunctionRef_Valid_6.whiley =====
+java.lang.IllegalArgumentException: Cannot overload exported function: test
+	at wyboogie.Wyil2Boogie.resolveFunctionOverloading(Wyil2Boogie.java:2119)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:284)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== FunctionRef_Valid_7.whiley =====
+java.lang.IllegalArgumentException: Cannot overload exported function: test
+	at wyboogie.Wyil2Boogie.resolveFunctionOverloading(Wyil2Boogie.java:2119)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:284)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== FunctionRef_Valid_8.whiley =====
+java.lang.IllegalArgumentException: Cannot overload exported function: test
+	at wyboogie.Wyil2Boogie.resolveFunctionOverloading(Wyil2Boogie.java:2119)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:284)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== FunctionRef_Valid_9.whiley =====
+java.lang.IllegalArgumentException: Cannot overload exported function: test
+	at wyboogie.Wyil2Boogie.resolveFunctionOverloading(Wyil2Boogie.java:2119)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:284)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Function_Valid_1.whiley =====
+mangle f : function(int)->(int) to f$2
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== Function_Valid_11.whiley =====
+Error compiling Function_Valid_11.whiley
+./Function_Valid_11.whiley:15: unable to resolve name (f(int) is ambiguous
+	found: Function_Valid_11:f : function(Function_Valid_11:fr8nat)->(bool)
+	found: Function_Valid_11:f : function(Function_Valid_11:fr8neg)->(bool))
+    assume f(x) == true
+           ^^^^
+
+===== Function_Valid_12.whiley =====
+mangle f : function(int[])->(int[]) to f$2
+mangle f : function(bool[])->(bool[]) to f$3
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 4 verified, 0 errors
+===== Function_Valid_13.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== Function_Valid_14.whiley =====
+mangle f : function(bool)->(int) to f$2
+mangle f : function(int[])->(int) to f$3
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 4 verified, 0 errors
+===== Function_Valid_15.whiley =====
+Error compiling Function_Valid_15.whiley
+./Function_Valid_15.whiley:3: unknown variable
+type msg1 is {int op, int s} where op == 1
+                                   ^^
+
+===== Function_Valid_16.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== Function_Valid_17.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== Function_Valid_18.whiley =====
+wyboogie.NotImplementedYet: comparison of void intersection type: Function_Valid_18:nat and Function_Valid_18:nat in 4:bool:eq (%2, %3)
+	at wyboogie.Wyil2Boogie.boogieEquality(Wyil2Boogie.java:1711)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1465)
+	at wyboogie.Wyil2Boogie.boogieBoolExpr(Wyil2Boogie.java:1359)
+	at wyboogie.Wyil2Boogie.writeConjunction(Wyil2Boogie.java:580)
+	at wyboogie.Wyil2Boogie.writeFunction(Wyil2Boogie.java:543)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:391)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Function_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Function_Valid_20.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Function_Valid_21.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Function_Valid_3.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Function_Valid_4.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== Function_Valid_5.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== Function_Valid_6.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== Function_Valid_7.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== Function_Valid_8.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== Function_Valid_9.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== HexAssign_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== IfElse_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== IfElse_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== IfElse_Valid_3.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== IfElse_Valid_4.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 4 verified, 0 errors
+===== IfElse_Valid_5.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Import_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Import_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Import_Valid_3.whiley =====
+mangle toInt : function(int[])->(int) to toInt$2
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Import_Valid_4.whiley =====
+Error compiling Import_Valid_4.whiley
+./Import_Valid_4.whiley:7: unknown type encountered
+function g(real x) -> int[]:
+           ^^^^
+
+===== Import_Valid_5.whiley =====
+Error compiling Import_Valid_5.whiley
+./Import_Valid_5.whiley:3: unable to resolve name (name not found: toString)
+    assume toString(1223374) == "1223374"
+           ^^^^^^^^^^^^^^^^^
+
+===== Import_Valid_6.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== IntConst_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== IntDefine_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== IntDefine_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== IntDiv_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== IntDiv_Valid_3.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== IntDiv_Valid_4.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== IntDiv_Valid_5.whiley =====
+MUTATED INPUT x : int
+MUTATED INPUT y : int
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== IntMul_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== IntMul_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== IntOp_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== Intersection_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 7 verified, 0 errors
+===== Intersection_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Lambda_Valid_1.whiley =====
+wyboogie.NotImplementedYet: lambda in 5:function(int)->(int):lambda (%4) function(int)->(int)
+	at wyboogie.Wyil2Boogie.boogieLambda(Wyil2Boogie.java:1625)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1400)
+	at wyboogie.Wyil2Boogie.writeAllocations(Wyil2Boogie.java:931)
+	at wyboogie.Wyil2Boogie.writeReturn(Wyil2Boogie.java:1241)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:766)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Lambda_Valid_10.whiley =====
+wyboogie.NotImplementedYet: lambda in 2:function(int)->(int):lambda (%1) function(int)->(int)
+	at wyboogie.Wyil2Boogie.boogieLambda(Wyil2Boogie.java:1625)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1400)
+	at wyboogie.Wyil2Boogie.writeAllocations(Wyil2Boogie.java:931)
+	at wyboogie.Wyil2Boogie.writeVariableInit(Wyil2Boogie.java:1346)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:780)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Lambda_Valid_11.whiley =====
+wyboogie.NotImplementedYet: lambda in 2:method()->(&int):lambda (%1) method()->(&int)
+	at wyboogie.Wyil2Boogie.boogieLambda(Wyil2Boogie.java:1625)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1400)
+	at wyboogie.Wyil2Boogie.writeAllocations(Wyil2Boogie.java:931)
+	at wyboogie.Wyil2Boogie.writeVariableInit(Wyil2Boogie.java:1346)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:780)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Lambda_Valid_12.whiley =====
+wyboogie.NotImplementedYet: lambda in 5:method()->(int):lambda (%4) method()->(int)
+	at wyboogie.Wyil2Boogie.boogieLambda(Wyil2Boogie.java:1625)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1400)
+	at wyboogie.Wyil2Boogie.writeAllocations(Wyil2Boogie.java:931)
+	at wyboogie.Wyil2Boogie.writeVariableInit(Wyil2Boogie.java:1346)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:780)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Lambda_Valid_2.whiley =====
+wyboogie.NotImplementedYet: lambda in 6:function(int)->(int):lambda (%5) function(int)->(int)
+	at wyboogie.Wyil2Boogie.boogieLambda(Wyil2Boogie.java:1625)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1400)
+	at wyboogie.Wyil2Boogie.writeAllocations(Wyil2Boogie.java:931)
+	at wyboogie.Wyil2Boogie.writeReturn(Wyil2Boogie.java:1241)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:766)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Lambda_Valid_3.whiley =====
+mangle toByte : function(Lambda_Valid_3:char)->(byte) to toByte$2
+MUTATED INPUT v : Lambda_Valid_3:char
+wyboogie.NotImplementedYet: lambda in 11:method(int)->(byte[]):lambda (%10) method(int)->(byte[])
+	at wyboogie.Wyil2Boogie.boogieLambda(Wyil2Boogie.java:1625)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1400)
+	at java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:193)
+	at java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:948)
+	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:481)
+	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:471)
+	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:545)
+	at java.util.stream.AbstractPipeline.evaluateToArrayNode(AbstractPipeline.java:260)
+	at java.util.stream.ReferencePipeline.toArray(ReferencePipeline.java:438)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1403)
+	at wyboogie.Wyil2Boogie.writeAllocations(Wyil2Boogie.java:931)
+	at wyboogie.Wyil2Boogie.writeReturn(Wyil2Boogie.java:1241)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:766)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Lambda_Valid_4.whiley =====
+mangle toByte : function(Lambda_Valid_4:char)->(byte) to toByte$2
+mangle read : method(Lambda_Valid_4:string)->(byte[]) to read$2
+MUTATED INPUT v : Lambda_Valid_4:char
+wyboogie.NotImplementedYet: lambda in 9:method()->(bool):lambda (%8) method()->(bool)
+	at wyboogie.Wyil2Boogie.boogieLambda(Wyil2Boogie.java:1625)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1400)
+	at java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:193)
+	at java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:948)
+	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:481)
+	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:471)
+	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:545)
+	at java.util.stream.AbstractPipeline.evaluateToArrayNode(AbstractPipeline.java:260)
+	at java.util.stream.ReferencePipeline.toArray(ReferencePipeline.java:438)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1403)
+	at wyboogie.Wyil2Boogie.writeAllocations(Wyil2Boogie.java:931)
+	at wyboogie.Wyil2Boogie.writeReturn(Wyil2Boogie.java:1241)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:766)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Lambda_Valid_5.whiley =====
+wyboogie.NotImplementedYet: lambda in 5:method(int)->(int):lambda (%4) method(int)->(int)
+	at wyboogie.Wyil2Boogie.boogieLambda(Wyil2Boogie.java:1625)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1400)
+	at wyboogie.AssertionGenerator.expr(AssertionGenerator.java:71)
+	at wyboogie.AssertionGenerator.check(AssertionGenerator.java:150)
+	at wyboogie.AssertionGenerator.checkPredicate(AssertionGenerator.java:94)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:776)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Lambda_Valid_6.whiley =====
+wyboogie.NotImplementedYet: lambda in 7:function(int)->(int):lambda (%6) function(int)->(int)
+	at wyboogie.Wyil2Boogie.boogieLambda(Wyil2Boogie.java:1625)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1400)
+	at wyboogie.Wyil2Boogie.writeAllocations(Wyil2Boogie.java:931)
+	at wyboogie.Wyil2Boogie.writeVariableInit(Wyil2Boogie.java:1346)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:780)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Lambda_Valid_7.whiley =====
+wyboogie.NotImplementedYet: lambda in 10:function(int)->(int):lambda (%9) function(int)->(int)
+	at wyboogie.Wyil2Boogie.boogieLambda(Wyil2Boogie.java:1625)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1400)
+	at wyboogie.Wyil2Boogie.writeAllocations(Wyil2Boogie.java:931)
+	at wyboogie.Wyil2Boogie.writeVariableInit(Wyil2Boogie.java:1346)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:780)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Lambda_Valid_8.whiley =====
+wyboogie.NotImplementedYet: lambda in 6:function(int)->(int):lambda (%5) function(int)->(int)
+	at wyboogie.Wyil2Boogie.boogieLambda(Wyil2Boogie.java:1625)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1400)
+	at wyboogie.Wyil2Boogie.writeAllocations(Wyil2Boogie.java:931)
+	at wyboogie.Wyil2Boogie.writeReturn(Wyil2Boogie.java:1241)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:766)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Lambda_Valid_9.whiley =====
+WARNING: assuming that all indirect function calls of arity 1 return type int
+WARNING: assuming that all indirect function calls of arity 1 return type int
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 4 verified, 0 errors
+===== LengthOf_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== LengthOf_Valid_4.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== LengthOf_Valid_5.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Lifetime_Lambda_Valid_1.whiley =====
+wyboogie.NotImplementedYet: lambda in 4:method<a,b>(&a:int,&b:int)->(&a:int):lambda (%3) method<a,b>(&a:int,&b:int)->(&a:int)
+	at wyboogie.Wyil2Boogie.boogieLambda(Wyil2Boogie.java:1625)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1400)
+	at wyboogie.Wyil2Boogie.writeAllocations(Wyil2Boogie.java:931)
+	at wyboogie.Wyil2Boogie.writeVariableInit(Wyil2Boogie.java:1346)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:780)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Lifetime_Lambda_Valid_2.whiley =====
+wyboogie.NotImplementedYet: lambda in 5:method<aa,bb>(&aa:int,&bb:int)->(int):lambda (%4) method<aa,bb>(&aa:int,&bb:int)->(int)
+	at wyboogie.Wyil2Boogie.boogieLambda(Wyil2Boogie.java:1625)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1400)
+	at wyboogie.Wyil2Boogie.writeAllocations(Wyil2Boogie.java:931)
+	at wyboogie.Wyil2Boogie.writeVariableInit(Wyil2Boogie.java:1346)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:780)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Lifetime_Lambda_Valid_3.whiley =====
+wyboogie.NotImplementedYet: lambda in 2:method()->(&int):lambda (%1) method()->(&int)
+	at wyboogie.Wyil2Boogie.boogieLambda(Wyil2Boogie.java:1625)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1400)
+	at wyboogie.Wyil2Boogie.writeAllocations(Wyil2Boogie.java:931)
+	at wyboogie.Wyil2Boogie.writeVariableInit(Wyil2Boogie.java:1346)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:780)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Lifetime_Lambda_Valid_4.whiley =====
+Error compiling Lifetime_Lambda_Valid_4.whiley
+./Lifetime_Lambda_Valid_4.whiley:3: empty type encountered
+type mymethod is method<a>(&*:mymethod)->(&a:mymethod)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+===== Lifetime_Lambda_Valid_5.whiley =====
+wyboogie.NotImplementedYet: lambda in 4:method<b>(&b:int,&b:int)->(&int):lambda (%3) method<b>(&b:int,&b:int)->(&int)
+	at wyboogie.Wyil2Boogie.boogieLambda(Wyil2Boogie.java:1625)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1400)
+	at wyboogie.Wyil2Boogie.writeAllocations(Wyil2Boogie.java:931)
+	at wyboogie.Wyil2Boogie.writeVariableInit(Wyil2Boogie.java:1346)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:780)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Lifetime_Lambda_Valid_6.whiley =====
+wyboogie.NotImplementedYet: lambda in 3:method<b>(&b:int)->(&int):lambda (%2) method<b>(&b:int)->(&int)
+	at wyboogie.Wyil2Boogie.boogieLambda(Wyil2Boogie.java:1625)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1400)
+	at wyboogie.Wyil2Boogie.writeAllocations(Wyil2Boogie.java:931)
+	at wyboogie.Wyil2Boogie.writeVariableInit(Wyil2Boogie.java:1346)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:780)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Lifetime_Lambda_Valid_7.whiley =====
+wyboogie.NotImplementedYet: lambda in 4:function()->(&this:int):lambda (%3) function()->(&this:int)
+	at wyboogie.Wyil2Boogie.boogieLambda(Wyil2Boogie.java:1625)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1400)
+	at wyboogie.Wyil2Boogie.writeAllocations(Wyil2Boogie.java:931)
+	at wyboogie.Wyil2Boogie.writeVariableInit(Wyil2Boogie.java:1346)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:780)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Lifetime_Valid_1.whiley =====
+wyboogie.NotImplementedYet: named block in 73::block(mynestedblock) (%72)
+	at wyboogie.Wyil2Boogie.writeNamedBlock(Wyil2Boogie.java:1198)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:756)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeNamedBlock(Wyil2Boogie.java:1197)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:756)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Lifetime_Valid_10.whiley =====
+wyboogie.NotImplementedYet: comparison of void intersection type: &a:int and &a:int in 12:bool:eq (%10, %11)
+	at wyboogie.Wyil2Boogie.boogieEquality(Wyil2Boogie.java:1711)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1465)
+	at wyboogie.Wyil2Boogie.boogieBoolExpr(Wyil2Boogie.java:1359)
+	at wyboogie.Wyil2Boogie.writeAssume(Wyil2Boogie.java:841)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:712)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeNamedBlock(Wyil2Boogie.java:1197)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:756)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeNamedBlock(Wyil2Boogie.java:1197)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:756)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Lifetime_Valid_2.whiley =====
+wyboogie.NotImplementedYet: named block in 49::block(mynestedblock) (%48)
+	at wyboogie.Wyil2Boogie.writeNamedBlock(Wyil2Boogie.java:1198)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:756)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeNamedBlock(Wyil2Boogie.java:1197)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:756)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Lifetime_Valid_3.whiley =====
+wyboogie.NotImplementedYet: named block in 113::block(mynestedblock) (%112)
+	at wyboogie.Wyil2Boogie.writeNamedBlock(Wyil2Boogie.java:1198)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:756)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeNamedBlock(Wyil2Boogie.java:1197)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:756)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Lifetime_Valid_4.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Lifetime_Valid_5.whiley =====
+wyboogie.NotImplementedYet: named block in 79::block(test) (%78)
+	at wyboogie.Wyil2Boogie.writeNamedBlock(Wyil2Boogie.java:1198)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:756)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Lifetime_Valid_6.whiley =====
+wyboogie.NotImplementedYet: named block in 40::block(test) (%39)
+	at wyboogie.Wyil2Boogie.writeNamedBlock(Wyil2Boogie.java:1198)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:756)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Lifetime_Valid_7.whiley =====
+mangle m : method<a>(&a:int,&int)->(int) to m$2
+mangle m : method<a>(&int,&a:int)->(int) to m$3
+mangle m2 : method<a,b>(&a:int,&b:int)->(int) to m2$2
+wyboogie.NotImplementedYet: named block in 45::block(test) (%44)
+	at wyboogie.Wyil2Boogie.writeNamedBlock(Wyil2Boogie.java:1198)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:756)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Lifetime_Valid_8.whiley =====
+mangle m : method<a>(&a:bool,&a:int,bool)->(&a:int) to m$2
+mangle m : method<a>(&int,&a:int,int|bool)->(&a:int) to m$3
+mangle m : method<a>(&int,&a:int,bool)->(&a:int) to m$4
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 5 verified, 0 errors
+===== Lifetime_Valid_9.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ListAccess_Valid_1.whiley =====
+java.lang.IllegalArgumentException: function with no return values: wyil.lang.WyilFile$FunctionOrMethod@39ba5a14
+	at wyboogie.Wyil2Boogie.writeFunction(Wyil2Boogie.java:509)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:391)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== ListAccess_Valid_3.whiley =====
+java.lang.IllegalArgumentException: function with no return values: wyil.lang.WyilFile$FunctionOrMethod@17f6480
+	at wyboogie.Wyil2Boogie.writeFunction(Wyil2Boogie.java:509)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:391)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== ListAccess_Valid_5.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ListAccess_Valid_6.whiley =====
+Error compiling ListAccess_Valid_6.whiley
+./ListAccess_Valid_6.whiley:8: incomparable operands: null and int[]
+        if r is int[]:
+           ^^^^^^^^^^
+
+===== ListAccess_Valid_8.whiley =====
+MUTATED INPUT b : byte
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== ListAccess_Valid_9.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== ListAssign_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== ListAssign_Valid_11.whiley =====
+MUTATED INPUT a : int[]
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ListAssign_Valid_12.whiley =====
+MUTATED INPUT xs : int[][]
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ListAssign_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ListAssign_Valid_3.whiley =====
+MUTATED INPUT ls : int[][]
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== ListAssign_Valid_4.whiley =====
+MUTATED INPUT board : ListAssign_Valid_4:Board
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ListAssign_Valid_5.whiley =====
+MUTATED INPUT list : ListAssign_Valid_5:nint[][]
+MUTATED INPUT list : ListAssign_Valid_5:nint[][]
+wyboogie.NotImplementedYet: comparison of void intersection type: ListAssign_Valid_5:nint[][] and null|int[][] in 34:bool:eq (%20, %33)
+	at wyboogie.Wyil2Boogie.boogieEquality(Wyil2Boogie.java:1711)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1465)
+	at wyboogie.Wyil2Boogie.boogieBoolExpr(Wyil2Boogie.java:1359)
+	at wyboogie.Wyil2Boogie.writeAssume(Wyil2Boogie.java:841)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:712)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== ListAssign_Valid_6.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== ListAssign_Valid_7.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ListAssign_Valid_8.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== ListAssign_Valid_9.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ListEmpty_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ListGenerator_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ListGenerator_Valid_10.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ListGenerator_Valid_11.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== ListGenerator_Valid_12.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== ListGenerator_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ListGenerator_Valid_3.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ListGenerator_Valid_5.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ListGenerator_Valid_6.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ListGenerator_Valid_7.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ListGenerator_Valid_8.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ListGenerator_Valid_9.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ListLength_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ListLength_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== ListLength_Valid_3.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== MessageRef_Valid_1.whiley =====
+java.lang.IllegalArgumentException: Cannot overload exported function: test
+	at wyboogie.Wyil2Boogie.resolveFunctionOverloading(Wyil2Boogie.java:2119)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:284)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== MessageRef_Valid_2.whiley =====
+WARNING: assuming that all indirect function calls of arity 2 return type int
+wyboogie.NotImplementedYet: indirect invoke with 2 args in 9:int:icall %6 (%7, %8)
+	at wyboogie.Wyil2Boogie.boogieIndirectInvokeExpr(Wyil2Boogie.java:1589)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1394)
+	at wyboogie.Wyil2Boogie.writeAllocations(Wyil2Boogie.java:931)
+	at wyboogie.Wyil2Boogie.writeVariableInit(Wyil2Boogie.java:1346)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:780)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== MessageSend_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== MessageSend_Valid_2.whiley =====
+wyboogie.NotImplementedYet: call to method (f) from inside an expression in 5:int:call MessageSend_Valid_2:f(%4)
+	at wyboogie.Wyil2Boogie.boogieInvoke(Wyil2Boogie.java:1607)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1397)
+	at wyboogie.Wyil2Boogie.boogieEquality(Wyil2Boogie.java:1714)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1465)
+	at wyboogie.Wyil2Boogie.boogieBoolExpr(Wyil2Boogie.java:1359)
+	at wyboogie.Wyil2Boogie.writeAssume(Wyil2Boogie.java:841)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:712)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== MessageSend_Valid_3.whiley =====
+wyboogie.NotImplementedYet: call to method (get) from inside an expression in 6:int:call MessageSend_Valid_3:get(%5)
+	at wyboogie.Wyil2Boogie.boogieInvoke(Wyil2Boogie.java:1607)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1397)
+	at java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:193)
+	at java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:948)
+	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:481)
+	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:471)
+	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:545)
+	at java.util.stream.AbstractPipeline.evaluateToArrayNode(AbstractPipeline.java:260)
+	at java.util.stream.ReferencePipeline.toArray(ReferencePipeline.java:438)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1377)
+	at wyboogie.Wyil2Boogie.writeAllocations(Wyil2Boogie.java:931)
+	at wyboogie.Wyil2Boogie.writeReturn(Wyil2Boogie.java:1241)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:766)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== MessageSend_Valid_4.whiley =====
+wyboogie.NotImplementedYet: call to method (get) from inside an expression in 5:int:call MessageSend_Valid_4:get(%4)
+	at wyboogie.Wyil2Boogie.boogieInvoke(Wyil2Boogie.java:1607)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1397)
+	at java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:193)
+	at java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:948)
+	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:481)
+	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:471)
+	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:545)
+	at java.util.stream.AbstractPipeline.evaluateToArrayNode(AbstractPipeline.java:260)
+	at java.util.stream.ReferencePipeline.toArray(ReferencePipeline.java:438)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1403)
+	at wyboogie.Wyil2Boogie.writeAllocations(Wyil2Boogie.java:931)
+	at wyboogie.Wyil2Boogie.writeReturn(Wyil2Boogie.java:1241)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:766)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== MessageSend_Valid_5.whiley =====
+wyboogie.NotImplementedYet: call to method (get) from inside an expression in 17:int:call MessageSend_Valid_5:get(%16)
+	at wyboogie.Wyil2Boogie.boogieInvoke(Wyil2Boogie.java:1607)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1397)
+	at wyboogie.Wyil2Boogie.boogieEquality(Wyil2Boogie.java:1714)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1465)
+	at wyboogie.Wyil2Boogie.boogieBoolExpr(Wyil2Boogie.java:1359)
+	at wyboogie.Wyil2Boogie.writeAssume(Wyil2Boogie.java:841)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:712)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== MethodCall_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== MethodCall_Valid_2.whiley =====
+wyboogie.NotImplementedYet: call to method (get) from inside an expression in 4:int:call MethodCall_Valid_2:get()
+	at wyboogie.Wyil2Boogie.boogieInvoke(Wyil2Boogie.java:1607)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1397)
+	at java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:193)
+	at java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:948)
+	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:481)
+	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:471)
+	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:545)
+	at java.util.stream.AbstractPipeline.evaluateToArrayNode(AbstractPipeline.java:260)
+	at java.util.stream.ReferencePipeline.toArray(ReferencePipeline.java:438)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1377)
+	at wyboogie.Wyil2Boogie.writeAllocations(Wyil2Boogie.java:931)
+	at wyboogie.Wyil2Boogie.writeReturn(Wyil2Boogie.java:1241)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:766)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== MethodCall_Valid_3.whiley =====
+wyboogie.NotImplementedYet: call to method (get) from inside an expression in 3:int:call MethodCall_Valid_3:get()
+	at wyboogie.Wyil2Boogie.boogieInvoke(Wyil2Boogie.java:1607)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1397)
+	at java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:193)
+	at java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:948)
+	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:481)
+	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:471)
+	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:545)
+	at java.util.stream.AbstractPipeline.evaluateToArrayNode(AbstractPipeline.java:260)
+	at java.util.stream.ReferencePipeline.toArray(ReferencePipeline.java:438)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1403)
+	at wyboogie.Wyil2Boogie.writeAllocations(Wyil2Boogie.java:931)
+	at wyboogie.Wyil2Boogie.writeReturn(Wyil2Boogie.java:1241)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:766)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== MethodCall_Valid_4.whiley =====
+WARNING: assuming that all indirect function calls of arity 1 return type int
+WARNING: assuming that all indirect function calls of arity 1 return type int
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+MethodCall_Valid_4.bpl(169,55): Error: use of undeclared function: parSum
+MethodCall_Valid_4.bpl(173,55): Error: use of undeclared function: seqSum
+2 name resolution errors detected in MethodCall_Valid_4.bpl
+===== MethodRef_Valid_1.whiley =====
+java.lang.IllegalArgumentException: Cannot overload exported function: test
+	at wyboogie.Wyil2Boogie.resolveFunctionOverloading(Wyil2Boogie.java:2119)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:284)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== MethodRef_Valid_2.whiley =====
+WARNING: assuming that all indirect function calls of arity 1 return type int
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+MethodRef_Valid_2.bpl(53,50): Error: use of undeclared function: f
+1 name resolution errors detected in MethodRef_Valid_2.bpl
+===== Method_Valid_1.whiley =====
+wyboogie.NotImplementedYet: comparison of void intersection type: Method_Valid_1:Piece and Method_Valid_1:Piece in 22:bool:eq (%20, %21)
+	at wyboogie.Wyil2Boogie.boogieEquality(Wyil2Boogie.java:1711)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1465)
+	at wyboogie.Wyil2Boogie.writeAllocations(Wyil2Boogie.java:931)
+	at wyboogie.Wyil2Boogie.writeIf(Wyil2Boogie.java:1149)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:739)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeWhile(Wyil2Boogie.java:1215)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:762)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== MultiLineComment_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== MultiLineComment_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== NegationType_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== NegationType_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== NegationType_Valid_3.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== NegationType_Valid_4.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== NegationType_Valid_5.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== OpenRecord_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== OpenRecord_Valid_10.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== OpenRecord_Valid_11.whiley =====
+Error compiling OpenRecord_Valid_11.whiley
+./OpenRecord_Valid_11.whiley:6: branch always taken
+    if x is SubtypeRecord:
+       ^^^^^^^^^^^^^^^^^^
+
+===== OpenRecord_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== OpenRecord_Valid_3.whiley =====
+WARNING: assuming that all indirect function calls of arity 1 return type int
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== OpenRecord_Valid_4.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== OpenRecord_Valid_5.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== OpenRecord_Valid_6.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== OpenRecord_Valid_9.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ProcessAccess_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== ProcessAccess_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Process_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Process_Valid_10.whiley =====
+wyboogie.NotImplementedYet: call to method (get) from inside an expression in 88:int:call Process_Valid_10:get(%87)
+	at wyboogie.Wyil2Boogie.boogieInvoke(Wyil2Boogie.java:1607)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1397)
+	at wyboogie.Wyil2Boogie.boogieEquality(Wyil2Boogie.java:1714)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1465)
+	at wyboogie.Wyil2Boogie.boogieBoolExpr(Wyil2Boogie.java:1359)
+	at wyboogie.Wyil2Boogie.writeAssume(Wyil2Boogie.java:841)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:712)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Process_Valid_11.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Process_Valid_12.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Process_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== Process_Valid_3.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== Process_Valid_4.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Process_Valid_5.whiley =====
+wyboogie.NotImplementedYet: call to method (run) from inside an expression in 5:bool:call Process_Valid_5:run(%4)
+	at wyboogie.Wyil2Boogie.boogieInvoke(Wyil2Boogie.java:1607)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1397)
+	at wyboogie.Wyil2Boogie.boogieEquality(Wyil2Boogie.java:1714)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1465)
+	at wyboogie.Wyil2Boogie.boogieBoolExpr(Wyil2Boogie.java:1359)
+	at wyboogie.Wyil2Boogie.writeAssume(Wyil2Boogie.java:841)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:712)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Process_Valid_6.whiley =====
+wyboogie.NotImplementedYet: call to method (createActor) from inside an expression in 6:&Process_Valid_6:Actor:call Process_Valid_6:createActor(%5)
+	at wyboogie.Wyil2Boogie.boogieInvoke(Wyil2Boogie.java:1607)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1397)
+	at wyboogie.Wyil2Boogie.boogieArrayGenerator(Wyil2Boogie.java:1563)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1381)
+	at wyboogie.Wyil2Boogie.writeAllocations(Wyil2Boogie.java:931)
+	at wyboogie.Wyil2Boogie.writeVariableInit(Wyil2Boogie.java:1346)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:780)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Process_Valid_7.whiley =====
+wyboogie.NotImplementedYet: call to method (get) from inside an expression in 7:any:call Process_Valid_7:get(%6)
+	at wyboogie.Wyil2Boogie.boogieInvoke(Wyil2Boogie.java:1607)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1397)
+	at wyboogie.Wyil2Boogie.boogieEquality(Wyil2Boogie.java:1714)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1465)
+	at wyboogie.Wyil2Boogie.boogieBoolExpr(Wyil2Boogie.java:1359)
+	at wyboogie.Wyil2Boogie.writeAssume(Wyil2Boogie.java:841)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:712)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Process_Valid_8.whiley =====
+wyboogie.NotImplementedYet: call to method (get) from inside an expression in 7:any:call Process_Valid_8:get(%6)
+	at wyboogie.Wyil2Boogie.boogieInvoke(Wyil2Boogie.java:1607)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1397)
+	at wyboogie.Wyil2Boogie.boogieEquality(Wyil2Boogie.java:1714)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1465)
+	at wyboogie.Wyil2Boogie.boogieBoolExpr(Wyil2Boogie.java:1359)
+	at wyboogie.Wyil2Boogie.writeAssume(Wyil2Boogie.java:841)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:712)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Process_Valid_9.whiley =====
+wyboogie.NotImplementedYet: call to method (get) from inside an expression in 81:int:call Process_Valid_9:get(%80)
+	at wyboogie.Wyil2Boogie.boogieInvoke(Wyil2Boogie.java:1607)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1397)
+	at wyboogie.Wyil2Boogie.boogieEquality(Wyil2Boogie.java:1714)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1465)
+	at wyboogie.Wyil2Boogie.boogieBoolExpr(Wyil2Boogie.java:1359)
+	at wyboogie.Wyil2Boogie.writeAssume(Wyil2Boogie.java:841)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:712)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Quantifiers_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== RecordAccess_Valid_1.whiley =====
+wyboogie.NotImplementedYet: call to method (get) from inside an expression in 4:int:call RecordAccess_Valid_1:get(%3)
+	at wyboogie.Wyil2Boogie.boogieInvoke(Wyil2Boogie.java:1607)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1397)
+	at wyboogie.Wyil2Boogie.boogieEquality(Wyil2Boogie.java:1714)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1465)
+	at wyboogie.Wyil2Boogie.boogieBoolExpr(Wyil2Boogie.java:1359)
+	at wyboogie.Wyil2Boogie.writeAssume(Wyil2Boogie.java:841)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:712)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== RecordAssign_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== RecordAssign_Valid_10.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== RecordAssign_Valid_2.whiley =====
+MUTATED INPUT r : RecordAssign_Valid_2:rec2
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== RecordAssign_Valid_3.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== RecordAssign_Valid_4.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== RecordAssign_Valid_5.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== RecordAssign_Valid_6.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== RecordAssign_Valid_7.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== RecordAssign_Valid_8.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== RecordAssign_Valid_9.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== RecordCoercion_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== RecordDefine_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== RecordDefine_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== RecordSubtype_Valid_1.whiley =====
+Error compiling RecordSubtype_Valid_1.whiley
+./RecordSubtype_Valid_1.whiley:12: expected type RecordSubtype_Valid_1:R4, found RecordSubtype_Valid_1:R1
+    return x
+           ^
+
+===== RecordSubtype_Valid_2.whiley =====
+Error compiling RecordSubtype_Valid_2.whiley
+./RecordSubtype_Valid_2.whiley:12: expected type RecordSubtype_Valid_2:List4, found RecordSubtype_Valid_2:List1
+    return r
+           ^
+
+===== RecursiveType_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== RecursiveType_Valid_10.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== RecursiveType_Valid_11.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== RecursiveType_Valid_12.whiley =====
+Error compiling RecursiveType_Valid_12.whiley
+./RecursiveType_Valid_12.whiley:6: record required, got: X<null|{int data,X lhs,X rhs}>
+where ((_this.lhs == null) || (_this.lhs.data < _this.data)) && ((_this.rhs == null) || (_this.rhs.data > _this.data))
+                               ^^^^^^^^^^^^^^
+
+===== RecursiveType_Valid_13.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== RecursiveType_Valid_14.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== RecursiveType_Valid_15.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== RecursiveType_Valid_16.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== RecursiveType_Valid_17.whiley =====
+wyboogie.NotImplementedYet: multiple return values:parseAddSubExpr
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:385)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== RecursiveType_Valid_18.whiley =====
+wyboogie.NotImplementedYet: multiple return values:parseAddSubExpr
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:385)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== RecursiveType_Valid_19.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+RecursiveType_Valid_19.bpl(49,5): Timed out on BP5003: A postcondition might not hold on this return path.
+RecursiveType_Valid_19.bpl(43,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    RecursiveType_Valid_19.bpl(47,8): anon0
+
+Boogie program verifier finished with 1 verified, 0 errors, 1 time out
+===== RecursiveType_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== RecursiveType_Valid_20.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+RecursiveType_Valid_20.bpl(47,5): Timed out on BP5003: A postcondition might not hold on this return path.
+RecursiveType_Valid_20.bpl(41,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    RecursiveType_Valid_20.bpl(45,8): anon0
+
+Boogie program verifier finished with 1 verified, 0 errors, 1 time out
+===== RecursiveType_Valid_21.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== RecursiveType_Valid_22.whiley =====
+Error compiling RecursiveType_Valid_22.whiley
+./RecursiveType_Valid_22.whiley:6: record required, got: X<null|{int data,X next}>
+where (_this.next == null) || (_this.data < _this.next.data)
+                                           ^^^^^^^^^^^^^^^^
+
+===== RecursiveType_Valid_23.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== RecursiveType_Valid_24.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+RecursiveType_Valid_24.bpl(43,13): Error BP5001: This assertion might not hold.
+Execution trace:
+    RecursiveType_Valid_24.bpl(37,5): anon0
+    RecursiveType_Valid_24.bpl(38,11): anon6_Then
+    RecursiveType_Valid_24.bpl(41,9): anon7_LoopHead
+    RecursiveType_Valid_24.bpl(43,13): anon7_LoopBody
+
+Boogie program verifier finished with 1 verified, 1 error
+===== RecursiveType_Valid_25.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== RecursiveType_Valid_26.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== RecursiveType_Valid_27.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== RecursiveType_Valid_28.whiley =====
+Error compiling RecursiveType_Valid_28.whiley
+./RecursiveType_Valid_28.whiley:27: unable to resolve name (no match for get(RecursiveType_Valid_28:LinkedList,int)
+	found: RecursiveType_Valid_28:get : function(RecursiveType_Valid_28:Link,int)->(int))
+        return get(ls.next,i+1)
+               ^^^^^^^^^^^^^^^^
+
+===== RecursiveType_Valid_3.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+RecursiveType_Valid_3.bpl(55,17): Error BP5001: This assertion might not hold.
+Execution trace:
+    RecursiveType_Valid_3.bpl(45,5): anon0
+    RecursiveType_Valid_3.bpl(49,9): anon8_Else
+    RecursiveType_Valid_3.bpl(50,15): anon9_Then
+    RecursiveType_Valid_3.bpl(53,13): anon10_LoopHead
+    RecursiveType_Valid_3.bpl(55,17): anon10_LoopBody
+RecursiveType_Valid_3.bpl(72,17): Error BP5003: A postcondition might not hold on this return path.
+RecursiveType_Valid_3.bpl(38,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    RecursiveType_Valid_3.bpl(45,5): anon0
+    RecursiveType_Valid_3.bpl(49,9): anon8_Else
+    RecursiveType_Valid_3.bpl(65,13): anon9_Else
+    RecursiveType_Valid_3.bpl(70,17): anon11_Then
+
+Boogie program verifier finished with 1 verified, 2 errors
+===== RecursiveType_Valid_4.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+RecursiveType_Valid_4.bpl(56,17): Error BP5001: This assertion might not hold.
+Execution trace:
+    RecursiveType_Valid_4.bpl(46,5): anon0
+    RecursiveType_Valid_4.bpl(50,9): anon11_Else
+    RecursiveType_Valid_4.bpl(51,15): anon12_Then
+    RecursiveType_Valid_4.bpl(54,13): anon13_LoopHead
+    RecursiveType_Valid_4.bpl(56,17): anon13_LoopBody
+RecursiveType_Valid_4.bpl(57,17): Error BP5001: This assertion might not hold.
+Execution trace:
+    RecursiveType_Valid_4.bpl(46,5): anon0
+    RecursiveType_Valid_4.bpl(50,9): anon11_Else
+    RecursiveType_Valid_4.bpl(51,15): anon12_Then
+    RecursiveType_Valid_4.bpl(54,13): anon13_LoopHead
+    RecursiveType_Valid_4.bpl(56,17): anon13_LoopBody
+RecursiveType_Valid_4.bpl(63,21): Error BP5001: This assertion might not hold.
+Execution trace:
+    RecursiveType_Valid_4.bpl(46,5): anon0
+    RecursiveType_Valid_4.bpl(50,9): anon11_Else
+    RecursiveType_Valid_4.bpl(51,15): anon12_Then
+    RecursiveType_Valid_4.bpl(54,13): anon13_LoopHead
+    RecursiveType_Valid_4.bpl(56,17): anon13_LoopBody
+    RecursiveType_Valid_4.bpl(63,21): anon14_Else
+
+Boogie program verifier finished with 1 verified, 3 errors
+===== RecursiveType_Valid_5.whiley =====
+Error compiling RecursiveType_Valid_5.whiley
+./RecursiveType_Valid_5.whiley:8: internal failure, Unable to type loop
+    while i < n:
+    ^^^^^^^^^^^^
+
+===== RecursiveType_Valid_6.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== RecursiveType_Valid_7.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+RecursiveType_Valid_7.bpl(163,72): error: invalid Type
+(0,0): error: the type of the last parameter is unspecified
+2 parse errors detected in RecursiveType_Valid_7.bpl
+===== RecursiveType_Valid_8.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== RecursiveType_Valid_9.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== ReferenceType_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Reference_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Reference_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== Reference_Valid_3.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== Reference_Valid_4.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== Reference_Valid_5.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== Reference_Valid_6.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Reference_Valid_6.bpl(56,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    Reference_Valid_6.bpl(44,12): anon0
+Reference_Valid_6.bpl(57,5): Error BP5001: This assertion might not hold.
+Execution trace:
+    Reference_Valid_6.bpl(44,12): anon0
+
+Boogie program verifier finished with 1 verified, 2 errors
+===== Reference_Valid_7.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Reference_Valid_8.whiley =====
+wyboogie.NotImplementedYet: call to method (f) from inside an expression in 1:null|int:call Reference_Valid_8:f(%0)
+	at wyboogie.Wyil2Boogie.boogieInvoke(Wyil2Boogie.java:1607)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1397)
+	at wyboogie.Wyil2Boogie.boogieEquality(Wyil2Boogie.java:1714)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1465)
+	at wyboogie.Wyil2Boogie.boogieBoolExpr(Wyil2Boogie.java:1359)
+	at wyboogie.Wyil2Boogie.writeAssume(Wyil2Boogie.java:841)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:712)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== Remainder_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Requires_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== Resolution_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Return_Valid_1.whiley =====
+wyboogie.NotImplementedYet: multiple return values:f
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:385)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== SingleLineComment_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== Skip_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== String_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== String_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== String_Valid_3.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== String_Valid_4.whiley =====
+MUTATED INPUT str : int[]
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+String_Valid_4.bpl(8,20): error: ")" expected
+1 parse errors detected in String_Valid_4.bpl
+===== String_Valid_5.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== String_Valid_6.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+String_Valid_6.bpl(51,4): Error: more than one declaration of block name: CONTINUE__WHILE__0
+String_Valid_6.bpl(61,4): Error: more than one declaration of block name: BREAK__WHILE__0
+2 name resolution errors detected in String_Valid_6.bpl
+===== Subtype_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== Subtype_Valid_10.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== Subtype_Valid_11.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== Subtype_Valid_12.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== Subtype_Valid_13.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== Subtype_Valid_14.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== Subtype_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== Subtype_Valid_3.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== Subtype_Valid_4.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== Subtype_Valid_5.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== Subtype_Valid_6.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== Subtype_Valid_7.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== Subtype_Valid_8.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== Subtype_Valid_9.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== Switch_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Switch_Valid_10.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Switch_Valid_11.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Switch_Valid_12.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Switch_Valid_13.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Switch_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Switch_Valid_3.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Switch_Valid_4.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Switch_Valid_5.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+Switch_Valid_5.bpl(33,17): error: ")" expected
+1 parse errors detected in Switch_Valid_5.bpl
+===== Switch_Valid_6.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Switch_Valid_7.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Switch_Valid_8.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== Switch_Valid_9.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Syntax_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== TypeEquals_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_10.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_11.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_12.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_14.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_15.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_16.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_17.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_18.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_19.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_21.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_23.whiley =====
+Error compiling TypeEquals_Valid_23.whiley
+./TypeEquals_Valid_23.whiley:3: unknown variable
+type bop is {int y, int x} where x > 0
+                                 ^
+
+===== TypeEquals_Valid_24.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_25.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_27.whiley =====
+java.lang.IllegalArgumentException: Cannot overload exported function: test
+	at wyboogie.Wyil2Boogie.resolveFunctionOverloading(Wyil2Boogie.java:2119)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:284)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== TypeEquals_Valid_28.whiley =====
+java.lang.IllegalArgumentException: Cannot overload exported function: test
+	at wyboogie.Wyil2Boogie.resolveFunctionOverloading(Wyil2Boogie.java:2119)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:284)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== TypeEquals_Valid_29.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== TypeEquals_Valid_3.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+TypeEquals_Valid_3.bpl(43,9): Error BP5001: This assertion might not hold.
+Execution trace:
+    TypeEquals_Valid_3.bpl(37,7): anon0
+    TypeEquals_Valid_3.bpl(40,5): anon2_LoopHead
+    TypeEquals_Valid_3.bpl(43,9): anon2_LoopBody
+
+Boogie program verifier finished with 1 verified, 1 error
+===== TypeEquals_Valid_30.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_31.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_32.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== TypeEquals_Valid_33.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_34.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_35.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+TypeEquals_Valid_35.bpl(40,10): Error: command assigns to an immutable variable: e
+1 type checking errors detected in TypeEquals_Valid_35.bpl
+===== TypeEquals_Valid_36.whiley =====
+Error compiling TypeEquals_Valid_36.whiley
+./TypeEquals_Valid_36.whiley:10: invalid array expression
+    if (t.lhs is plist) && ((|t.lhs| > 0) && (t.lhs[0] == 0)):
+                              ^^^^^
+
+===== TypeEquals_Valid_37.whiley =====
+Error compiling TypeEquals_Valid_37.whiley
+./TypeEquals_Valid_37.whiley:10: invalid array expression
+    if (t.lhs is plist) && ((|t.lhs| > 0) && (t.lhs[0] == 0)):
+                              ^^^^^
+
+===== TypeEquals_Valid_38.whiley =====
+Error compiling TypeEquals_Valid_38.whiley
+./TypeEquals_Valid_38.whiley:8: invalid array expression
+    if (t.lhs is int[]) && ((|t.lhs| > 0) && (t.lhs[0] == 0)):
+                              ^^^^^
+
+===== TypeEquals_Valid_39.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_40.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_41.whiley =====
+Error compiling TypeEquals_Valid_41.whiley
+./TypeEquals_Valid_41.whiley:3: unknown variable
+type bop is {int y, int x} where x > 0
+                                 ^
+
+===== TypeEquals_Valid_42.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_43.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_44.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_45.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_46.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_47.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_48.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_49.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_5.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_50.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_51.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_52.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_53.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_54.whiley =====
+MUTATED INPUT x : null|int
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_55.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_6.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== TypeEquals_Valid_7.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== TypeEquals_Valid_9.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== UnionType_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== UnionType_Valid_10.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== UnionType_Valid_11.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== UnionType_Valid_12.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== UnionType_Valid_13.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== UnionType_Valid_14.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== UnionType_Valid_15.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+UnionType_Valid_15.bpl(14,265): Error: undeclared identifier: $dum
+1 name resolution errors detected in UnionType_Valid_15.bpl
+===== UnionType_Valid_16.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== UnionType_Valid_17.whiley =====
+wyboogie.NotImplementedYet: call to method (f) from inside an expression in 3:int:call UnionType_Valid_17:f(%2)
+	at wyboogie.Wyil2Boogie.boogieInvoke(Wyil2Boogie.java:1607)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1397)
+	at wyboogie.Wyil2Boogie.boogieEquality(Wyil2Boogie.java:1714)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1465)
+	at wyboogie.Wyil2Boogie.boogieBoolExpr(Wyil2Boogie.java:1359)
+	at wyboogie.Wyil2Boogie.writeAssume(Wyil2Boogie.java:841)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:712)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== UnionType_Valid_18.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== UnionType_Valid_19.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== UnionType_Valid_2.whiley =====
+wyboogie.NotImplementedYet: multiple return values:parseTerm
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:385)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== UnionType_Valid_20.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== UnionType_Valid_21.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== UnionType_Valid_22.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== UnionType_Valid_23.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== UnionType_Valid_3.whiley =====
+wyboogie.NotImplementedYet: comparison of void intersection type: UnionType_Valid_3:TYPE and UnionType_Valid_3:TYPE in 17:bool:eq (%15, %16)
+	at wyboogie.Wyil2Boogie.boogieEquality(Wyil2Boogie.java:1711)
+	at wyboogie.Wyil2Boogie.boogieExpr(Wyil2Boogie.java:1465)
+	at wyboogie.Wyil2Boogie.writeAllocations(Wyil2Boogie.java:931)
+	at wyboogie.Wyil2Boogie.writeIf(Wyil2Boogie.java:1149)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:739)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeWhile(Wyil2Boogie.java:1215)
+	at wyboogie.Wyil2Boogie.writeStatement(Wyil2Boogie.java:762)
+	at wyboogie.Wyil2Boogie.writeBlock(Wyil2Boogie.java:695)
+	at wyboogie.Wyil2Boogie.writeProcedure(Wyil2Boogie.java:435)
+	at wyboogie.Wyil2Boogie.apply(Wyil2Boogie.java:304)
+	at wyboogie.Wyil2Boogie.main(Wyil2Boogie.java:2368)
+===== UnionType_Valid_4.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== UnionType_Valid_5.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== UnionType_Valid_6.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== UnionType_Valid_7.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== UnionType_Valid_8.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== UnionType_Valid_9.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== Update_Valid_2.whiley =====
+MUTATED INPUT l : Update_Valid_2:list
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== VarDecl_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== VarDecl_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== VarDecl_Valid_3.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 3 verified, 0 errors
+===== VarDecl_Valid_4.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_1.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_10.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_11.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+While_Valid_11.bpl(61,5): Error BP5003: A postcondition might not hold on this return path.
+While_Valid_11.bpl(31,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    While_Valid_11.bpl(36,7): anon0
+    While_Valid_11.bpl(43,5): anon5_LoopHead
+    While_Valid_11.bpl(43,5): anon5_LoopDone
+
+Boogie program verifier finished with 1 verified, 1 error
+===== While_Valid_12.whiley =====
+MUTATED INPUT v1 : int[]
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_14.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_15.whiley =====
+MUTATED INPUT list : While_Valid_15:LinkedList
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_16.whiley =====
+MUTATED INPUT src : While_Valid_16:nat[]
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+While_Valid_16.bpl(57,5): Error BP5003: A postcondition might not hold on this return path.
+While_Valid_16.bpl(33,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    While_Valid_16.bpl(39,9): anon0
+    While_Valid_16.bpl(46,5): anon2_LoopHead
+    While_Valid_16.bpl(46,5): anon2_LoopDone
+
+Boogie program verifier finished with 1 verified, 1 error
+===== While_Valid_17.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== While_Valid_18.whiley =====
+MUTATED INPUT offset : While_Valid_18:nat
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_19.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== While_Valid_2.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+While_Valid_2.bpl(50,9): Error BP5005: This loop invariant might not be maintained by the loop.
+Execution trace:
+    While_Valid_2.bpl(37,8): anon0
+    While_Valid_2.bpl(48,5): anon6_LoopHead
+    While_Valid_2.bpl(53,9): anon6_LoopBody
+    While_Valid_2.bpl(57,16): anon7_Then
+While_Valid_2.bpl(51,9): Error BP5005: This loop invariant might not be maintained by the loop.
+Execution trace:
+    While_Valid_2.bpl(37,8): anon0
+    While_Valid_2.bpl(48,5): anon6_LoopHead
+    While_Valid_2.bpl(53,9): anon6_LoopBody
+    While_Valid_2.bpl(59,13): anon7_Else
+    While_Valid_2.bpl(61,20): anon8_Then
+
+Boogie program verifier finished with 1 verified, 2 errors
+===== While_Valid_20.whiley =====
+MUTATED INPUT l : While_Valid_20:LinkedList
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_21.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_22.whiley =====
+mangle max : function(int[])->(int) to max$2
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+While_Valid_22.bpl(70,22): Error: undeclared identifier: j
+While_Valid_22.bpl(70,34): Error: undeclared identifier: j
+2 name resolution errors detected in While_Valid_22.bpl
+===== While_Valid_23.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+While_Valid_23.bpl(36,22): Error: undeclared identifier: j
+While_Valid_23.bpl(36,34): Error: undeclared identifier: j
+2 name resolution errors detected in While_Valid_23.bpl
+===== While_Valid_24.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_25.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_26.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_27.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_28.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_29.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_3.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_30.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_31.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_32.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_33.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_34.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_35.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_36.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_37.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_38.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_39.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_40.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_41.whiley =====
+MUTATED INPUT items : int[]
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_42.whiley =====
+MUTATED INPUT xs : int[]
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+While_Valid_42.bpl(40,19): Error: more than one declaration of variable name: j
+While_Valid_42.bpl(44,19): Error: more than one declaration of variable name: j
+While_Valid_42.bpl(51,26): Error: more than one declaration of variable name: j
+3 name resolution errors detected in While_Valid_42.bpl
+===== While_Valid_43.whiley =====
+MUTATED INPUT items : int[]
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_44.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_45.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_46.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_47.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_48.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 1 verified, 0 errors
+===== While_Valid_49.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_5.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+While_Valid_5.bpl(58,5): Error BP5003: A postcondition might not hold on this return path.
+While_Valid_5.bpl(31,5): Related location: This is the postcondition that might not hold.
+Execution trace:
+    While_Valid_5.bpl(36,7): anon0
+    While_Valid_5.bpl(43,5): anon4_LoopHead
+    While_Valid_5.bpl(43,5): anon4_LoopDone
+
+Boogie program verifier finished with 1 verified, 1 error
+===== While_Valid_50.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_51.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_52.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_7.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
+===== While_Valid_9.whiley =====
+Boogie program verifier version 2.3.0.61016, Copyright (c) 2003-2014, Microsoft.
+
+Boogie program verifier finished with 2 verified, 0 errors
