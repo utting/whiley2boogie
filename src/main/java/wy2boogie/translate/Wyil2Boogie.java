@@ -995,7 +995,6 @@ public final class Wyil2Boogie {
 		}
 		case DECL_variable: {
 			Decl.Variable var = (Decl.Variable) c;
-			// TODO: check the init expression
 			writeVariableInit(indent, var);
 			break;
 		}
@@ -1088,6 +1087,14 @@ public final class Wyil2Boogie {
 	 * @param stmt
 	 */
 	private void writeAssign(int indent, Stmt.Assign stmt) {
+		// TODO: check that rhs satisfies any lhs invariants?
+		// But do we want to force *every* assignment to preserve the lhs invariants???
+		// (Boogie does not check invariants automatically - it allows them to be broken temporarily)
+		//  See ref_man_krml178.pdf p30, Section 9.3 Assignments.
+		//
+		// I think a better alternative would be to add any local variable invariants just to loop invariants.
+		// This would allow them to be broken temporarily, but require them to be restored on each loop.
+
 		final Tuple<LVal> lhs = stmt.getLeftHandSide();
 		final Tuple<Expr> rhs = stmt.getRightHandSide();
 		// FIXME: not sure about this --- djp
@@ -1412,24 +1419,20 @@ public final class Wyil2Boogie {
 		// Location<?>[] modifiedOperands = b.getOperandGroup(1);
 		this.loopCounter++;
 		this.loopLabels.addLast("DO__WHILE__" + this.loopCounter);
-		// TODO: we could remove this if (true) {...} wrapper?
-		this.out.printf("if (true) {\n");
-		writeIndent(indent + 2);
+		writeIndent(indent + 1);
 		this.out.printf("CONTINUE__%s:\n", this.loopLabels.getLast());
-		writeBlock(indent + 1, b.getBody());
-		writeIndent(indent + 2);
+		writeBlock(indent, b.getBody());
+		writeIndent(indent + 1);
 		this.out.printf("// invariant:");
-		this.vcg.checkPredicates(indent + 1, loopInvariant);
-		writeLoopInvariant(indent + 2, "assert", loopInvariant);
+		this.vcg.checkPredicates(indent, loopInvariant);
+		writeLoopInvariant(indent + 1, "assert", loopInvariant);
 		this.out.println();
-		writeIndent(indent + 2);
-		this.vcg.checkPredicate(indent + 1, b.getCondition());
+		writeIndent(indent + 1);
+		this.vcg.checkPredicate(indent, b.getCondition());
 		this.out.printf("// while:\n");
-		writeIndent(indent + 2);
+		writeIndent(indent + 1);
 		final String cond = writeAllocations(indent, b.getCondition()).as(BOOL).toString();
 		this.out.printf("if (%s) { goto CONTINUE__%s; }\n", cond, this.loopLabels.getLast());
-		writeIndent(indent + 1);
-		this.out.println("}");
 		writeIndent(indent + 1);
 		this.out.printf("BREAK__%s:\n", this.loopLabels.removeLast());
 	}
@@ -1645,7 +1648,11 @@ public final class Wyil2Boogie {
 				this.out.printf("call ");
 				this.outerMethodCall = null;
 			}
-			this.out.printf("%s := %s;\n", loc.getName(), rhs.toString());
+			String name = loc.getName().toString();
+			this.out.printf("%s := %s;\n", name, rhs.toString());
+			// now prove that initial value satisfies any typing invariant.
+			writeIndent(indent + 1);
+			this.out.printf("assert %s;\n", typePredicate(name, loc.getType()));
 		}
 		// ELSE
 		// TODO: Do we need a havoc here, to mimic non-det initialisation?
