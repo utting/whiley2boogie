@@ -48,6 +48,144 @@ Investigated running output Boogie programs using Boogaloo:
     https://bitbucket.org/nadiapolikarpova/boogaloo/wiki/Home 
     (It doesn't really 'run' the programs - it just searches for counter-examples)
 
+
+Invalid Tests that pass (2019-08-13)
+====================================
+real	4m38.105s
+user	6m10.365s
+sys	0m45.650s
+# none of these should be 'FullyVerified'
+# the last two pass because Boogie translation does not yet check type invariants after init/assign.
+Ensures_Invalid_4.whiley                 FullyVerified  Whiley verifier says loop invar not restored, but seems ok?
+Subtype_Invalid_10.whiley                FullyVerified  Assignment x[0].f=2 should break type invariant?
+
+Valid Test results at 2019-08-13
+================================
+Total execution time: (significantly longer!  was 15-18mins)
+$ time wyboogie $VALID >OUT119_type_check_init.txt 2>&1
+real	23m57.637s
+user	23m49.427s
+sys	2m36.542s
+$ wystats OUT119_type_check_init.txt
+Syntax/type error:         0 	0%
+Error Compiling:           0 	0%
+NotImplementedYet:        23 	3%
+Other Exceptions:          2 	0%
+Errors in BPL:            10 	1%
+Fully Verified:          543 	86%
+Verify time outs:          5 	0%
+Verify errors:            48 	7%
+Total:  631
+
+$ wydiff OUT119_type_check_init.results  |grep -v 'PartVerified *.*whiley *PartVerified'
+Array_Valid_9.whiley                     FullyVerified	      |	Array_Valid_9.whiley                     BplErrors
+Complex_Valid_10.whiley                  PartVerified	      |	Complex_Valid_10.whiley                  Timeouts Boogie prog
+Complex_Valid_11.whiley                  FullyVerified	      |	Complex_Valid_11.whiley                  Timeouts Boogie prog
+Complex_Valid_2.whiley                   PartVerified	      |	Complex_Valid_2.whiley                   FullyVerified
+Complex_Valid_4.whiley                   PartVerified	      |	Complex_Valid_4.whiley                   FullyVerified
+Complex_Valid_8.whiley                   PartVerified	      |	Complex_Valid_8.whiley                   FullyVerified
+ConstrainedInt_Valid_22.whiley           PartVerified	      |	ConstrainedInt_Valid_22.whiley           FullyVerified
+ConstrainedList_Valid_2.whiley           FullyVerified	      |	ConstrainedList_Valid_2.whiley           PartVerified Boogie
+ConstrainedList_Valid_21.whiley          FullyVerified	      |	ConstrainedList_Valid_21.whiley          Timeouts Boogie prog
+ConstrainedList_Valid_23.whiley          FullyVerified	      |	ConstrainedList_Valid_23.whiley          BplErrors
+ConstrainedList_Valid_26.whiley          PartVerified	      |	ConstrainedList_Valid_26.whiley          FullyVerified
+ConstrainedRecord_Valid_8.whiley         FullyVerified	      |	ConstrainedRecord_Valid_8.whiley         PartVerified Boogie
+DoWhile_Valid_6.whiley                   FullyVerified	      |	DoWhile_Valid_6.whiley                   PartVerified Boogie
+DoWhile_Valid_8.whiley                   FullyVerified	      |	DoWhile_Valid_8.whiley                   PartVerified Boogie
+Ensures_Valid_6.whiley                   PartVerified	      |	Ensures_Valid_6.whiley                   FullyVerified
+FunctionRef_Valid_9.whiley               FullyVerified	      |	FunctionRef_Valid_9.whiley               PartVerified Boogie
+IfElse_Valid_4.whiley                    PartVerified	      |	IfElse_Valid_4.whiley                    FullyVerified
+IntAdd_Valid_1.whiley                    PartVerified	      |	IntAdd_Valid_1.whiley                    FullyVerified
+IntDiv_Valid_3.whiley                    PartVerified	      |	IntDiv_Valid_3.whiley                    FullyVerified
+IntMul_Valid_2.whiley                    PartVerified	      |	IntMul_Valid_2.whiley                    FullyVerified
+IntOp_Valid_1.whiley                     PartVerified	      |	IntOp_Valid_1.whiley                     FullyVerified
+Lambda_Valid_6.whiley                    FullyVerified	      |	Lambda_Valid_6.whiley                    PartVerified Boogie
+Lifetime_Valid_1.whiley                  FullyVerified	      |	Lifetime_Valid_1.whiley                  BplErrors
+Lifetime_Valid_11.whiley                 FullyVerified	      |	Lifetime_Valid_11.whiley                 PartVerified Boogie
+Lifetime_Valid_3.whiley                  FullyVerified	      |	Lifetime_Valid_3.whiley                  BplErrors
+ListAccess_Valid_1.whiley                FullyVerified	      |	ListAccess_Valid_1.whiley                Exception
+ListAccess_Valid_3.whiley                FullyVerified	      |	ListAccess_Valid_3.whiley                Exception
+MessageSend_Valid_2.whiley               FullyVerified	      |	MessageSend_Valid_2.whiley               PartVerified Boogie
+MessageSend_Valid_5.whiley               FullyVerified	      |	MessageSend_Valid_5.whiley               PartVerified Boogie
+MethodCall_Valid_4.whiley                FullyVerified	      |	MethodCall_Valid_4.whiley                BplErrors
+MethodRef_Valid_1.whiley                 FullyVerified	      |	MethodRef_Valid_1.whiley                 BplErrors
+MethodRef_Valid_2.whiley                 FullyVerified	      |	MethodRef_Valid_2.whiley                 BplErrors
+OpenRecord_Valid_4.whiley                PartVerified	      |	OpenRecord_Valid_4.whiley                FullyVerified
+OpenRecord_Valid_9.whiley                PartVerified	      |	OpenRecord_Valid_9.whiley                FullyVerified
+Process_Valid_1.whiley                   PartVerified	      |	Process_Valid_1.whiley                   FullyVerified
+Process_Valid_11.whiley                  PartVerified	      |	Process_Valid_11.whiley                  FullyVerified
+Process_Valid_7.whiley                   FullyVerified	      |	Process_Valid_7.whiley                   PartVerified Boogie
+Process_Valid_8.whiley                   FullyVerified	      |	Process_Valid_8.whiley                   PartVerified Boogie
+Property_Valid_10.whiley                 PartVerified	      |	Property_Valid_10.whiley                 FullyVerified
+Property_Valid_11.whiley                 PartVerified	      |	Property_Valid_11.whiley                 FullyVerified
+Property_Valid_12.whiley                 PartVerified	      |	Property_Valid_12.whiley                 FullyVerified
+Property_Valid_15.whiley                 PartVerified	      |	Property_Valid_15.whiley                 FullyVerified
+Property_Valid_4.whiley                  PartVerified	      |	Property_Valid_4.whiley                  FullyVerified
+Property_Valid_7.whiley                  FullyVerified	      |	Property_Valid_7.whiley                  PartVerified Boogie
+Quantifiers_Valid_2.whiley               PartVerified	      |	Quantifiers_Valid_2.whiley               FullyVerified
+Record_Valid_5.whiley                    FullyVerified	      |	Record_Valid_5.whiley                    Timeouts Boogie prog
+RecursiveType_Valid_2.whiley             PartVerified	      |	RecursiveType_Valid_2.whiley             FullyVerified
+RecursiveType_Valid_20.whiley            FullyVerified	      |	RecursiveType_Valid_20.whiley            PartVerified Boogie
+RecursiveType_Valid_29.whiley            PartVerified	      |	RecursiveType_Valid_29.whiley            FullyVerified
+RecursiveType_Valid_3.whiley             PartVerified	      |	RecursiveType_Valid_3.whiley             FullyVerified
+RecursiveType_Valid_4.whiley             PartVerified	      |	RecursiveType_Valid_4.whiley             FullyVerified
+Reference_Valid_1.whiley                 FullyVerified	      |	Reference_Valid_1.whiley                 PartVerified Boogie
+Reference_Valid_2.whiley                 PartVerified	      |	Reference_Valid_2.whiley                 FullyVerified
+Reference_Valid_3.whiley                 PartVerified	      |	Reference_Valid_3.whiley                 FullyVerified
+Reference_Valid_9.whiley                 FullyVerified	      |	Reference_Valid_9.whiley                 PartVerified Boogie
+Requires_Valid_2.whiley                  FullyVerified	      |	Requires_Valid_2.whiley                  PartVerified Boogie
+String_Valid_4.whiley                    FullyVerified	      |	String_Valid_4.whiley                    BplErrors
+String_Valid_6.whiley                    PartVerified	      |	String_Valid_6.whiley                    FullyVerified
+Subtype_Valid_5.whiley                   PartVerified	      |	Subtype_Valid_5.whiley                   FullyVerified
+Switch_Valid_5.whiley                    FullyVerified	      |	Switch_Valid_5.whiley                    BplErrors
+Template_Valid_11.whiley                 PartVerified	      |	Template_Valid_11.whiley                 FullyVerified
+Template_Valid_12.whiley                 PartVerified	      |	Template_Valid_12.whiley                 FullyVerified
+Template_Valid_15.whiley                 PartVerified	      |	Template_Valid_15.whiley                 FullyVerified
+Template_Valid_16.whiley                 PartVerified	      |	Template_Valid_16.whiley                 FullyVerified
+Template_Valid_17.whiley                 PartVerified	      |	Template_Valid_17.whiley                 FullyVerified
+Template_Valid_26.whiley                 PartVerified	      |	Template_Valid_26.whiley                 FullyVerified
+Template_Valid_3.whiley                  PartVerified	      |	Template_Valid_3.whiley                  FullyVerified
+Template_Valid_30.whiley                 PartVerified	      |	Template_Valid_30.whiley                 FullyVerified
+Template_Valid_5.whiley                  PartVerified	      |	Template_Valid_5.whiley                  FullyVerified
+TypeEquals_Valid_25.whiley               PartVerified	      |	TypeEquals_Valid_25.whiley               FullyVerified
+TypeEquals_Valid_30.whiley               PartVerified	      |	TypeEquals_Valid_30.whiley               FullyVerified
+TypeEquals_Valid_54.whiley               PartVerified	      |	TypeEquals_Valid_54.whiley               FullyVerified
+While_Valid_11.whiley                    FullyVerified	      |	While_Valid_11.whiley                    PartVerified Boogie
+While_Valid_15.whiley                    PartVerified	      |	While_Valid_15.whiley                    FullyVerified
+While_Valid_20.whiley                    PartVerified	      |	While_Valid_20.whiley                    FullyVerified
+While_Valid_23.whiley                    FullyVerified	      |	While_Valid_23.whiley                    PartVerified Boogie
+While_Valid_24.whiley                    PartVerified	      |	While_Valid_24.whiley                    FullyVerified
+While_Valid_26.whiley                    PartVerified	      |	While_Valid_26.whiley                    FullyVerified
+While_Valid_27.whiley                    PartVerified	      |	While_Valid_27.whiley                    FullyVerified
+While_Valid_32.whiley                    PartVerified	      |	While_Valid_32.whiley                    FullyVerified
+While_Valid_34.whiley                    PartVerified	      |	While_Valid_34.whiley                    FullyVerified
+While_Valid_35.whiley                    PartVerified	      |	While_Valid_35.whiley                    FullyVerified
+While_Valid_37.whiley                    PartVerified	      |	While_Valid_37.whiley                    FullyVerified
+While_Valid_42.whiley                    FullyVerified	      |	While_Valid_42.whiley                    BplErrors
+While_Valid_5.whiley                     FullyVerified	      |	While_Valid_5.whiley                     PartVerified Boogie
+While_Valid_59.whiley                    FullyVerified	      |	While_Valid_59.whiley                    PartVerified Boogie
+While_Valid_60.whiley                    FullyVerified	      |	While_Valid_60.whiley                    PartVerified Boogie
+While_Valid_61.whiley                    FullyVerified	      |	While_Valid_61.whiley                    PartVerified Boogie
+While_Valid_62.whiley                    FullyVerified	      |	While_Valid_62.whiley                    PartVerified Boogie
+While_Valid_68.whiley                    PartVerified	      |	While_Valid_68.whiley                    FullyVerified
+While_Valid_69.whiley                    FullyVerified	      |	While_Valid_69.whiley                    PartVerified Boogie
+
+WhileyVerifier	Boogie
+--------------	------
+FullyVerified	NotImplYet	14
+PartVerified	FullyVerified	51
+FullyVerified	FullyVerified	492
+FullyVerified	Exception	2
+PartVerified	Timeouts	1
+FullyVerified	Timeouts	3
+PartVerified	PartVerified	25
+FullyVerified	PartVerified	24
+PartVerified	NotImplYet	9
+FullyVerified	BplErrors	10
+Total	631
+
+
+
 Invalid Tests that pass (2019-02-18)
 ====================================
 # none of these should be 'FullyVerified'
