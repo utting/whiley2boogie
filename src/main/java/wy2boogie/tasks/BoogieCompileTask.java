@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
-import java.util.concurrent.Callable;
 import java.util.function.Function;
 
 import wy2boogie.core.BoogieFile;
@@ -13,20 +12,8 @@ import wy2boogie.translate.Wyil2Boogie;
 import wybs.lang.Build;
 import wybs.lang.Build.Meter;
 import wybs.util.AbstractBuildTask;
-import wyc.io.WhileyFileParser;
-import wyc.task.CompileTask;
-import wycc.util.Logger;
-import wycc.util.Pair;
 import wyfs.lang.Path;
-import wyfs.lang.Path.Entry;
-import wyfs.lang.Path.Root;
-import wyc.lang.WhileyFile;
-import wyfs.util.DirectoryRoot;
-import wyil.check.*;
-import wyil.lang.Compiler;
 import wyil.lang.WyilFile;
-import wyil.transform.MoveAnalysis;
-import wyil.transform.NameResolution;
 
 public class BoogieCompileTask extends AbstractBuildTask<WyilFile, BoogieFile> {
 
@@ -71,14 +58,12 @@ public class BoogieCompileTask extends AbstractBuildTask<WyilFile, BoogieFile> {
 	public Function<Meter,Boolean> initialise() throws IOException {
 		// Extract target and source files for compilation. This is the component which
 		// requires I/O.
-		WyilFile[] whileys = new WyilFile[sources.size()];
-		for (int i = 0; i != whileys.length; ++i) {
-			whileys[i] = sources.get(i).read();
-		}
+		BoogieFile bf = target.read();
+		WyilFile wyf = sources.get(0).read();
 		// Construct the lambda for subsequent execution. This will eventually make its
 		// way into some kind of execution pool, possibly for concurrent execution with
 		// other tasks.
-		return (Meter meter) -> execute(target, whileys);
+		return (Meter meter) -> execute(meter, bf, wyf);
 	}
 
 	/**
@@ -90,7 +75,7 @@ public class BoogieCompileTask extends AbstractBuildTask<WyilFile, BoogieFile> {
 	 * @param sources --- The WyilFile(s) being translated.
 	 * @return
 	 */
-	public boolean execute(Path.Entry<BoogieFile> target, WyilFile... sources) {
+	public boolean execute(Build.Meter meter, BoogieFile target, WyilFile... sources) {
 		// Parse source files into target
 		if (sources.length != 1) {
 			throw new NotImplementedYet("Cannot compile multiple wyil files yet.", null);
@@ -99,11 +84,12 @@ public class BoogieCompileTask extends AbstractBuildTask<WyilFile, BoogieFile> {
 
 		final ByteArrayOutputStream out = new ByteArrayOutputStream();
 		final PrintWriter writer = new PrintWriter(out);
-		final Wyil2Boogie translator = new Wyil2Boogie(writer);
+		final Wyil2Boogie translator = new Wyil2Boogie(meter, writer);
 		translator.setVerbose(verbose);
 		translator.apply(source);
 		writer.close();
-		target.write(new BoogieFile(target, out.toByteArray()));
+		BoogieFile f = null;
+		target.setBytes(out.toByteArray());
 		return true;
 	}
 

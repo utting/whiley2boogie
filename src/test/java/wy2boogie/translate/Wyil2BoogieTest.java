@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -33,7 +34,7 @@ public class Wyil2BoogieTest {
     public void testCommaSepMap() {
         Wyil2Boogie wy2b = new Wyil2Boogie(System.err);
         String[] vals = {"1","0","5"};
-        List<String> strs = List.of(vals);
+        List<String> strs = Arrays.asList(vals);
         assertEquals("1, 0, 5", wy2b.commaSepMap(strs, s -> s));
         assertEquals(", , ", wy2b.commaSepMap(strs, s -> ""));
         assertEquals("1, , 5", wy2b.commaSepMap(strs, s -> s.equals("0") ? "" : s));

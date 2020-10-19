@@ -262,6 +262,10 @@ public final class Wyil2Boogie {
 	 */
 	// private final ConcreteTypeExtractor concreteTypeExtractor;
 
+	public Wyil2Boogie(PrintWriter writer) {
+		this(Build.NULL_METER,writer);
+	}
+
 	public Wyil2Boogie(Build.Meter meter, PrintWriter writer) {
 		this.meter = meter;
         this.out = writer;
@@ -272,6 +276,10 @@ public final class Wyil2Boogie {
 		// EmptinessTest<SemanticType> strictEmptiness = new StrictTypeEmptinessTest();
 		// this.concreteTypeExtractor = new ConcreteTypeExtractor(strictEmptiness);
     }
+
+	public Wyil2Boogie(OutputStream stream) {
+		this(Build.NULL_METER,stream);
+	}
 
     public Wyil2Boogie(Build.Meter meter, OutputStream stream) {
         this(meter,new PrintWriter(new OutputStreamWriter(stream)));
@@ -1529,15 +1537,15 @@ public final class Wyil2Boogie {
 	private void writeReturn(int indent, Stmt.Return b) {
 		// Boogie return does not take any expressions.
 		// Instead, we must write to the result variables.
-		final Expr operand = b.getReturn();
-		final String[] args = new String[operands.size()];
-		if (callAsProcedure(operand)) {
-			this.outerMethodCall = operand;
+		final Expr[] operands = new Expr[] {b.getReturn()};
+		final String[] args = new String[operands.length];
+		if (operands.length == 1 && callAsProcedure(operands[0])) {
+			this.outerMethodCall = operands[0];
 		}
-		for (int i = 0; i != operands.size(); ++i) {
-			args[i] = writeAllocations(indent, operands.get(i)).asWVal().toString();
+		for (int i = 0; i != operands.length; ++i) {
+			args[i] = writeAllocations(indent, operands[i]).asWVal().toString();
 		}
-		if (callAsProcedure(operand)) {
+		if (operands.length == 1 && callAsProcedure(operands[0])) {
 			// handles the case where RHS is one method/function call that returns multiple results
 			this.out.print("call ");
 			this.outerMethodCall = null;
@@ -1546,7 +1554,7 @@ public final class Wyil2Boogie {
 			writeIndent(indent + 1);
 		} else {
 			// handle the cases where each return variable has its own expression.
-			for (int i = 0; i != operands.size(); ++i) {
+			for (int i = 0; i != operands.length; ++i) {
 				final Decl.Variable locn = this.outDecls.get(i);
 				final String name = locn.getName().get();
 				this.out.printf("%s := %s;\n", name, args[i]);

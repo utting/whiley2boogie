@@ -52,7 +52,7 @@ public class BoogieFile extends AbstractCompilationUnit<BoogieFile> {
 	/**
 	 * Raw contents of the Boogie file.
 	 */
-	private final byte[] bytes;
+	private byte[] bytes;
 
 	public BoogieFile(Path.Entry<BoogieFile> entry, byte[] bytes) {
 		super(entry);
@@ -61,6 +61,10 @@ public class BoogieFile extends AbstractCompilationUnit<BoogieFile> {
 
 	public byte[] getBytes() {
 		return this.bytes;
+	}
+
+	public void setBytes(byte[] bytes) {
+		this.bytes = bytes;
 	}
 
 	@Override

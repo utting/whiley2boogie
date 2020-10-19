@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import wybs.lang.Build;
 import wybs.util.AbstractCompilationUnit.Name;
 import wybs.util.AbstractCompilationUnit.Tuple;
 import wyc.lang.WhileyFile;
@@ -58,11 +59,10 @@ public class BoogieCommand implements Command {
 		}
 
 		@Override
-		public Command initialise(Command parent, Configuration configuration) {
-			return new BoogieCommand((WyProject) parent, configuration, System.out, System.err);
+		public Command initialise(Command.Environment environment) {
+			return new BoogieCommand(environment, System.out, System.err);
 		}
 	};
-
 
 	/**
 	 * Provides a generic place to which normal output should be directed. This
@@ -77,11 +77,6 @@ public class BoogieCommand implements Command {
 	private final PrintStream syserr;
 
 	/**
-	 * The enclosing project for this build
-	 */
-	private final WyProject project;
-
-	/**
 	 * Creates a 'boogie' command for the given project.
 	 *
 	 * TODO: change project from wycc.WyProject to wybs.lang.Build.Project?
@@ -91,9 +86,8 @@ public class BoogieCommand implements Command {
 	 * @param sysout
 	 * @param syserr
 	 */
-	public BoogieCommand(WyProject project, Configuration configuration, OutputStream sysout,
+	public BoogieCommand(Configuration configuration, OutputStream sysout,
 			OutputStream syserr) {
-		this.project = project;
 		this.sysout = new PrintStream(sysout);
 		this.syserr = new PrintStream(syserr);
 	}
@@ -115,16 +109,16 @@ public class BoogieCommand implements Command {
 	}
 
 	@Override
-	public boolean execute(Template template) throws Exception {
+	public boolean execute(Command.Project project, Template template) throws Exception {
 		boolean verbose = template.getOptions().get("verbose", Boolean.class);
 		boolean counterexample = template.getOptions().get("counterexample", Boolean.class);
 		String output = template.getOptions().get("output", String.class);
 		//
 		if(counterexample) {
-			return translateCounterexample(verbose,template.getArguments());
+			return translateCounterexample(project,verbose,template.getArguments());
 		} else {
-			List<String> files = translateAnyWhileyFiles(verbose,output,template.getArguments());
-			return translateWyilFile(verbose,files);
+			List<String> files = translateAnyWhileyFiles(project, verbose, output, template.getArguments());
+			return translateWyilFile(project,verbose,files);
 		}
 	}
 
@@ -137,12 +131,12 @@ public class BoogieCommand implements Command {
 	 * @return
 	 * @throws Exception
 	 */
-	public List<String> translateAnyWhileyFiles(boolean verbose, String output, List<String> args) throws Exception {
+	public List<String> translateAnyWhileyFiles(Command.Project project, boolean verbose, String output, List<String> args) throws Exception {
 		try {
 			if (verbose) {
 				sysout.println("translateAnyWhileyFiles: " + args + " output=" + output);
 			}
-			Path.Root projectRoot = project.getBuildProject().getRoot();
+			Path.Root projectRoot = project.getRoot();
 			List<String> files = new ArrayList<>();
 			List<Path.Entry<WhileyFile>> sources = new ArrayList<>();
 			// Identify and read in any source files
@@ -167,9 +161,9 @@ public class BoogieCommand implements Command {
 			files.add(output);
 
 			// TODO: should we create a separate compile task for each *.whiley file?
-			Path.Entry<WyilFile> target = createWyilFile(id);
-			CompileTask task = new CompileTask(project.getBuildProject(), projectRoot, target, sources);
-			boolean ok = task.initialise().call();
+			Path.Entry<WyilFile> target = createWyilFile(project,id);
+			CompileTask task = new CompileTask(project, projectRoot, target, sources);
+			boolean ok = task.initialise().apply(Build.NULL_METER);
 			if (verbose) {
 				sysout.println("whiley compile " + sources + " returns " + ok);
 			}
@@ -193,8 +187,8 @@ public class BoogieCommand implements Command {
 		}
 	}
 
-	private Path.Entry<WyilFile> createWyilFile(Path.ID id) throws IOException {
-		Path.Root projectRoot = project.getBuildProject().getRoot();
+	private Path.Entry<WyilFile> createWyilFile(Command.Project project, Path.ID id) throws IOException {
+		Path.Root projectRoot = project.getRoot();
 		Path.Entry<WyilFile> target = projectRoot.get(id, WyilFile.ContentType);
 		// Check whether target binary exists or not
 		if (target == null) {
@@ -210,9 +204,9 @@ public class BoogieCommand implements Command {
 		return target;
 	}
 
-	public boolean translateWyilFile(boolean verbose, List<String> args) throws Exception {
+	public boolean translateWyilFile(Command.Project project, boolean verbose, List<String> args) throws Exception {
 		try {
-			Path.Root projectRoot = project.getBuildProject().getRoot();
+			Path.Root projectRoot = project.getRoot();
 			// Convert command-line arguments to project files
 			ArrayList<Path.Entry<WyilFile>> delta = new ArrayList<>();
 			for (String arg : args) {
@@ -229,10 +223,10 @@ public class BoogieCommand implements Command {
 			// Go through all listed *.wyil files and translate each one to Boogie.
 			for (Path.Entry<WyilFile> source : delta) {
 				Path.Entry<BoogieFile> target = projectRoot.create(source.id(), BoogieFile.ContentType);
-				BoogieCompileTask task = new BoogieCompileTask(project.getBuildProject(), target,
+				BoogieCompileTask task = new BoogieCompileTask(project, target,
 						Collections.singleton(source));
 				task.setVerbose(verbose);
-				boolean ok = task.initialise().call();
+				boolean ok = task.initialise().apply(Build.NULL_METER);
 				if (!ok) {
 					// FIXME: need a better error reporting mechanism
 					if (verbose) {
@@ -262,9 +256,9 @@ public class BoogieCommand implements Command {
 	 * @param args
 	 * @return
 	 */
-	public boolean translateCounterexample(boolean verbose, List<String> args) {
+	public boolean translateCounterexample(Command.Project project, boolean verbose, List<String> args) {
 		try {
-			Path.Root projectRoot = project.getBuildProject().getRoot();
+			Path.Root projectRoot = project.getRoot();
 			// Convert command-line arguments to project files
 			ArrayList<Path.Entry<BoogieExampleFile>> delta = new ArrayList<>();
 			for (String arg : args) {
