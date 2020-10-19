@@ -34,9 +34,8 @@ public class BoogieCompileTask extends AbstractBuildTask<WyilFile, BoogieFile> {
 	private boolean counterexamples;
 
 
-	public BoogieCompileTask(Build.Project project, Path.Entry<BoogieFile> target,
-							 Collection<Path.Entry<WyilFile>> sources) {
-		super(project, target, sources);
+	public BoogieCompileTask(Build.Project project, Path.Entry<BoogieFile> target, Path.Entry<WyilFile> source) {
+		super(project, target, Arrays.asList(source));
 	}
 
 	public BoogieCompileTask setVerbose(boolean flag) {
@@ -76,6 +75,7 @@ public class BoogieCompileTask extends AbstractBuildTask<WyilFile, BoogieFile> {
 	 * @return
 	 */
 	public boolean execute(Build.Meter meter, BoogieFile target, WyilFile... sources) {
+		meter = meter.fork("BoogieCompiler");
 		// Parse source files into target
 		if (sources.length != 1) {
 			throw new NotImplementedYet("Cannot compile multiple wyil files yet.", null);

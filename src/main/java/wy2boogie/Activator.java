@@ -46,7 +46,7 @@ import static wyil.lang.WyilFile.Name;
 public class Activator implements Module.Activator {
 
 	public static Trie PKGNAME_CONFIG_OPTION = Trie.fromString("package/name");
-	public static Trie SOURCE_CONFIG_OPTION = Trie.fromString("build/whiley/source");
+	public static Trie SOURCE_CONFIG_OPTION = Trie.fromString("build/whiley/target");
 	public static Trie TARGET_CONFIG_OPTION = Trie.fromString("build/boogie/target");
 	public static Trie VERIFY_CONFIG_OPTION = Trie.fromString("build/boogie/verify");
 	public static Trie COUNTEREXAMPLE_CONFIG_OPTION = Trie.fromString("build/boogie/counterexamples");
@@ -63,7 +63,6 @@ public class Activator implements Module.Activator {
 		@Override
 		public Configuration.Schema getConfigurationSchema() {
 			return Configuration.fromArray(
-					Configuration.UNBOUND_STRING(SOURCE_CONFIG_OPTION, "Specify location for Whiley source files", SOURCE_DEFAULT),
 					Configuration.UNBOUND_STRING(TARGET_CONFIG_OPTION, "Specify location for generated Boogie .bpl files", TARGET_DEFAULT),
 					Configuration.UNBOUND_BOOLEAN(VERIFY_CONFIG_OPTION, "Enable verification of Whiley files using Boogie", new Value.Bool(false)),
 					Configuration.UNBOUND_BOOLEAN(COUNTEREXAMPLE_CONFIG_OPTION, "Enable counterexample generation during verification", new Value.Bool(false)));
@@ -72,34 +71,38 @@ public class Activator implements Module.Activator {
 		@Override
 		public void initialise(Configuration configuration, Command.Project project) throws IOException {
 			Trie pkg = Trie.fromString(configuration.get(Value.UTF8.class, PKGNAME_CONFIG_OPTION).unwrap());
-			//
+			// Specify directory where generated Boogie files are dumped.
 			Trie source = Trie.fromString(configuration.get(Value.UTF8.class, SOURCE_CONFIG_OPTION).unwrap());
-			// Specify directory where generated WyIL files are dumped.
-			Trie target = Trie.fromString(configuration.get(Value.UTF8.class, TARGET_CONFIG_OPTION).unwrap());
-			// Specify set of files included
-			Content.Filter<WyilFile> includes = Content.filter("**", WyilFile.ContentType);
+			// Construct the source root
+			Path.Root sourceRoot = project.getRoot().createRelativeRoot(source);
+			// Register build target for this package
+			registerBuildTarget(configuration, project, sourceRoot, pkg);
+		}
+
+		private void registerBuildTarget(Configuration configuration, Build.Project project, Path.Root sourceRoot,
+				Trie pkg) throws IOException {
+			// Specify directory where generated JS files are dumped.
+			Trie target= Trie.fromString(configuration.get(Value.UTF8.class, TARGET_CONFIG_OPTION).unwrap());
 			// Determine whether verification enabled or not
 			boolean verification = configuration.get(Value.Bool.class, VERIFY_CONFIG_OPTION).unwrap();
 			// Determine whether to try and find counterexamples or not
 			boolean counterexamples = configuration.get(Value.Bool.class, COUNTEREXAMPLE_CONFIG_OPTION).unwrap();
-			// Construct the source root
-			Path.Root sourceRoot = project.getRoot().createRelativeRoot(source);
 			// Construct the binary root
 			Path.Root binaryRoot = project.getRoot().createRelativeRoot(target);
 			// Initialise the target file being built
 			Path.Entry<BoogieFile> binary = initialiseBinaryTarget(binaryRoot,pkg);
-			// Add build rule to project.
-			project.getRules().add(new AbstractBuildRule<WyilFile, BoogieFile>(sourceRoot, includes, null) {
+			// Specify set of files included
+			Content.Filter<WyilFile> wyilIncludes = Content.filter("**", WyilFile.ContentType);
+			//
+			project.getRules().add(new AbstractBuildRule<WyilFile, BoogieFile>(sourceRoot, wyilIncludes, null) {
 				@Override
 				protected void apply(List<Path.Entry<WyilFile>> matches, Collection<Build.Task> tasks)
 						throws IOException {
 					// Construct a new build task
-					BoogieCompileTask task = new BoogieCompileTask(project, binary, matches);
-
+					BoogieCompileTask task = new BoogieCompileTask(project, binary, matches.get(0));
 					// task.setVerbose();
 					task.setVerification(verification);
 				    task.setCounterExamples(counterexamples);
-
 					// Submit the task for execution
 					tasks.add(task);
 				}
@@ -108,12 +111,12 @@ public class Activator implements Module.Activator {
 
 		@Override
 		public Content.Type<?> getSourceType() {
-			return WhileyFile.ContentType;
+			return WyilFile.ContentType;
 		}
 
 		@Override
 		public Content.Type<?> getTargetType() {
-			return WyilFile.ContentType;
+			return BoogieFile.ContentType;
 		}
 
 		@Override
@@ -122,7 +125,7 @@ public class Activator implements Module.Activator {
 		}
 
 		private Path.Entry<BoogieFile> initialiseBinaryTarget(Path.Root binroot, Path.ID id) throws IOException {
-			if(binroot.exists(id, WyilFile.ContentType)) {
+			if(binroot.exists(id, BoogieFile.ContentType)) {
 				// Yes, it does so reuse it.
 				return binroot.get(id, BoogieFile.ContentType);
 			} else {
