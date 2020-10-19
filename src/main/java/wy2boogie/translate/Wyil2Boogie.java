@@ -37,6 +37,8 @@ import java.util.stream.StreamSupport;
 
 import static wyil.lang.WyilFile.*;
 
+import wybs.lang.Build;
+import wybs.lang.Build.Meter;
 import wybs.lang.SyntacticItem;
 import wybs.util.AbstractCompilationUnit;
 import wyil.lang.WyilFile;
@@ -176,6 +178,11 @@ public final class Wyil2Boogie {
      */
 	private boolean verbose = false;
 
+	/**
+	 * Used for debugging performance issues within the compiler framework.
+	 */
+	private final Build.Meter meter;
+
     /** Keeps track of which (non-mangled) WField names have already been declared. */
     private final Set<String> declaredFields = new HashSet<>();
 
@@ -255,9 +262,10 @@ public final class Wyil2Boogie {
 	 */
 	// private final ConcreteTypeExtractor concreteTypeExtractor;
 
-	public Wyil2Boogie(PrintWriter writer) {
+	public Wyil2Boogie(Build.Meter meter, PrintWriter writer) {
+		this.meter = meter;
         this.out = writer;
-        this.vcg = new AssertionGenerator(this);
+        this.vcg = new AssertionGenerator(meter,this);
 		initFunctionOverloading();
         // Create concrete type extractor
         // OLD Equality approach: with wyc 0.6.5
@@ -265,8 +273,8 @@ public final class Wyil2Boogie {
 		// this.concreteTypeExtractor = new ConcreteTypeExtractor(strictEmptiness);
     }
 
-    public Wyil2Boogie(OutputStream stream) {
-        this(new PrintWriter(new OutputStreamWriter(stream)));
+    public Wyil2Boogie(Build.Meter meter, OutputStream stream) {
+        this(meter,new PrintWriter(new OutputStreamWriter(stream)));
     }
 
 
@@ -316,16 +324,12 @@ public final class Wyil2Boogie {
 			// axiom (forall v1:WVal, captured__:WVal :: apply__1(closure__1(func__f1, captured__), v1) == f1(v1));
 			// to: (and check f_pre?)
 			// axiom (forall v1..vn:WVal :: apply__1(closure__0(func__f1), v1..vn) == f1(v1..vn));
-
-			if (type.getReturns().size() != 1) {
-                throw new NotImplementedYet("multi-valued constant functions", null);
-            }
-            final Type ret = type.getReturns().get(0);
-            final Tuple<Type> args = type.getParameters();
+            final Type ret = type.getReturn();
+            final Type arg = type.getParameter();
             final StringBuilder vDecl = new StringBuilder();
             final StringBuilder vCall = new StringBuilder();
             // TODO: see if we need to add type template parameters here too???
-            for (int i = 1; i <= args.size(); i++) {
+            for (int i = 1; i <= arg.shape(); i++) {
                 if (i > 1) {
                     vDecl.append(", ");
                     vCall.append(", ");
@@ -333,7 +337,7 @@ public final class Wyil2Boogie {
                 vDecl.append("v" + i + ":WVal");
                 vCall.append("v" + i);
             }
-            final String call = String.format("apply__%d(toFunction(f), %s)", args.size(), vCall.toString());
+            final String call = String.format("apply__%d(toFunction(f), %s)", arg.shape(), vCall.toString());
             // TODO: this is not needed now that all functions return WVal?
             this.out.printf("axiom (forall f:WVal, %s :: isFunction(f) ==> %s);\n",
 					vDecl.toString(),
@@ -341,7 +345,7 @@ public final class Wyil2Boogie {
             // TODO: we could handle different arities of captured variables here?
             this.out.printf("axiom (forall %s, captured__:WVal :: apply__%d(%s, %s) == %s(%s));\n\n",
                     vDecl.toString(),
-					args.size(),
+					arg.shape(),
                     "closure__1(" + func_const + ", captured__)",
 					vCall.toString(),
                     mangleName(name),
@@ -508,8 +512,8 @@ public final class Wyil2Boogie {
 		// (otherwise, we would have to calculate the transitive closure of the call graph).
 		boolean usesHeap = true; // locals.containsKey(HEAP);
 		final String name = getMangledFunctionMethodName(method.getQualifiedName(), mtype);
-		final int inSize = mtype.getParameters().size();
-		final int outSize = mtype.getReturns().size();
+		final int inSize = mtype.getParameter().shape();
+		final int outSize = mtype.getReturn().shape();
 		this.inDecls = method.getParameters();
 		this.outDecls = method.getReturns();
 		assert this.inDecls.size() == inSize;
@@ -573,7 +577,7 @@ public final class Wyil2Boogie {
 
 	private Map<String, Type> findMutatedInputs(Decl.FunctionOrMethod method) {
 		final Map<String, Type> result = new LinkedHashMap<>();
-		final AbstractVisitor visitor = new AbstractVisitor() {
+		final AbstractVisitor visitor = new AbstractVisitor(meter) {
 			@Override
 			public void visitAssign(Stmt.Assign stmt) {
 				for (Expr e : stmt.getLeftHandSide()) {
@@ -790,7 +794,7 @@ public final class Wyil2Boogie {
 	private Map<String, String> findLocalVarDecls(Stmt.Block body) {
 		// We start after the input and output parameters.
 		this.switchCount = 0;
-		PrePassVisitor visitor = new PrePassVisitor();
+		PrePassVisitor visitor = new PrePassVisitor(meter);
 		visitor.visitBlock(body);
 		// reset to zero so that we generate same switch labels as we generate code.
 		this.switchCount = 0;
@@ -813,6 +817,10 @@ public final class Wyil2Boogie {
 	private class PrePassVisitor extends AbstractVisitor {
 		private int newCount = 0;
 		final Map<String, String> locals = new LinkedHashMap<>(); // preserve order, but remove duplicates
+
+		public PrePassVisitor(Meter meter) {
+			super(meter);
+		}
 
 		@Override
 		public void visitVariable(Decl.Variable decl) {
@@ -975,7 +983,7 @@ public final class Wyil2Boogie {
 		}
 		case STMT_return: {
 			Stmt.Return s = (Stmt.Return) c;
-			this.vcg.checkPredicates(indent, s.getReturns());
+			this.vcg.checkPredicate(indent, s.getReturn());
 			writeReturn(indent, s);
 			break;
 		}
@@ -988,14 +996,14 @@ public final class Wyil2Boogie {
 			writeSwitch(indent, s);
 			break;
 		}
-		case DECL_variableinitialiser: {
-			Decl.Variable var = (Decl.Variable) c;
+		case DECL_staticvar: {
+			Decl.StaticVariable var = (Decl.StaticVariable) c;
 			this.vcg.checkPredicate(indent, var.getInitialiser());
 			// fall through into the non-init case.
 		}
-		case DECL_variable: {
-			Decl.Variable var = (Decl.Variable) c;
-			writeVariableInit(indent, var);
+		case STMT_initialiser: {
+			Stmt.Initialiser init = (Stmt.Initialiser) c;
+			writeInitialiser(indent, init);
 			break;
 		}
 		case DECL_lambda:
@@ -1521,15 +1529,15 @@ public final class Wyil2Boogie {
 	private void writeReturn(int indent, Stmt.Return b) {
 		// Boogie return does not take any expressions.
 		// Instead, we must write to the result variables.
-		final Tuple<Expr> operands = b.getReturns();
+		final Expr operand = b.getReturn();
 		final String[] args = new String[operands.size()];
-		if (operands.size() == 1 && callAsProcedure(operands.get(0))) {
-			this.outerMethodCall = operands.get(0);
+		if (callAsProcedure(operand)) {
+			this.outerMethodCall = operand;
 		}
 		for (int i = 0; i != operands.size(); ++i) {
 			args[i] = writeAllocations(indent, operands.get(i)).asWVal().toString();
 		}
-		if (operands.size() == 1 && callAsProcedure(operands.get(0))) {
+		if (callAsProcedure(operand)) {
 			// handles the case where RHS is one method/function call that returns multiple results
 			this.out.print("call ");
 			this.outerMethodCall = null;
@@ -1638,21 +1646,26 @@ public final class Wyil2Boogie {
 		this.out.printf("goto BREAK__%s;\n", this.loopLabels.getLast());
 	}
 
-	private void writeVariableInit(int indent, Decl.Variable loc) {
-		if (loc.hasInitialiser()) {
-			if (callAsProcedure(loc.getInitialiser())) {
-				this.outerMethodCall = loc.getInitialiser();
+	private void writeInitialiser(int indent, Stmt.Initialiser init) {
+		if (init.hasInitialiser()) {
+			if (callAsProcedure(init.getInitialiser())) {
+				this.outerMethodCall = init.getInitialiser();
 			}
-			final BoogieExpr rhs = writeAllocations(indent, loc.getInitialiser()).asWVal();
-			if (callAsProcedure(loc.getInitialiser())) {
+			final BoogieExpr rhs = writeAllocations(indent, init.getInitialiser()).asWVal();
+			if (callAsProcedure(init.getInitialiser())) {
 				this.out.printf("call ");
 				this.outerMethodCall = null;
 			}
-			String name = loc.getName().toString();
+			Tuple<Decl.Variable> vars = init.getVariables();
+			if(vars.size() != 1) {
+				throw new IllegalArgumentException("Need to support multi-initialisers!");
+			}
+			Decl.Variable var = vars.get(0);
+			String name = var.getName().toString();
 			this.out.printf("%s := %s;\n", name, rhs.toString());
 			// now prove that initial value satisfies any typing invariant.
 			writeIndent(indent + 1);
-			this.out.printf("assert %s;\n", typePredicate(name, loc.getType()));
+			this.out.printf("assert %s;\n", typePredicate(name, var.getType()));
 		}
 		// ELSE
 		// TODO: Do we need a havoc here, to mimic non-det initialisation?
@@ -1806,7 +1819,7 @@ public final class Wyil2Boogie {
 		case EXPR_logicaliff:
 			return boogieEquality((Expr.BinaryOperator) expr);
 
-		case EXPR_logiaclimplication:
+		case EXPR_logicalimplication:
 			// we translate A ===> B into !A || B.
 			final Expr.LogicalImplication impl = (Expr.LogicalImplication) expr;
 			final BoogieExpr lhs = boogieExpr(impl.getFirstOperand()).as(BOOL);
@@ -1991,9 +2004,8 @@ public final class Wyil2Boogie {
 		if (this.verbose) {
 			System.out.println("DECL_lambda:"
 					+ "\n  name     : " + lambda.getName() // usually empty string
-					+ "\n  captures : " + lambda.getCapturedVariables() // Set<Variable>
+					+ "\n  captures : " + lambda.getCapturedVariables(meter) // Set<Variable>
 					+ "\n  type     : " + lambda.getType()
-					+ "\n  types    : " + lambda.getTypes() // always null
 					+ "\n  params   : " + lambda.getParameters()
 					+ "\n  body    : " + lambda.getBody()  // an Expr
 					+ "\n  returns : " + lambda.getReturns()
@@ -2004,7 +2016,7 @@ public final class Wyil2Boogie {
 		if (lambdaName == null) {
 			throw new IllegalStateException("missed lambda on pass 1: " + lambda);
 		}
-		Set<Decl.Variable> captures = lambda.getCapturedVariables();
+		Set<Decl.Variable> captures = lambda.getCapturedVariables(meter);
 		StringBuilder closure = new StringBuilder();
 		closure.append("closure__");
 		closure.append(captures.size());
@@ -2036,7 +2048,6 @@ public final class Wyil2Boogie {
 					+ "\n  paraTypes: " + lambda.getParameterTypes()
 					+ "\n  signature: " + lambda.getBinding().getDeclaration().getType()
 					+ "\n  type     : " + lambda.getType()
-					+ "\n  types    : " + lambda.getTypes()
 					+ "\n  data    : " + Arrays.toString(lambda.getData())
 					+ "\n  string  : " + lambda.toString()
 			);
@@ -2239,9 +2250,9 @@ public final class Wyil2Boogie {
 	private BoogieExpr boogieQuantifier(String quant, String predOp, Expr.Quantifier c) {
 		final BoogieExpr decls = new BoogieExpr(BOOL);
 		final BoogieExpr constraints = new BoogieExpr(BOOL);
-		Tuple<Decl.Variable> parameters = c.getParameters();
+		Tuple<Decl.StaticVariable> parameters = c.getParameters();
 		for (int i = 0; i != parameters.size(); ++i) {
-			Decl.Variable parameter = parameters.get(i);
+			Decl.StaticVariable parameter = parameters.get(i);
 			Expr.ArrayRange range = (Expr.ArrayRange) parameter.getInitialiser();
 			if (i != 0) {
 				decls.append(", ");
@@ -2306,8 +2317,8 @@ public final class Wyil2Boogie {
 			final String tParams = commaSepMap(params, t -> typePropertyName(t));
 			return String.format("%s(%s)", name, commaSep(tParams, var));
 		}
-		if (type instanceof Type.Variable) {
-			Type.Variable tv = (Type.Variable) type;
+		if (type instanceof Type.Existential) {
+			Type.Existential tv = (Type.Existential) type;
 			return "is__type(" + tv.toCanonicalString() + ", " + var + ")";
 		}
 		if (typeStr.equals("int")) { // WAS type instanceof Type.Int) {
@@ -2494,7 +2505,7 @@ public final class Wyil2Boogie {
 			return "type__bool";
 		} else if (type instanceof Type.Null) {
 			return "type__null";
-		} else if (type instanceof Type.Variable) {
+		} else if (type instanceof Type.Existential) {
 			return type.toCanonicalString();
 		} else if (type instanceof Type.Nominal) {
 			Type.Nominal nom = (Type.Nominal) type;
@@ -2623,19 +2634,11 @@ public final class Wyil2Boogie {
 		//       We do not rely on the semantics of those functions within this translator,
 		//       so their types within the translator are not critical.)
 		final Type type_Any = new Type.Union(Type.Int, Type.Bool, Type.Null);
-		final Type[] any1 = { type_Any };
-		final Type[] bool1 = { Type.Bool };
-		final Type[] int1 = { Type.Int };
-		final Type[] array1 = { new Type.Array(type_Any) };
-		final Type[] ref1 = { new Type.Reference(type_Any) };
-		final Type[] record1 = { new Type.Record(false, new Tuple<>()) };
-		final Type[] object1 = { new Type.Record(true, new Tuple<>()) };
 		// the following types are approximate - the params or returns are more specific
 		// than needed.
-		final Type.Function typePredicate = new Type.Function(new Tuple<>(bool1), new Tuple<>(any1));
-		final Type.Function anyFunction = new Type.Function(new Tuple<>(any1), new Tuple<>(any1));
-		final Type anyMethod = new Type.Method(new Tuple<>(new Type[0]), new Tuple<>(any1), new Tuple<>(),
-				new Tuple<>());
+		final Type.Function typePredicate = new Type.Function(Type.Bool, type_Any);
+		final Type.Function anyFunction = new Type.Function(type_Any, type_Any);
+		final Type anyMethod = new Type.Method(type_Any, type_Any);
 
 		this.functionOverloads = new HashMap<>();
 
@@ -2658,14 +2661,14 @@ public final class Wyil2Boogie {
 				"applyTo1", "applyTo2", "applyTo3" }) {
 			addPredefinedFunction(predef, anyFunction);
 		}
-		addPredefinedFunction("fromInt", new Type.Function(new Tuple<>(any1), new Tuple<>(int1)));
-		addPredefinedFunction("fromBool", new Type.Function(new Tuple<>(any1), new Tuple<>(bool1)));
-		addPredefinedFunction("fromArray", new Type.Function(new Tuple<>(any1), new Tuple<>(array1)));
-		addPredefinedFunction("fromRecord", new Type.Function(new Tuple<>(any1), new Tuple<>(record1)));
-		addPredefinedFunction("fromObject", new Type.Function(new Tuple<>(any1), new Tuple<>(object1)));
-		addPredefinedFunction("fromRef", new Type.Function(new Tuple<>(any1), new Tuple<>(ref1)));
-		addPredefinedFunction("fromFunction", new Type.Function(new Tuple<>(any1), new Tuple<>(anyFunction)));
-		addPredefinedFunction("fromMethod", new Type.Function(new Tuple<>(any1), new Tuple<>(anyMethod)));
+		addPredefinedFunction("fromInt", new Type.Function(type_Any, Type.Int));
+		addPredefinedFunction("fromBool", new Type.Function(type_Any, Type.Bool));
+		addPredefinedFunction("fromArray", new Type.Function(type_Any, new Type.Array(type_Any)));
+		addPredefinedFunction("fromRecord", new Type.Function(type_Any, new Type.Record(false, new Tuple<>())));
+		addPredefinedFunction("fromObject", new Type.Function(type_Any, new Type.Record(true, new Tuple<>())));
+		addPredefinedFunction("fromRef", new Type.Function(type_Any, new Type.Reference(type_Any)));
+		addPredefinedFunction("fromFunction", new Type.Function(type_Any, new Type.Function(type_Any, type_Any)));
+		addPredefinedFunction("fromMethod", new Type.Function(type_Any, new Type.Method(type_Any, type_Any)));
 
 	}
 	/**
@@ -2813,18 +2816,20 @@ public final class Wyil2Boogie {
 			}
 		} else if (type instanceof Type.Callable) {
 			final Type.Callable t = (Type.Callable) type;
-			for (final Type b : t.getParameters()) {
-				declareFields(b, done);
+			Type params = t.getParameter();
+			Type returns = t.getReturn();
+			for (int i = 0; i != params.shape(); ++i) {
+				declareFields(params.dimension(i), done);
 			}
-			for (final Type b : t.getReturns()) {
-				declareFields(b, done);
+			for (int i = 0; i != returns.shape(); ++i) {
+				declareFields(returns.dimension(i), done);
 			}
 		} else if (type instanceof Type.Nominal) {
 			// A nominal type's definition RHS could contain fields.
 			// But we have already processed that RHS when we reached the type definition.
 		} else if (type instanceof Type.Primitive) {
 			// no fields to declare
-		} else if (type instanceof Type.Variable) {
+		} else if (type instanceof Type.Existential) {
 			// a type parameter, so no fields known at this stage.
 		} else {
 			throw new IllegalArgumentException("unknown type encountered: " + type.getClass());
@@ -2834,7 +2839,8 @@ public final class Wyil2Boogie {
 	private class CallGraphVisitor extends AbstractVisitor {
 		/*NonNull*/ private Set<String> callees;
 
-		public CallGraphVisitor(String caller) {
+		public CallGraphVisitor(Build.Meter meter, String caller) {
+			super(meter);
 			callees = callGraph.get(caller);
 			if (callees == null) {
 				callees = new HashSet<>();
@@ -2858,7 +2864,7 @@ public final class Wyil2Boogie {
 	 */
 	private void populateCallGraph(Decl.FunctionOrMethod method) {
 		String name = getMangledFunctionMethodName(method.getQualifiedName(), method.getType());
-		new CallGraphVisitor(name).visitBlock(method.getBody());
+		new CallGraphVisitor(meter,name).visitBlock(method.getBody());
 		if (verbose) {
 			System.out.println("  call graph: " + name + " calls " + callGraph.get(name));
 		}
@@ -2906,7 +2912,7 @@ public final class Wyil2Boogie {
 		// return callGraph.containsKey(callee) && callGraph.get(callee).contains(caller);
 	}
 
-	private final AbstractVisitor recordVisitor = new AbstractVisitor() {
+	private final AbstractVisitor recordVisitor = new AbstractVisitor(Build.NULL_METER) {
 		@Override
 		public void visitType(Type type) {
 			declareFields(type, new HashSet<>());
@@ -2957,13 +2963,13 @@ public final class Wyil2Boogie {
 		this.out.printf("const unique %s:WFuncName;\n", lambdaName);
 
 		// add axiom apply_n(closure_m(lambdaName, captured...), args...) = decl.getBody();
-		String captureNames = commaSepMap(decl.getCapturedVariables(), v -> v.getName().get());
+		String captureNames = commaSepMap(decl.getCapturedVariables(meter), v -> v.getName().get());
 		String paramNames = commaSepMap(decl.getParameters(), v -> v.getName().get());
 		// An example trigger of this axiom is: apply__2(closure__1(funcName,cap1),in1,in2).
 		// TODO: check if we need to also handle type template parameters within lambda expressions???
 		final String call = String.format("apply__%d(closure__%d(%s)%s)",
 				decl.getParameters().size(),
-				decl.getCapturedVariables().size(),
+				decl.getCapturedVariables(meter).size(),
 				commaSep(lambdaName, captureNames),
 				(paramNames.isEmpty() ? "" : (", " + paramNames))
 				);
@@ -2973,7 +2979,7 @@ public final class Wyil2Boogie {
 					call,
 					body.toString());
 		} else {
-			String decls1 = commaSepMap(decl.getCapturedVariables(), v -> v.getName().get() + ":WVal");
+			String decls1 = commaSepMap(decl.getCapturedVariables(meter), v -> v.getName().get() + ":WVal");
 			String decls2 = commaSepMap(decl.getParameters(), v -> v.getName().get() + ":WVal");
 			String decls = commaSep(decls1, decls2);
 			this.out.printf("axiom (forall %s :: {%s} %s == %s);\n\n",
@@ -2985,7 +2991,7 @@ public final class Wyil2Boogie {
 	}
 
 	/** Walks recursively through a constant and declares any function constants. */
-	private final AbstractVisitor funcConstantVisitor = new AbstractVisitor() {
+	private final AbstractVisitor funcConstantVisitor = new AbstractVisitor(Build.NULL_METER) {
 		@Override
 		public void visitLambdaAccess(Expr.LambdaAccess l) {
 			Decl.Callable decl = l.getBinding().getDeclaration();

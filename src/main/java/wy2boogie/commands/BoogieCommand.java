@@ -1,10 +1,9 @@
 package wy2boogie.commands;
 
 import wyc.task.CompileTask;
-import wycc.WyProject;
-import wycc.cfg.Configuration;
-import wycc.cfg.Configuration.Schema;
-import wycc.lang.Command;
+import wycli.cfg.Configuration;
+import wycli.cfg.Configuration.Schema;
+import wycli.lang.Command;
 import wyfs.lang.Path;
 import wyfs.util.Trie;
 import wyil.lang.WyilFile;

@@ -5,11 +5,13 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.function.Function;
 
 import wy2boogie.core.BoogieFile;
 import wy2boogie.translate.NotImplementedYet;
 import wy2boogie.translate.Wyil2Boogie;
 import wybs.lang.Build;
+import wybs.lang.Build.Meter;
 import wybs.util.AbstractBuildTask;
 import wyc.io.WhileyFileParser;
 import wyc.task.CompileTask;
@@ -25,7 +27,6 @@ import wyil.lang.Compiler;
 import wyil.lang.WyilFile;
 import wyil.transform.MoveAnalysis;
 import wyil.transform.NameResolution;
-import wyil.transform.RecursiveTypeAnalysis;
 
 public class BoogieCompileTask extends AbstractBuildTask<WyilFile, BoogieFile> {
 
@@ -67,7 +68,7 @@ public class BoogieCompileTask extends AbstractBuildTask<WyilFile, BoogieFile> {
 	}
 
 	@Override
-	public Callable<Boolean> initialise() throws IOException {
+	public Function<Meter,Boolean> initialise() throws IOException {
 		// Extract target and source files for compilation. This is the component which
 		// requires I/O.
 		WyilFile[] whileys = new WyilFile[sources.size()];
@@ -77,7 +78,7 @@ public class BoogieCompileTask extends AbstractBuildTask<WyilFile, BoogieFile> {
 		// Construct the lambda for subsequent execution. This will eventually make its
 		// way into some kind of execution pool, possibly for concurrent execution with
 		// other tasks.
-		return () -> execute(target, whileys);
+		return (Meter meter) -> execute(target, whileys);
 	}
 
 	/**
@@ -89,7 +90,7 @@ public class BoogieCompileTask extends AbstractBuildTask<WyilFile, BoogieFile> {
 	 * @param sources --- The WyilFile(s) being translated.
 	 * @return
 	 */
-	public boolean execute(Path.Entry<BoogieFile> target, WyilFile... sources) throws IOException {
+	public boolean execute(Path.Entry<BoogieFile> target, WyilFile... sources) {
 		// Parse source files into target
 		if (sources.length != 1) {
 			throw new NotImplementedYet("Cannot compile multiple wyil files yet.", null);

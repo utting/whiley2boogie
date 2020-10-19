@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import wybs.lang.Build;
 import wyil.util.AbstractVisitor;
 
 import static wyil.lang.WyilFile.*;
@@ -21,6 +22,7 @@ import static wyil.lang.WyilFile.*;
  *
  */
 public class AssertionGenerator {
+	private final Build.Meter meter;
     private final Wyil2Boogie wy2b;
 
     private final BoogieExpr ZERO = new BoogieExpr(INT, "0");
@@ -34,8 +36,9 @@ public class AssertionGenerator {
     private List<BoogieExpr> context = new ArrayList<>();
 	private String currentFunctionMethodName;
 
-	public AssertionGenerator(Wyil2Boogie wyil2Boogie) {
-        wy2b = wyil2Boogie;
+	public AssertionGenerator(Build.Meter meter, Wyil2Boogie wyil2Boogie) {
+		this.meter = meter;
+        this.wy2b = wyil2Boogie;
     }
 
     /**
@@ -125,7 +128,7 @@ public class AssertionGenerator {
      * This descends into sub-expressions, and records useful context information.
      */
     private void check(Expr expr) {
-		AbstractVisitor visitor = new AbstractVisitor() {
+		AbstractVisitor visitor = new AbstractVisitor(meter) {
 
 			@Override
 			public void visitArrayAccess(Expr.ArrayAccess expr) {
@@ -178,7 +181,6 @@ public class AssertionGenerator {
 					generateCheck(funPre);
 					// assume the functions postcondition, unless we are part of a recursive cycle with it.
 					if (type instanceof Type.Function &&
-							type.getReturns().size() == 1 &&
 							!wy2b.canRecurseBackTo(funName, getCurrentFunctionMethodName())) {
 						generateAssume(funPost);
 					}
@@ -208,7 +210,7 @@ public class AssertionGenerator {
 			public void visitUniversalQuantifier(Expr.UniversalQuantifier expr) {
 				List<String> vars = new ArrayList<>();
 				List<BoogieExpr> constraints = new ArrayList<>();
-				for (Decl.Variable parameter : expr.getParameters()) {
+				for (Decl.StaticVariable parameter : expr.getParameters()) {
 					Expr.ArrayRange range = (Expr.ArrayRange) parameter.getInitialiser();
 					// declare the bound variable: v:WVal
 					String bndName = parameter.getName().get();
