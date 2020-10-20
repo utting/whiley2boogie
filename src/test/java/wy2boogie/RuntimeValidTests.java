@@ -158,7 +158,7 @@ public class RuntimeValidTests {
 				@Override
 				public void apply(Collection<Build.Task> tasks) throws IOException {
 					// Construct a new build task
-					BoogieCompileTask task = new BoogieCompileTask(project, bgTarget, wyilTarget);
+					BoogieCompileTask task = new BoogieCompileTask(project, Logger.NULL, bgTarget, wyilTarget);
 					// Enable verification!
 					task.setVerification(true);
 					// Submit the task for execution

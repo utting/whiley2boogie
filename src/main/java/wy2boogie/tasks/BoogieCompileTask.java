@@ -13,10 +13,16 @@ import wy2boogie.util.Boogie;
 import wybs.lang.Build;
 import wybs.lang.Build.Meter;
 import wybs.util.AbstractBuildTask;
+import wybs.util.Logger;
+import wycli.lang.Command;
 import wyfs.lang.Path;
 import wyil.lang.WyilFile;
 
 public class BoogieCompileTask extends AbstractBuildTask<WyilFile, BoogieFile> {
+	/**
+	 * Useful for debugging!
+	 */
+	private final Logger logger;
 	/**
 	 * Specify whether to print verbose progress messages or not
 	 */
@@ -42,9 +48,13 @@ public class BoogieCompileTask extends AbstractBuildTask<WyilFile, BoogieFile> {
 	 */
 	private boolean counterexamples;
 
+	public BoogieCompileTask(Command.Project project, Path.Entry<BoogieFile> target, Path.Entry<WyilFile> source) {
+		this(project, project.getEnvironment().getLogger(), target, source);
+	}
 
-	public BoogieCompileTask(Build.Project project, Path.Entry<BoogieFile> target, Path.Entry<WyilFile> source) {
+	public BoogieCompileTask(Build.Project project, Logger logger, Path.Entry<BoogieFile> target, Path.Entry<WyilFile> source) {
 		super(project, target, Arrays.asList(source));
+		this.logger = logger;
 		this.verifier = new Boogie();
 	}
 
@@ -100,11 +110,14 @@ public class BoogieCompileTask extends AbstractBuildTask<WyilFile, BoogieFile> {
 		target.setBytes(out.toByteArray());
 		// Attempt to verify file with Boogie!
 		if (verification) {
+			long ms = System.currentTimeMillis();
 			Boogie.Error[] errors = verifier.check(timeout, target);
+			String errlog = (errors == null) ? "internal failure" : Integer.toString(errors.length);
+			logger.logTimedMessage("Boogie verification (" + errlog + ")", (System.currentTimeMillis() - ms), 0);
 			if(verbose && errors != null) {
 				// Debugging output
 				for(int i=0;i!=errors.length;++i) {
-					System.out.println(errors[i]);
+					logger.logTimedMessage(errors[i].toString(), 0, 0);
 				}
 			}
 			return errors != null && errors.length == 0;

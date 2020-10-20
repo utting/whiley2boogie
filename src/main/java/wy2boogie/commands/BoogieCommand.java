@@ -7,6 +7,7 @@ import wycli.lang.Command;
 import wyfs.lang.Path;
 import wyfs.util.Trie;
 import wyil.lang.WyilFile;
+import wyil.lang.WyilFile.Decl;
 import wy2boogie.core.*;
 import wy2boogie.tasks.BoogieCompileTask;
 
@@ -117,7 +118,7 @@ public class BoogieCommand implements Command {
 		if(counterexample) {
 			return translateCounterexample(project,verbose,template.getArguments());
 		} else {
-			List<String> files = translateAnyWhileyFiles(project, verbose, output, template.getArguments());
+			List<Path.Entry<WyilFile>> files = translateAnyWhileyFiles(project, verbose, output, template.getArguments());
 			return translateWyilFile(project,verbose,files);
 		}
 	}
@@ -131,13 +132,12 @@ public class BoogieCommand implements Command {
 	 * @return
 	 * @throws Exception
 	 */
-	public List<String> translateAnyWhileyFiles(Command.Project project, boolean verbose, String output, List<String> args) throws Exception {
+	public List<Path.Entry<WyilFile>> translateAnyWhileyFiles(Command.Project project, boolean verbose, String output, List<String> args) throws Exception {
 		try {
 			if (verbose) {
 				sysout.println("translateAnyWhileyFiles: " + args + " output=" + output);
 			}
 			Path.Root projectRoot = project.getRoot();
-			List<String> files = new ArrayList<>();
 			List<Path.Entry<WhileyFile>> sources = new ArrayList<>();
 			// Identify and read in any source files
 			for(int i=0;i!=args.size();++i) {
@@ -152,14 +152,10 @@ public class BoogieCommand implements Command {
 					} else {
 						sources.add(source);
 					}
-				} else {
-					files.add(arg);
 				}
 			}
 			// Create target for run
 			Trie id = Trie.fromString(output.replace(".wyil", ""));
-			files.add(output);
-
 			// TODO: should we create a separate compile task for each *.whiley file?
 			Path.Entry<WyilFile> target = createWyilFile(project,id);
 			CompileTask task = new CompileTask(project, projectRoot, target, sources);
@@ -174,7 +170,7 @@ public class BoogieCommand implements Command {
 				System.exit(1);  // abort the whole translation chain.
 			}
 			// Done
-			return files;
+			return Arrays.asList(target);
 		} catch(RuntimeException e) {
 			throw e;
 		} catch (IOException e) {
@@ -185,6 +181,14 @@ public class BoogieCommand implements Command {
 			}
 			return Collections.EMPTY_LIST;
 		}
+	}
+
+	private Path.Entry<BoogieFile> createBoogieFile(Command.Project project, Path.ID id) throws IOException {
+		Path.Root projectRoot = project.getRoot();
+		// Doesn't exist, so create with default value
+		Path.Entry<BoogieFile> target = projectRoot.create(id, BoogieFile.ContentType);
+		target.write(new BoogieFile(target, new byte[0]));
+		return target;
 	}
 
 	private Path.Entry<WyilFile> createWyilFile(Command.Project project, Path.ID id) throws IOException {
@@ -204,27 +208,15 @@ public class BoogieCommand implements Command {
 		return target;
 	}
 
-	public boolean translateWyilFile(Command.Project project, boolean verbose, List<String> args) throws Exception {
+	public boolean translateWyilFile(Command.Project project, boolean verbose, List<Path.Entry<WyilFile>> delta) throws Exception {
 		try {
-			Path.Root projectRoot = project.getRoot();
-			// Convert command-line arguments to project files
-			ArrayList<Path.Entry<WyilFile>> delta = new ArrayList<>();
-			for (String arg : args) {
-				// strip extension
-				arg = arg.replace(".wyil", "");
-				//
-				delta.add(projectRoot.get(Trie.fromString(arg), WyilFile.ContentType));
-			}
 			if (verbose) {
-				sysout.println("DEBUG: translateWyilFiles: " + args);
-				sysout.println("DEBUG: projectRoot: " + projectRoot);
 				sysout.println("DEBUG: delta: " + delta);
 			}
 			// Go through all listed *.wyil files and translate each one to Boogie.
 			for (Path.Entry<WyilFile> source : delta) {
-				Path.Entry<BoogieFile> target = projectRoot.create(source.id(), BoogieFile.ContentType);
-				BoogieCompileTask task = new BoogieCompileTask(project, target,
-						Collections.singleton(source));
+				Path.Entry<BoogieFile> target = createBoogieFile(project,source.id());
+				BoogieCompileTask task = new BoogieCompileTask(project, target, source);
 				task.setVerbose(verbose);
 				boolean ok = task.initialise().apply(Build.NULL_METER);
 				if (!ok) {

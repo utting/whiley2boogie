@@ -29,7 +29,7 @@ public class BoogieFile extends AbstractCompilationUnit<BoogieFile> {
 		@Override
 		public BoogieFile read(Path.Entry<BoogieFile> e, InputStream input) throws IOException {
 			// At this stage, parsing Boogie is strictly off-limits :)
-			throw new UnsupportedOperationException();
+			return new BoogieFile(e, new byte[0]);
 		}
 
 		@Override

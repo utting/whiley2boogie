@@ -79,7 +79,7 @@ public class Activator implements Module.Activator {
 			registerBuildTarget(configuration, project, sourceRoot, pkg);
 		}
 
-		private void registerBuildTarget(Configuration configuration, Build.Project project, Path.Root sourceRoot,
+		private void registerBuildTarget(Configuration configuration, Command.Project project, Path.Root sourceRoot,
 				Trie pkg) throws IOException {
 			// Specify directory where generated JS files are dumped.
 			Trie target= Trie.fromString(configuration.get(Value.UTF8.class, TARGET_CONFIG_OPTION).unwrap());
