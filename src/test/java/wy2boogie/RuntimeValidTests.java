@@ -93,7 +93,7 @@ public class RuntimeValidTests {
 
  	protected void runTest(String name) throws IOException {
 		// Compile to Java Bytecode
-		Pair<Boolean, String> p = compileWhiley2JavaScript(
+		Pair<Boolean, String> p = compileWhiley2Boogie(
 				WHILEY_SRC_DIR, // location of source directory
 				name); // name of test to compile
 
@@ -103,7 +103,6 @@ public class RuntimeValidTests {
 		if (!r) {
 			fail("Test failed to compile!");
 		}
-		// Execute the generated JavaScript Program.
 	}
 
  	/**
@@ -113,7 +112,7 @@ public class RuntimeValidTests {
 
  	/**
 	 * Run the Whiley Compiler with the given list of arguments to produce a
-	 * JavaScript source file. This will then need to be separately compiled.
+	 * Boogie source file. This will then need to be separately compiled.
 	 *
 	 * @param arg
 	 *            --- list of command-line arguments to provide to the Whiley
@@ -121,7 +120,7 @@ public class RuntimeValidTests {
 	 * @return
 	 * @throws IOException
 	 */
-	public static Pair<Boolean,String> compileWhiley2JavaScript(String whileydir, String arg) throws IOException {
+	public static Pair<Boolean,String> compileWhiley2Boogie(String whileydir, String arg) throws IOException {
 		ByteArrayOutputStream syserr = new ByteArrayOutputStream();
 		ByteArrayOutputStream sysout = new ByteArrayOutputStream();
 		PrintStream psyserr = new PrintStream(syserr);
@@ -147,13 +146,12 @@ public class RuntimeValidTests {
 					tasks.add(task);
 				}
 			});
-			// Construct an empty JavaScriptFile
+			// Construct an empty Boogie file
 			Path.Entry<BoogieFile> bgTarget = root.create(wyilTarget.id(), BoogieFile.ContentType);
-			// NOTE: Java Nashorn supports ES5 only?
 			BoogieFile bgFile = new BoogieFile(bgTarget,new byte[0]);
-			// Write out the JavaScriptFile
+			// Write out the Boogie File
 			bgTarget.write(bgFile);
-			// Add WyIL => JavaScript Build Rule
+			// Add WyIL => Boogie Build Rule
 			project.add(new Build.Rule() {
 				@Override
 				public void apply(Collection<Build.Task> tasks) throws IOException {
