@@ -2088,7 +2088,7 @@ public final class Wyil2Boogie {
 		final Expr lhs = c.getOperand();
 		final Type rhs = c.getTestType();
 		// convert lhs to a string, so we can pass it into typePredicate(...).
-		final String lhsStr = boogieExpr(lhs).as(WVAL).asAtom().toString();
+		final String lhsStr = boogieExpr(lhs).asWVal().asAtom().toString();
 		BoogieExpr typePred = new BoogieExpr(BOOL, typePredicate(lhsStr, rhs));
 		typePred.setOp(" && ");
 		return typePred;
