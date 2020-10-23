@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+function percent {
+    # Example: percent number total  -> string
+    echo "$((100 * $1 / $2))%"
+}
+
+if [[ "$#" > 0 ]]
+then
+    #num_syntax_type_errors=$(grep -i '^ *^' "$@" | wc -l)  # before 18-aug-2019
+    #num_compile_errors=$(grep '^Error: while compiling' "$@" | wc -l)  # after 18-aug-2019
+    num_not_impl=$(grep -i 'Caused by: wy2boogie.translate.NotImplementedYet:' "$@" | wc -l)
+    #num_exceptions=$(grep 'Exception: ' "$@" | grep -v translate.NotImplementedYet | wc -l)
+    num_bpl_errors=$(grep -i '^STDOUT.*\.bpl.* Error:' "$@" | sed -e 's/(.*//' | uniq | wc -l)
+    num_fully_verified=$(grep -i ' verified, 0 errors' "$@" | wc -l)
+	num_fully_verified=$((num_fully_verified / 2))  # STDOUT and STDERR
+    #num_timeouts=$(grep -i ', [1-9][0-9]* time out' "$@" | wc -l)
+    num_partial_verified=$(grep -i ' verified, [1-9][0-9]* error' "$@" | wc -l)
+	num_partial_verified=$((num_partial_verified / 2))  # STDOUT and STDERR
+    total=$((num_compile_errors + num_not_impl + num_exceptions + num_bpl_errors +
+             num_fully_verified + num_timeouts + num_partial_verified))
+
+    #echo -e "Syntax/type error:  $num_syntax_type_errors \t$(percent $num_syntax_type_errors total)"
+    #echo -e "Error Compiling:    $num_compile_errors \t$(percent num_compile_errors total)"
+    echo -e "NotImplementedYet:  $num_not_impl \t$(percent num_not_impl total)"
+    #echo -e "Other Exceptions:   $num_exceptions \t$(percent num_exceptions total)"
+    echo -e "Errors in BPL:      $num_bpl_errors \t$(percent num_bpl_errors total)"
+    echo -e "Fully Verified:     $num_fully_verified \t$(percent num_fully_verified total)"
+    #echo -e "Verify time outs:   $num_timeouts \t$(percent num_timeouts total)"
+    echo -e "Verify errors:      $num_partial_verified \t$(percent num_partial_verified total)"
+    echo "Total:  $total"
+else
+    echo "Usage: $0 OUT*.txt"
+    exit 1
+fi
