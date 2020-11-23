@@ -56,6 +56,7 @@ public class BoogieCompileTask extends AbstractBuildTask<WyilFile, BoogieFile> {
 		super(project, target, Arrays.asList(source));
 		this.logger = logger;
 		this.verifier = new Boogie();
+		this.verifier.setTimeLimit(this.timeout / 1000);
 	}
 
 	public BoogieCompileTask setVerbose(boolean flag) {

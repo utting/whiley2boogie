@@ -58,7 +58,7 @@ public class Boogie {
 	 *
 	 * @param flag
 	 */
-	public void setEnchancedErrorMessages(boolean flag) {
+	public void setEnhancedErrorMessages(boolean flag) {
 		options.put("enhancedErrorMessages", flag ? "1":"0");
 	}
 
