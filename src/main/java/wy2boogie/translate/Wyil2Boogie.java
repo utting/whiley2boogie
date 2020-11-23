@@ -1004,11 +1004,7 @@ public final class Wyil2Boogie {
 			writeSwitch(indent, s);
 			break;
 		}
-		case DECL_staticvar: {
-			Decl.StaticVariable var = (Decl.StaticVariable) c;
-			this.vcg.checkPredicate(indent, var.getInitialiser());
-			// fall through into the non-init case.
-		}
+		case DECL_staticvar:
 		case STMT_initialiser: {
 			Stmt.Initialiser init = (Stmt.Initialiser) c;
 			writeInitialiser(indent, init);
@@ -1656,6 +1652,7 @@ public final class Wyil2Boogie {
 
 	private void writeInitialiser(int indent, Stmt.Initialiser init) {
 		if (init.hasInitialiser()) {
+			this.vcg.checkPredicate(indent, init.getInitialiser());
 			if (callAsProcedure(init.getInitialiser())) {
 				this.outerMethodCall = init.getInitialiser();
 			}
