@@ -50,6 +50,8 @@ public class Boogie {
 	public Boogie(String command) {
 		this.boogieCmd = command;
 		this.options = new HashMap<>();
+		// Note: we use Z3 array theory, because it handles large arrays much better (like Byte_Valid*.whiley)
+		this.options.put("useArrayTheory", null);
 	}
 
 	/**
