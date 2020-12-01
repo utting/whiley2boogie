@@ -2338,6 +2338,10 @@ public final class Wyil2Boogie {
 			Type.Existential tv = (Type.Existential) type;
 			return "is__type(" + tv.toCanonicalString() + ", " + var + ")";
 		}
+		if (type instanceof Type.Universal) {
+			Type.Universal tv = (Type.Universal) type;
+			return "is__type(" + tv.toCanonicalString() + ", " + var + ")";
+		}
 		if (typeStr.equals("int")) { // WAS type instanceof Type.Int) {
 			return "isInt(" + var + ")";
 		}
@@ -2843,7 +2847,7 @@ public final class Wyil2Boogie {
 			// But we have already processed that RHS when we reached the type definition.
 		} else if (type instanceof Type.Primitive) {
 			// no fields to declare
-		} else if (type instanceof Type.Existential) {
+		} else if (type instanceof Type.Existential || type instanceof Type.Universal) {
 			// a type parameter, so no fields known at this stage.
 		} else {
 			throw new IllegalArgumentException("unknown type encountered: " + type.getClass());
