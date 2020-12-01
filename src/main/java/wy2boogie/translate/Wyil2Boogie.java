@@ -1006,7 +1006,8 @@ public final class Wyil2Boogie {
 			break;
 		}
 		case DECL_staticvar:
-		case STMT_initialiser: {
+		case STMT_initialiser:
+		case STMT_initialiservoid: {
 			Stmt.Initialiser init = (Stmt.Initialiser) c;
 			writeInitialiser(indent, init);
 			break;
@@ -1017,7 +1018,7 @@ public final class Wyil2Boogie {
 			break;
 
 		default:
-			throw new NotImplementedYet("unknown bytecode encountered", c);
+			throw new NotImplementedYet("unknown bytecode " + c.getOpcode() + " encountered", c);
 		}
 	}
 
@@ -1660,6 +1661,12 @@ public final class Wyil2Boogie {
 	}
 
 	private void writeInitialiser(int indent, Stmt.Initialiser init) {
+		Tuple<Decl.Variable> vars = init.getVariables();
+		if(vars.size() != 1) {
+			throw new IllegalArgumentException("Need to support multi-initialisers!");
+		}
+		Decl.Variable var = vars.get(0);
+		String name = var.getName().toString();
 		if (init.hasInitialiser()) {
 			this.vcg.checkPredicate(indent, init.getInitialiser());
 			if (callAsProcedure(init.getInitialiser())) {
@@ -1670,19 +1677,15 @@ public final class Wyil2Boogie {
 				this.out.printf("call ");
 				this.outerMethodCall = null;
 			}
-			Tuple<Decl.Variable> vars = init.getVariables();
-			if(vars.size() != 1) {
-				throw new IllegalArgumentException("Need to support multi-initialisers!");
-			}
-			Decl.Variable var = vars.get(0);
-			String name = var.getName().toString();
 			this.out.printf("%s := %s;\n", name, rhs.toString());
 			// now prove that initial value satisfies any typing invariant.
 			writeIndent(indent + 1);
 			this.out.printf("assert %s;\n", typePredicate(name, var.getType()));
+		} else {
+			// we need a havoc here, to mimic non-det initialisation
+			// TODO: check if DECL_staticvar can omit the init?  If so, check the proof obligation.
+			this.out.printf("havoc %s;\n", name);
 		}
-		// ELSE
-		// TODO: Do we need a havoc here, to mimic non-det initialisation?
 	}
 
 	/** Convenience: equivalent to boogieExpr(_).as(BOOL). */
@@ -2475,9 +2478,6 @@ public final class Wyil2Boogie {
 	 * @return the tuple of concrete types that are the parameter values for the template types.
 	 */
 	private Tuple<Type> typeParamValues(Expr.Invoke expr) {
-		if (this.verbose) {
-			System.out.println("DEBUG: call param values " + expr.getBinding().getDeclaration().getQualifiedName());
-		}
 		// we step through the parameter variables looking for the Template.Type ones,
 		// and we save the corresponding parameter values (the actual type parameters).
 		Tuple<Template.Variable> paramVars = expr.getBinding().getDeclaration().getTemplate();
