@@ -128,6 +128,7 @@ public class AssertionGenerator {
      * This descends into sub-expressions, and records useful context information.
      */
     private void check(Expr expr) {
+    	final Wyil2Boogie this_wy2b = this.wy2b;
 		AbstractVisitor visitor = new AbstractVisitor(meter) {
 
 			@Override
@@ -167,9 +168,17 @@ public class AssertionGenerator {
 
 				QualifiedName name = funCall.getBinding().getDeclaration().getQualifiedName();
 				Type.Callable type = funCall.getBinding().getDeclaration().getType();
-				// properties do not have preconditions.
-				if (type instanceof Type.Function || type instanceof Type.Method) {
-					// Now check the precondition of this function/method.
+				// Now check any preconditions.
+				//
+				// NOTE that this applies only to simple functions, because properties do not have preconditions,
+				// and methods (plus complex functions with multiple results!) use the Boogie 'call' mechanism,
+				// which already checks preconditions and assumes the postconditions.
+				// So it is just the simple functions that we need to check preconditions and assume their
+				// postconditions here. (An alternative approach is to use global axioms to define the
+				// pre-post effects of functions, but this requires those axioms to be guarded so that
+				// they cannot be used while the body of the function itself is being verified).
+				if ((type instanceof Type.Function) && !this_wy2b.callAsProcedure(funCall)) {
+					// Now check the precondition of this function.
 					String funName = wy2b.getMangledFunctionMethodName(name, type);
 					Tuple<Expr> operands = funCall.getOperands();
 					String args = wy2b.commaSep(wy2b.typeParamValuesString(funCall), getArgs(operands));

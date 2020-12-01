@@ -586,39 +586,40 @@ public final class Wyil2Boogie {
 	private Map<String, Type> findMutatedInputs(Decl.FunctionOrMethod method) {
 		final Map<String, Type> result = new LinkedHashMap<>();
 		final AbstractVisitor visitor = new AbstractVisitor(meter) {
+
+			/** Adds all assigned local/parameter variables into 'result' map. */
+			private void collectMutatedVars(Expr e) {
+				if (e instanceof Expr.VariableAccess) {
+					Decl.Variable decl = ((Expr.VariableAccess) e).getVariableDeclaration();
+					for (Decl.Variable param : method.getParameters()) {
+						if (param == decl) {
+							// this is a mutated input!
+							final String name = decl.getName().get();
+							System.err.printf("MUTATED INPUT %s : %s\n", name, decl.getType());
+							result.put(name, decl.getType());
+						}
+					}
+				} else if (e instanceof Expr.Dereference ||
+						e instanceof Expr.StaticVariableAccess) {
+					return;  // these are not mutating local/parameter variables
+				} else if (e instanceof Expr.RecordAccess) {
+					collectMutatedVars(((Expr.RecordAccess) e).getOperand());
+				} else if (e instanceof Expr.ArrayAccess) {
+					collectMutatedVars(((Expr.ArrayAccess) e).getFirstOperand());
+				} else if (e instanceof Expr.TupleInitialiser) {
+					for (Expr e2 : ((Expr.TupleInitialiser) e).getOperands()) {
+						collectMutatedVars(e2);
+					}
+				} else {
+					System.err.printf("WARNING: unknown assignment LHS: %s %s\n",
+							e.toString(), e.getClass().toString());
+				}
+			}
+
 			@Override
 			public void visitAssign(Stmt.Assign stmt) {
 				for (Expr e : stmt.getLeftHandSide()) {
-					boolean mayMutate = true; // guilty until proven innocent.
-					while (!(e instanceof Expr.VariableAccess)) {
-						if (e instanceof Expr.Dereference ||
-						    e instanceof Expr.StaticVariableAccess) {
-							mayMutate = false;
-							break;
-						}
-						// ArrayAccess, RecordAccess
-						if (e instanceof Expr.RecordAccess) {
-							e = ((Expr.RecordAccess) e).getOperand();
-						} else if (e instanceof Expr.ArrayAccess) {
-							e = ((Expr.ArrayAccess) e).getFirstOperand();
-						} else {
-							System.err.printf("WARNING: unknown assignment LHS: %s %s\n",
-									e.toString(), e.getClass().toString());
-							mayMutate = false;
-							break;
-						}
-					}
-					if (mayMutate) {
-						Decl.Variable decl = ((Expr.VariableAccess) e).getVariableDeclaration();
-						for (Decl.Variable param : method.getParameters()) {
-							if (param == decl) {
-								// this is a mutated input!
-								final String name = decl.getName().get();
-								System.err.printf("MUTATED INPUT %s : %s\n", name, decl.getType());
-								result.put(name, decl.getType());
-							}
-						}
-					}
+					collectMutatedVars(e);
 				}
 			}
 		};
@@ -1107,8 +1108,13 @@ public final class Wyil2Boogie {
 		// I think a better alternative would be to add any local variable invariants just to loop invariants.
 		// This would allow them to be broken temporarily, but require them to be restored on each loop.
 
-		final Tuple<LVal> lhs = stmt.getLeftHandSide();
-		final Tuple<Expr> rhs = stmt.getRightHandSide();
+		Tuple<? extends Expr> lhs = stmt.getLeftHandSide();
+		if (lhs.size() == 1 && lhs.get(0) instanceof Expr.TupleInitialiser) {
+			// expand out the left-hand-side tuple into separate targets.
+			Expr.TupleInitialiser tuple = (Expr.TupleInitialiser) lhs.get(0);
+			lhs = tuple.getOperands();
+		}
+		Tuple<Expr> rhs = stmt.getRightHandSide();
 		// FIXME: not sure about this --- djp
 		if (callAsProcedure(rhs.get(0))) {
 			this.outerMethodCall = rhs.get(0);
@@ -1119,7 +1125,7 @@ public final class Wyil2Boogie {
 		final List<Index>[] lhsIndexes = new List[lhs.size()];
 		for (int i = 0; i != lhs.size(); ++i) {
 			lhsIndexes[i] = new ArrayList<>();
-			lhsVars[i] = extractLhsBase(lhs.get(i), lhsIndexes[i]);
+			lhsVars[i] = extractLhsBase((LVal) lhs.get(i), lhsIndexes[i]);
 		}
 		// then build up any complex rhs terms, like a[i := (a[i][$f := ...])]
 		final String[] rhsExprs = new String[rhs.size()];
@@ -1158,22 +1164,23 @@ public final class Wyil2Boogie {
 	 * @param expr RHS of the assignment
 	 * @return true when expr calls a method, or a function with multiple return values (which we encode as a Boogie procedure).
 	 */
-	private boolean callAsProcedure(Expr expr) {
+	protected boolean callAsProcedure(Expr expr) {
 		if (expr instanceof Expr.Invoke) {
 			Expr.Invoke invoke = (Expr.Invoke) expr;
 			Decl decl = invoke.getBinding().getDeclaration();
 			if (decl instanceof Decl.Method) {
+				// methods can have side-effects, so they use the Boogie 'call' syntax.
 				return true;
-			}
-			// This is a bit of a hack, so that functions with multiple returns can be used in simple ways.
-			// That is, we translate them to procedures instead of functions!
-			// This means they can have multiple return values, but can only be called as RHS of assignment.
-			// (which is the case in all the tests and programs I've seen).
-			if (decl instanceof Decl.Function && ((Decl.Function) decl).getReturns().size() > 1) {
-				return true;
+			} else if (decl instanceof Decl.Function) {
+				// This is a bit of a hack, so that functions with multiple returns can be used in simple ways.
+				// That is, we translate them to procedures instead of functions!
+				// This means they can have multiple return values, but can only be called as RHS of assignment.
+				// (which is the case in all the tests and programs I've seen).
+				Decl.Function func = (Decl.Function) decl;
+				return func.getReturns().size() > 1;
 			}
 		}
-		return false;
+		return false;  // e.g. properties are always pure, never use 'call'.
 	}
 
 	/**
@@ -1533,7 +1540,9 @@ public final class Wyil2Boogie {
 	private void writeReturn(int indent, Stmt.Return b) {
 		// Boogie return does not take any expressions.
 		// Instead, we must write to the result variables.
-		final Expr[] operands = new Expr[] {b.getReturn()};
+		Expr[] operands = (b.getReturn() instanceof Expr.TupleInitialiser)
+				? ((Expr.TupleInitialiser) (b.getReturn())).getOperands().toArray(Expr.class)
+				: new Expr[] {b.getReturn()};
 		final String[] args = new String[operands.length];
 		if (operands.length == 1 && callAsProcedure(operands[0])) {
 			this.outerMethodCall = operands[0];
