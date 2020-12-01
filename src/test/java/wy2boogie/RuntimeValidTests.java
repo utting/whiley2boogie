@@ -212,6 +212,7 @@ public class RuntimeValidTests {
 	public void beforeMethod() {
 		String ignored = IGNORED.get(this.testName);
 		Assume.assumeTrue("Test " + this.testName + " skipped: " + ignored, ignored == null);
+		//Assume.assumeTrue("Test " + this.testName + " DO ONLY: " + this.testName, this.testName.equals("Return_Valid_1"));
 	}
 
 	@Test
